@@ -1,0 +1,264 @@
+{% load static %}
+{% include "demouiapp/_header.html" %}
+
+<center>
+    <div hidden id="mydiv" class="alert alert-success" role="alert"
+        style="min-height:100px; min-width: 600px; background-color: rgb(228, 252, 233); padding:10px; margin: 20px; margin-left: 150px; margin-right: 250px; border-style:solid; border-color:rgb(0, 182, 39);border-width: 1px;">
+        <h4 class="alert-heading">🚀 Running!</h4>
+        <br />
+        <p>Operation is running, please wait a minute or two.</p>
+    </div>
+</center>
+<div id="main" role="main" class="container theme-showcase">
+    <div class="jumbotron container">
+        <center>
+            <table cellspacing="20" cellpadding="20" style="width: 100%; table-layout: fixed">
+                <table style="width:90%; padding-left:50px;">
+                    <tbody>
+
+                        <tr>
+
+                            <td style="width:90%; padding-left:50px;">
+                                <script>
+                                    let toggle = button => {
+                                        let element = document.getElementById("mydiv");
+                                        let elementMain = document.getElementById("main-panel");
+                                        let arg1 = event.target.getAttribute('data-arg1');
+                                        element.removeAttribute("hidden");
+                                        elementMain.setAttribute("hidden", "hidden");
+                                        button.innerText = "Running";
+                                        window.open(arg1, "_self");
+                                    }
+                                </script>
+
+
+
+                                <div style="  background-color:#ecf0fe; padding: 40px; margin: 0px;">
+
+                                    <div role="main" class="container theme-showcase">
+                                        <div class="jumbotron container">
+                                            <table>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="width:90%; padding-left:50px;">
+
+                                                            <p></p>
+                                                            <p style="font-size:40px;">IBM AIOps Demo UI</p>
+                                                            <p style="font-size:14px;">Container Image: {{DEMO_IMAGE}}
+                                                            </p>
+                                                            <p style="font-size:14px;">Build Date: {{mod_time_readable}}
+                                                            </p>
+
+                                                            <p><BR></p>
+                                                            <p style="font-size:20px;">A Simple way to generate
+                                                                Incidents
+                                                                for IBM CloudPak for AIOps.
+                                                            </p>
+                                                            <p><BR></p>
+                                                            <blockquote>
+                                                                <p>Source code is <a target="_blank"
+                                                                        href="https://github.com/niklaushirt/ibm-aiops-deployer/tree/main/tools/97_addons/ibm-aiops-demo-ui">here</a>
+                                                                    if you want to
+                                                                    mess around a bit.</p>
+                                                            </blockquote>
+                                                            <p><BR></p>
+                                                            <h4>🚀 © 2024 Niklaus Hirt (nikh@ch.ibm.com)</h5>
+                                                                <p></p>
+                                                                <p></p>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    </p>
+                                    <p></p>
+                                    <p></p>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+        </center>
+    </div>
+</div>
+
+
+
+<BR>
+
+{% if CONTACT_INFO.strip %}
+
+<div role="main" class="container theme-showcase">
+    <div class="jumbotron container">
+        <center>
+
+            <table style="width:90%; padding-left:50px;">
+                <tbody>
+
+                    <tr>
+
+                        <td style="width:90%; padding-left:50px;">
+
+                            <div style="  background-color:#ecf0fe; padding: 40px; margin: 0px;">
+
+                                <div role="main" class="container theme-showcase">
+                                    <div class="jumbotron container">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td style="width:90%; padding-left:50px;">
+                                                        {{CONTACT_INFO|safe}}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                </p>
+                                <p></p>
+                                <p></p>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </center>
+    </div>
+</div>
+{% endif %}
+
+
+
+{% if hasCustomScenario > 1 %}
+<BR>
+<BR>
+<BR>
+    <div id="main-panel" role="main" class="container theme-showcase">
+        <div class="jumbotron container">
+        <center>
+
+            <table style="width:90%; padding-left:50px;">
+                <tbody>
+
+                    <tr>
+
+                        <td style="width:90%; padding-left:50px;">
+
+                            <div style="  background-color:#ecf0fe; padding: 40px; margin: 0px;">
+
+                                <div role="main" class="container theme-showcase">
+                                    <div class="jumbotron container">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td style="width:90%; padding-left:50px;"><BR><BR>
+                                                        <HR>
+                                                        CUSTOM_NAME<BR>
+                                                        {{CUSTOM_NAME|safe}}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width:90%; padding-left:50px;"><BR><BR>
+                                                        <HR>
+                                                        CUSTOM_EVENTS<BR>
+                                                        {{CUSTOM_EVENTS|safe}}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width:90%; padding-left:50px;"><BR><BR>
+                                                        <HR>
+                                                        CUSTOM_METRICS<BR>
+                                                        {{CUSTOM_METRICS|safe}}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width:90%; padding-left:50px;"><BR><BR>
+                                                        <HR>
+                                                        CUSTOM_LOGS<BR>
+                                                        {{CUSTOM_LOGS|safe}}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width:90%; padding-left:50px;"><BR><BR>
+                                                        <HR>
+                                                        CUSTOM_TOPOLOGY_APP_NAME<BR>
+                                                        {{CUSTOM_TOPOLOGY_APP_NAME|safe}}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width:90%; padding-left:50px;"><BR><BR>
+                                                        <HR>
+                                                            CUSTOM_TOPOLOGY_TAG<BR>
+                                                        {{CUSTOM_TOPOLOGY_TAG|safe}}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width:90%; padding-left:50px;"><BR><BR>
+                                                        <HR>
+                                                        CUSTOM_TOPOLOGY<BR>
+                                                        {{CUSTOM_TOPOLOGY|safe}}
+                                                    </td>
+                                                </tr>
+                                    </div>
+
+                                    </p>
+                                    <p></p>
+                                    <p></p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            &nbsp;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &nbsp;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 259px; vertical-align:top">
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <div style="padding-bottom: 1rem;" class="sc-ftTHYK jxfOQM">
+                                <a target="_blank" tabindex="0" class="bx--btn bx--btn--primary bx--btn--expressive"
+                                    style="font-size: 18px;max-width:450px;width:350px;" onclick="toggle(this)"
+                                    data-arg1='reloadTopology'>Reload Topolgy
+                                    <svg focusable="false" preserveAspectRatio="xMidYMid meet"
+                                        xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true"
+                                        width="32" height="32" viewBox="0 0 32 32" class="bx--btn__icon">
+                                        <path d="M12 12H14V24H12zM18 12H20V24H18z"></path>
+                                        <path
+                                            d="M12 4H6A2 2 0 004 6v6a2 2 0 002 2h6a2 2 0 002-2V6A2 2 0 0012 4zm0 8H6V6h6zM26 4H20a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2V6A2 2 0 0026 4zm0 8H20V6h6zM12 18H6a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2V20A2 2 0 0012 18zm0 8H6V20h6zM26 18H20a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2V20A2 2 0 0026 18zm0 8H20V20h6z">
+                                        </path>
+                                    </svg>
+                                </a>
+
+
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </center>
+    </div>
+</div>
+{% endif %}
+
+
+
+
+
+
+
+
+
+{% include "demouiapp/_footer.html" %}

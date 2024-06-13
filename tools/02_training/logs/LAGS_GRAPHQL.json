@@ -1,0 +1,59 @@
+# Write your query or mutation here
+ query {
+                                getTrainingDefinitions {
+                                  definitionName
+                                  dataSets {
+                                    notes
+                                    dataSetId
+                                    
+                                  }
+                                  algorithmName
+                                  version
+                                  deployedVersion
+                                  description
+                                  createdBy
+                                  modelDeploymentDate
+                                  promoteOption
+                                  trainingSchedule {
+                                    frequency
+                                    repeat
+                                    timeRangeValidStart
+                                    timeRangeValidEnd
+                                    noEndDate
+                                  }
+                                }
+                              }
+                              
+                              
+
+
+
+mutation createTrainingDefinition {
+  createTrainingDefinition(
+    definitionName: "log_anomaly_golden_signal_configuration"
+    algorithmName: "Log_Anomaly_Golden_Signal"
+    dataSetIds: "ukMMTosBPFSHnWI7gjP6"
+    description: "Automatically created by Nick's scripts"
+    createdBy: "demo"
+    enableSelectiveTraining: false
+    promoteOption: manual
+		enableLADGoldenSignal: true
+    trainingSchedule: {
+      frequency: manual
+      repeat: daily
+      atTimeHour: 0,
+      atTimeMinute: 0,
+        timeRangeValidStart: null,
+        timeRangeValidEnd: null,
+        noEndDate: true
+
+    }
+  ) {
+    status
+    message
+  }
+}
+
+
+
+

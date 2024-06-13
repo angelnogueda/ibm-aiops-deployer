@@ -1,0 +1,92 @@
+{
+  "id": "temporal2",
+  "metadata": {
+    "labels": {
+      "ibm.com/aiops/managed-by-analytics": "true",
+      "ibm.com/aiops/alert-insight-type": "aiops.ibm.com/insight-source/relationship/causal/temporal",
+      "ibm.com/aiops/alert-relationship-source": "aiops.ibm.com/insight-source/relationship/causal/temporal",
+      "ibm.com/aiops/alert-relationship-sources/temporal/group-id": "911755dc14f8a4cc00b3c50d37c42d8ccb352b43",
+      "ibm.com/aiops/policy/temporal/version": "3",
+      "ibm.com/aiops/policy/temporal/has-evidence": "true"
+    },
+    "name": "MySQL - Database not responding - Check conditions and error events1",
+    "description": "Created by Nicks scripts",
+    "createdBy": {
+      "id": "demo",
+      "type": "user"
+    }
+  },
+  "state": "enabled",
+  "executionPriority": 50,
+  "spec": {
+    "trigger": {
+      "entityId": "alert",
+      "triggerId": "aiops.ibm.com/trigger/alert-pre-create"
+    },
+    "actions": [{
+      "actionId": "aiops.ibm.com/action/internal/conditional",
+      "arguments": {
+        "condition": " {{ alert.signature }} == \"{application=robot-shop, name=web, sourceId=kubernetes, type=host}-Instana Performance-\" or  {{ alert.signature }} == \"{accessScope=default, application=robot-shop, cluster=selenium.grid, component=selenium.grid, controller=selenium, hostname=selenium.grid.ibm.com, interface=eth0, ipAddress=9.123.123.1, location=NewYork 1, name=web, port=8080, service=robot-shop, sourceId=kubernetes, type=host}-Instana Synthetic-> 30 seconds\" or  {{ alert.signature }} == \"{application=robot-shop, name=ratings-predictive, sourceId=kubernetes, type=host}-Instana Performance-\" or  {{ alert.signature }} == \"{accessScope=default, application=robot-shop, interface=DSwitch 1-VM Network Port 1, ipAddress=9.123.123.1, location=Dallas 10, name=mysql-db, service=robot-shop, sourceId=database, type=host}-Security Change-> 30 seconds\" or  {{ alert.signature }} == \"{name=mysql-db, sourceId=database, type=host}-Github Commit-\" or  {{ alert.signature }} == \"{accessScope=default, application=robot-shop, interface=DSwitch 1-VM Network Port 1, ipAddress=9.123.123.1, location=Dallas 10, name=mysql-db, service=robot-shop, sourceId=database, type=host}-Instana Change-\" or  {{ alert.signature }} == \"{accessScope=default, application=robot-shop, cluster=selenium.grid, component=selenium.grid, controller=selenium, hostname=selenium.grid.ibm.com, interface=eth0, ipAddress=9.123.123.1, location=NewYork 1, name=catalogue, port=8080, service=robot-shop, sourceId=kubernetes, type=host}-Instana Synthetic-> 30 seconds\" or  {{ alert.signature }} == \"{application=robot-shop, name=mysql-db, sourceId=database, type=host}-Instana Availabilty-\" or  {{ alert.signature }} == \"{accessScope=default, application=robot-shop, interface=DSwitch 1-VM Network Port 1, ipAddress=9.123.123.1, location=Dallas 10, name=DCW1-000484, service=robot-shop, sourceId=vm, type=host}-VM - RESIZE-\" or  {{ alert.signature }} == \"{application=ratings, entity=ratings, name=ratings, type=application}-Natural language anomaly-7d694fe6-692f-11ee-8230-0a580a82026f-sev-5\"",
+        "then": [{
+          "actionId": "aiops.ibm.com/action/internal/insights/correlate",
+          "output": "alert.insights.[]",
+          "arguments": {
+            "entity": {
+              "$variable": "alert"
+            },
+            "correlationKey": {
+              "$variable": "policy.id"
+            },
+            "relationshipType": "aiops.ibm.com/insight-type/relationship/causal",
+            "relationshipSource": {
+              "$variable": "policy.metadata.labels.[ibm.com/aiops/alert-relationship-source]"
+            },
+            "relationshipDetails": {
+              "groupId": {
+                "$variable": "policy.metadata.labels.[ibm.com/aiops/alert-relationship-sources/temporal/group-id]"
+              },
+              "policyId": {
+                "$variable": "policy.id"
+              },
+              "window": {
+                "type": "rolling",
+                "durationMS": 900000
+              }
+            }
+          }
+        }]
+      }
+    }],
+    "hotfields": [{
+      "fieldname": "alert.signature",
+      "value": "{application=robot-shop, name=web, sourceId=kubernetes, type=host}-Instana Performance-"
+    }, {
+      "fieldname": "alert.signature",
+      "value": "{accessScope=default, application=robot-shop, cluster=selenium.grid, component=selenium.grid, controller=selenium, hostname=selenium.grid.ibm.com, interface=eth0, ipAddress=9.123.123.1, location=NewYork 1, name=web, port=8080, service=robot-shop, sourceId=kubernetes, type=host}-Instana Synthetic-> 30 seconds"
+    }, {
+      "fieldname": "alert.signature",
+      "value": "{application=robot-shop, name=ratings-predictive, sourceId=kubernetes, type=host}-Instana Performance-"
+    }, {
+      "fieldname": "alert.signature",
+      "value": "{accessScope=default, application=robot-shop, interface=DSwitch 1-VM Network Port 1, ipAddress=9.123.123.1, location=Dallas 10, name=mysql-db, service=robot-shop, sourceId=database, type=host}-Security Change-> 30 seconds"
+    }, {
+      "fieldname": "alert.signature",
+      "value": "{name=mysql-db, sourceId=database, type=host}-Github Commit-"
+    }, {
+      "fieldname": "alert.signature",
+      "value": "{accessScope=default, application=robot-shop, interface=DSwitch 1-VM Network Port 1, ipAddress=9.123.123.1, location=Dallas 10, name=mysql-db, service=robot-shop, sourceId=database, type=host}-Instana Change-"
+    }, {
+      "fieldname": "alert.signature",
+      "value": "{accessScope=default, application=robot-shop, cluster=selenium.grid, component=selenium.grid, controller=selenium, hostname=selenium.grid.ibm.com, interface=eth0, ipAddress=9.123.123.1, location=NewYork 1, name=catalogue, port=8080, service=robot-shop, sourceId=kubernetes, type=host}-Instana Synthetic-> 30 seconds"
+    }, {
+      "fieldname": "alert.signature",
+      "value": "{application=robot-shop, name=mysql-db, sourceId=database, type=host}-Instana Availabilty-"
+    }, {
+      "fieldname": "alert.signature",
+      "value": "{accessScope=default, application=robot-shop, interface=DSwitch 1-VM Network Port 1, ipAddress=9.123.123.1, location=Dallas 10, name=DCW1-000484, service=robot-shop, sourceId=vm, type=host}-VM - RESIZE-"
+    }, {
+      "fieldname": "alert.signature",
+      "value": "{application=ratings, entity=ratings, name=ratings, type=application}-Natural language anomaly-7d694fe6-692f-11ee-8230-0a580a82026f-sev-5"
+    }]
+  }
+}

@@ -1,0 +1,161 @@
+﻿apiVersion: console.openshift.io/v1
+kind: ConsoleQuickStart
+metadata:
+  name: install-ibm-aiops
+spec:
+  conclusion: You now have have a complete, pre-trained IBM CloudPak for AIOps Demo Environment!
+  description: >-
+    Install a complete, pre-trained IBM CloudPak for AIOps Demo Environment.
+  displayName: Install IBM CloudPak for AIOps Demo Environment
+  durationMinutes: 10
+  introduction: >-
+    ### This quick start shows you how to install a complete, pre-trained IBM CloudPak for AIOps Demo Environment.
+
+    You should have previously obtained an **OpenShift cluster** 
+  prerequisites:
+    - You have obtained an OpenShift cluster - [Specifications](https://github.com/niklaushirt/ibm-aiops-deployer#11-prerequisites) - [Techzone](https://techzone.ibm.com/collection/tech-zone-certified-base-images/journey-vmware-on-ibm-cloud-environments)
+  tasks:
+
+    - description: >-
+        You can get the entitlement key (registry pull token) from [https://myibm.ibm.com/products-services/containerlibrary](https://myibm.ibm.com/products-services/containerlibrary).
+
+        This allows the images to be pulled from the IBM Container Registry.
+      review:
+        failedTaskHelp: This task isn’t verified yet. Try the task again.
+        instructions: >-
+          #### Have you got the entitlement key that looks like **eyJhbGciOiJIUzI1NiJ9.eyJp...kjhasdfk**?
+      summary:
+        failed: Try the steps again.
+        success: You have aquired the entitlement key to install the CloudPak!
+      title: Get the Entitlement Key
+
+
+    - description: >-
+        In the the OCP Web UI click on the `+` sign in the right upper corner
+      review:
+        failedTaskHelp: This task isn’t verified yet. Try the task again.
+        instructions: >-
+          #### A black empty text box has opened?
+      summary:
+        failed: Try the steps again.
+        success: You are ready to configure the installation!
+      title: Paste Installation YAML File
+
+    - description: >-
+        Copy and paste the content from [this file](https://github.com/niklaushirt/ibm-aiops-deployer/blob/main/Quick_Install/00_INSTALL_IBM_AIOPS.yaml)
+      review:
+        failedTaskHelp: This task isn’t verified yet. Try the task again.
+        instructions: >-
+          #### The basic configuration has been pasted into the OpenShift Web UI?
+      summary:
+        failed: Try the steps again.
+        success: You are ready to configure the installation!
+      title: Get the installation YAML File
+
+
+
+    - description: >-
+        Replace `<REGISTRY_TOKEN>` at the top of the file with your entitlement key
+      review:
+        failedTaskHelp: This task isn’t verified yet. Try the task again.
+        instructions: >-
+          #### Your entitlement key has been pasted into the configuration?
+      summary:
+        failed: Try the steps again.
+        success: You are ready to configured the Entitlement Key!
+      title: Replace Entitlement Key
+
+
+
+
+    - description: >-
+        Replace the default Password `global_password: CHANGEME` with a Password of your choice (line 82)
+      review:
+        failedTaskHelp: This task isn’t verified yet. Try the task again.
+        instructions: >-
+          #### The global Password has beemn changed with a Password of my choice?
+      summary:
+        failed: Try the steps again.
+        success: You are ready to configured the global default Password!
+      title: Change the default Password
+
+
+    - description: >-
+        Click `Create`to start the installation
+      review:
+        failedTaskHelp: This task isn’t verified yet. Try the task again.
+        instructions: >-
+          #### After a few minutes you should see a blue bar a the top of your OpenShift Web UI.
+      summary:
+        failed: Try the steps again.
+        success: >-
+          You have started the installation!
+      title: Start the Installation
+
+
+    - description: >-
+          1. After a few minutes you should see a blue bar a the top of your OpenShift Web UI.
+
+          saying `Installing IBMAIOps - Demo - Version v4.x - Open Logs`
+
+          2. Click in `Open Logs`
+
+          This will open the Installatio Logs for you to follow.
+
+      review:
+        failedTaskHelp: This task isn’t verified yet. Try the task again.
+        instructions: >-
+          #### You should see the installation Logs scroll by
+
+      summary:
+        failed: Try the steps again.
+        success: >-
+          Are now monitoring the installation!
+      title: Monitor the Installation
+
+
+
+    - description: >-
+         Grab a coffe and check back regularly.
+
+         The Installation takes between 1.5-2.5 hours.
+
+         When done you get a green bar on top, saying `✅ IBMAIOPS is installed in this cluster.`
+
+      review:
+        failedTaskHelp: This task isn’t verified yet. Try the task again.
+        instructions: >-
+          #### If you get an orange bar, please [restart the installation](https://github.com/niklaushirt/ibm-aiops-deployer#re-run-the-installer)
+      summary:
+        failed: Restart the installation
+        success: >-
+          You have successfully completed the installation!
+      title: Grab a coffe 
+
+
+
+    - description: >-
+        
+        You should have gotten a green bar with the following:
+
+        `✅ IBMAIOPS is installed in this cluster. 🚀 Access the DemoUI with Password 'XYZ' here: DemoUI`
+
+        1. Click on the **DemoUI** link.
+
+        2. Log in with the Password you have defined before
+
+        2. [Start Demoing](https://github.com/niklaushirt/ibm-aiops-deployer#3-demo-the-solution)
+
+        3. Click on **Filesystem Usage** from the list to run the query.
+
+
+        #### Note: select **Custom Query** from the dropdown to create and run a
+        custom query utilizing PromQL.
+      review:
+        failedTaskHelp: This task isn’t verified yet. Try the task again.
+        instructions: |
+          #### Do you see a chart displayed with filesystem usage for your project?
+      summary:
+        failed: Try the steps again.
+        success: You have uccessfully installed your very own IBM CloudPak for AIOps Demo Environment!
+      title: Connect to the Demo Environment

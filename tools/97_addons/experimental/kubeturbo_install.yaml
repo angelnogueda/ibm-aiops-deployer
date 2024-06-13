@@ -1,0 +1,106 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubeturbo
+  annotations:
+    openshift.io/node-selector: ""
+  labels:
+    openshift.io/cluster-monitoring: "true"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: turbo-user
+  namespace: kubeturbo
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1    
+metadata:
+  name: turbo-all-binding-local
+subjects:
+- kind: ServiceAccount
+  name: turbo-user
+  namespace: kubeturbo
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: turbo-config
+  namespace: kubeturbo
+data:
+  turbo.config: |-
+    {
+        "communicationConfig": {
+            "serverMeta": {
+                "version": "8.9.3",
+                "turboServer": "https://nginx-turbonomic.apps.ocp-270003bu3k-4sbk.cloud.techzone.ibm.com/"
+            },
+            "restAPIConfig": {
+                "opsManagerUserName": "administrator",
+                "opsManagerPassword": "that you have defined in the configuration file"
+            }
+        },
+        "targetConfig": {
+            "targetName": "Arya"
+        },
+        "HANodeConfig": {
+            "nodeRoles": [ "master" ]
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubeturbo
+  namespace: kubeturbo
+spec:
+  replicas: 1
+  selector:
+     matchLabels:
+       app.kubernetes.io/name: kubeturbo
+  template:
+    metadata:
+      annotations:
+        kubeturbo.io/monitored: "false"
+      labels:
+        app.kubernetes.io/name: kubeturbo
+    spec:
+      serviceAccountName: turbo-user
+      containers:
+      - name: kubeturbo
+        image: icr.io/cpopen/turbonomic/kubeturbo:8.9.3
+        env:
+          - name: kubeturbo
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+        args:
+          - --turboconfig=/etc/kubeturbo/turbo.config
+          - --v=2
+          - --kubelet-https=true
+          - --kubelet-port=10250
+        volumeMounts:
+          - name: turbo-volume
+            mountPath: /etc/kubeturbo
+            readOnly: true
+          - name: turbonomic-credentials-volume
+            mountPath: /etc/turbonomic-credentials
+            readOnly: true
+          - name: varlog
+            mountPath: /var/log
+      volumes:
+      - name: turbo-volume
+        configMap:
+          name: turbo-config
+      - name: turbonomic-credentials-volume
+        secret:
+          defaultMode: 420
+          optional: true
+          secretName: turbonomic-credentials
+      - name: varlog
+        emptyDir: {}
+      restartPolicy: Always

@@ -1,0 +1,30 @@
+﻿apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: zzzz
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: ibm-aiops-installer
+    server: 'https://kubernetes.default.svc'
+  project: default
+  source:
+    helm:
+      parameters:
+        - name: cp4aiops.content.additional.enabled
+          value: 'false'
+        - name: cp4aiops.content.demoui.enabled
+          value: 'true'
+        - name: cp4aiops.content.policies.enabled
+          value: 'false'
+        - name: cp4aiops.content.runbooks.enabled
+          value: 'false'
+        - name: cp4aiops.content.topology.enabled
+          value: 'false'
+        - name: cp4aiops.content.training.enabled
+          value: 'false'
+        - name: cp4aiops.globalPassword
+          value: CHANGEME
+    path: tools/97_addons/experimental/gitops/content/cp4aiops-demo-content
+    repoURL: 'https://github.com/niklaushirt/ibm-aiops-deployer'
+    targetRevision: dev_latest

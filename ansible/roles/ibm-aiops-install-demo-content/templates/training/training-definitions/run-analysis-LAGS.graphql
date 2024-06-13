@@ -1,0 +1,7 @@
+mutation startTrainingRun {
+  startTrainingRun(definitionName: "log_anomaly_golden_signal_configuration") {
+    message
+    status
+  }
+}
+

@@ -1,0 +1,28 @@
+mutation createTrainingDefinition {
+  createTrainingDefinition(
+    definitionName: "log_anomaly_golden_signal_configuration"
+    algorithmName: "Log_Anomaly_Golden_Signal"
+    description: "Automatically created by Nick's scripts"
+    createdBy: "demo"
+    enableSelectiveTraining: false
+    promoteOption: manual
+		enableLADGoldenSignal: true
+    trainingSchedule: {
+      frequency: manual
+      repeat: daily
+      atTimeHour: 0,
+      atTimeMinute: 0,
+        timeRangeValidStart: null,
+        timeRangeValidEnd: null,
+        noEndDate: true
+
+    }
+  ) {
+    status
+    message
+  }
+}
+
+
+
+

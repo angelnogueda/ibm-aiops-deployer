@@ -1,0 +1,384 @@
+[{
+      "name": "AddEdgeProperty",
+      "itemType": "Relationship",
+      "description": "A tool to add an edge property via prompts",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": 2,
+      "validForTypes": [
+         "*"
+      ],
+      "script": "var name = prompt(\"property name\", \"name\");\nvar value = prompt(\"property value\", \"value\");\nvar options = {\n    method: 'POST',\n    headers: {\n        \"X-TenantID\": \"cfd95b7e-3bc7-4006-a4a8-a73a79c71255\",\n        \"Authorization\": \"Basic base64TOKEN'==\",\n        \"Content-type\": \"application/json\"\n    },\n    body: '{ \"' + name + '\": \"' + value + '\"}',\n    onSuccess: _onSuccess,\n    onError: _onError\n};\nasmFunctions.sendHttpRequest('https://asm-develop-svt.fyre.ibm.com/1.0/topology/resources/' + asmProperties._fromId + '/references/out/' + asmProperties._edgeType + '/' + asmProperties._toId, options);\n\nfunction _onSuccess(response, status, headers) {\n  asmFunctions.showToasterMessage(\"normal\", \"Resource updated.\")\n}\nfunction _onError(response, status, headers) {\n  var msg = JSON.parse(response);\n  asmFunctions.showToasterMessage(\"critical\", msg._error.description );\n}",
+      "menuLabel": "Add Vertex Property",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ],
+      "databaseSource": "metadata"
+   },
+   {
+      "name": "AddVertexProperty",
+      "itemType": "Resource",
+      "description": "A tool to add a vertex property via prompts",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": 2,
+      "validForTypes": [
+         "*"
+      ],
+      "script": "var name = prompt(\"property name\", \"name\");\nvar value = prompt(\"property value\", \"value\");\nvar options = {\n    method: 'POST',\n    headers: {\n        \"X-TenantID\": \"cfd95b7e-3bc7-4006-a4a8-a73a79c71255\",\n        \"Authorization\": \"Basic base64TOKEN'==\",\n        \"Content-type\": \"application/json\"\n    },\n    body: '{ \"' + name + '\": \"' + value + '\"}',\n    onSuccess: _onSuccess,\n    onError: _onError\n};\nasmFunctions.sendHttpRequest('https://asm-develop-svt.fyre.ibm.com/1.0/topology/resources/' + asmProperties._id, options);\n\nfunction _onSuccess(response, status, headers) {\n  asmFunctions.showToasterMessage(\"normal\", \"Resource updated.\")\n}\n\nfunction _onError(response, status, headers) {\n  var msg = JSON.parse(response);\n  asmFunctions.showToasterMessage(\"critical\", msg._error.description );\n}",
+      "menuLabel": "Add Vertex Property",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ],
+      "databaseSource": "metadata"
+   },
+   {
+      "name": "DeleteVertex",
+      "itemType": "Resource",
+      "description": "Delete a vertex from the topology service",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": 2,
+      "validForTypes": [
+         "*"
+      ],
+      "script": "var options = {\n    method: 'DELETE',\n    headers: {\n        \"X-TenantID\": \"cfd95b7e-3bc7-4006-a4a8-a73a79c71255\",\n        \"Authorization\": \"Basic base64TOKEN'==\",\n        \"Content-type\": \"application/json\"\n    },\n    onSuccess: _onSuccess,\n    onError: _onError\n};\nasmFunctions.sendHttpRequest('https://asm-develop-svt.fyre.ibm.com/1.0/topology/resources/' + asmProperties._id, options);\n\nfunction _onSuccess(response, status, headers) {\n  asmFunctions.showToasterMessage(\"Information\", \"Resource '\" + asmProperties.name + \"' deleted.\")\n}\n\nfunction _onError(response, status, headers) {\n  var msg = JSON.parse(response);\n  asmFunctions.showToasterMessage(\"critical\", msg._error.description );\n}",
+      "menuLabel": "Delete Vertex",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ],
+      "databaseSource": "metadata"
+   },
+   {
+      "name": "AddVertex",
+      "itemType": "Resource",
+      "description": "Add a vertex to the topology service, and a reference to the selected vertex",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": 2,
+      "validForTypes": [
+         "*"
+      ],
+      "script": "var name = prompt(\"Name\", \"name\");\nvar type = prompt(\"Type\", \"host\");\nvar edgeType = prompt(\"Edge type\", \"connectedTo\");\nvar toOrFrom = prompt(\"Edge 'to' or 'from' the selected node?\", \"to\");\nvar options = {\n    method: 'POST',\n    headers: {\n        \"X-TenantID\": \"cfd95b7e-3bc7-4006-a4a8-a73a79c71255\",\n        \"Authorization\": \"Basic base64TOKEN'==\",\n        \"Content-type\": \"application/json\"\n    },\n    body: '{ \"name\":\"' + name + '\", \"entityTypes\": [\"' + type + '\"], \"_references\":[{\"_' + toOrFrom + 'Id\": \"' + asmProperties._id +'\",\"_edgeType\": \"' + edgeType + '\"}]}',\n    onSuccess: _onSuccess,\n    onError: _onError\n};\nasmFunctions.sendHttpRequest('https://asm-develop-svt.fyre.ibm.com/1.0/topology/resources', options);\n\n\nfunction _onSuccess(response, status, headers) {\n    asmFunctions.showToasterMessage('information', status + ': Created resource ' + headers.entityid);\n}\nfunction _onError(response, status, headers) {\n  var msg = JSON.parse(response);\n  asmFunctions.showToasterMessage(\"critical\", msg._error.description );\n}",
+      "menuLabel": "Add Vertex",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ],
+      "databaseSource": "metadata"
+   },
+   {
+      "name": "Portainer",
+      "itemType": "Resource",
+      "description": "Launch Portainer in an iFrame for docker resources",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": "5",
+      "validForTypes": [
+         "image",
+         "network"
+      ],
+      "script": "var portainerUrl = \"http://asm-develop-svt.fyre.ibm.com:9000/#/\";\nwindow.open(portainerUrl + asmProperties.entityTypes[0] + \"s/\" + asmProperties.dockerId + \"/\", \"portainer\", \"width=1200,height=800\");",
+      "menuLabel": "Portainer",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "name": "PortainerConsole",
+      "itemType": "Resource",
+      "description": "Launch console via portainer",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": "5",
+      "validForTypes": [
+         "container"
+      ],
+      "script": "var portainerUrl = \"http://asm-develop-svt.fyre.ibm.com:9000/#/\";\nwindow.open(portainerUrl + asmProperties.entityTypes[0] + \"s/\" + asmProperties.dockerId + \"/console\", \"portainer\", \"width=1200,height=800\");",
+      "menuLabel": "Launch Console",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "name": "PortainerContainerStats",
+      "itemType": "Resource",
+      "description": "show container stats",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": "5",
+      "validForTypes": [
+         "container"
+      ],
+      "script": "var portainerUrl = \"http://asm-develop-svt.fyre.ibm.com:9000/#/\";\nwindow.open(portainerUrl + asmProperties.entityTypes[0] + \"s/\" + asmProperties.dockerId + \"/stats\", \"portainer\", \"width=1200,height=800\");",
+      "menuLabel": "Portainer Stats",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "name": "PortainerSwarmNode",
+      "itemType": "Resource",
+      "description": "launch node ui in portainer for a docker-engine",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": "5",
+      "validForTypes": [
+         "application"
+      ],
+      "script": "var portainerUrl = \"http://asm-develop-svt.fyre.ibm.com:9000/#/\";\nwindow.open(portainerUrl + \"nodes/\" + asmProperties.uniqueId + \"/\", \"portainer\", \"width=1200,height=800\");",
+      "menuLabel": "Portainer",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "name": "PortainerService",
+      "itemType": "Resource",
+      "description": "Launch portainer UI for service",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": "5",
+      "validForTypes": [
+         "service"
+      ],
+      "script": "var portainerUrl = \"http://asm-develop-svt.fyre.ibm.com:9000/#/\";\nwindow.open(portainerUrl + asmProperties.entityTypes[0] + \"/\" + asmProperties.dockerId + \"/\", \"portainer\", \"width=1200,height=800\");",
+      "menuLabel": "Portainer",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "name": "PortainerContainerVolumes",
+      "itemType": "Resource",
+      "description": "Portainer tool for containers and volumes",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": "5",
+      "validForTypes": [
+         "container",
+         "volume"
+      ],
+      "script": "var portainerUrl = \"http://asm-develop-svt.fyre.ibm.com:9000/#/\";\nwindow.open(portainerUrl + asmProperties.entityTypes[0] + \"s/\" + asmProperties.dockerId, \"portainer\", \"width=1200,height=800\");",
+      "menuLabel": "Portainer",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "name": "PortainerTask",
+      "itemType": "Both",
+      "description": "Launch UI for docker tasks",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": "5",
+      "validForTypes": [
+         "task"
+      ],
+      "script": "var portainerUrl = \"http://asm-develop-svt.fyre.ibm.com:9000/#/\";\nwindow.open(portainerUrl + asmProperties.entityTypes[0] + \"/\" + asmProperties.dockerId, \"portainer\", \"width=1200,height=800\");",
+      "menuLabel": "Portainer",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "definition": "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 270 308'><ellipse id='a' cx='135' cy='153' rx='40' ry='144' fill='none' stroke='#000' stroke-width='5'/><use xlink:href='#a' transform='rotate(60 135 153)'/><use xlink:href='#a' transform='rotate(-60 135 153)'/></svg>",
+      "entityTypes": [
+         "ASM_UI_CUSTOM_ICON"
+      ],
+      "uniqueId": "atom-svg",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "definition": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 45 45\"><defs><clipPath id=\"a\"><path d=\"M0 36h36V0H0v36z\"/></clipPath></defs><g clip-path=\"url(#a)\" transform=\"matrix(1.25 0 0 -1.25 0 45)\"><path d=\"M36 18c0-9.94-8.06-18-18-18S0 8.06 0 18s8.06 18 18 18 18-8.06 18-18\" fill=\"#ffcc4d\"/><path d=\"M15.457 20.185c-.06.135-1.5 3.297-4.457 3.297s-4.397-3.162-4.457-3.297c-.092-.207-.032-.45.144-.59.177-.144.427-.148.61-.015.013.01 1.262.902 3.703.902 2.426 0 3.674-.88 3.702-.9.088-.067.194-.1.298-.1.11 0 .22.036.31.11.18.14.24.385.147.593\" fill=\"#664500\"/><path d=\"M31 22.5c0-3.59-2.91-6.5-6.5-6.5S18 18.91 18 22.5s2.91 6.5 6.5 6.5 6.5-2.91 6.5-6.5\" fill=\"#f5f8fa\"/><path d=\"M27 22.5c0-1.38-1.12-2.5-2.5-2.5S22 21.12 22 22.5s1.12 2.5 2.5 2.5 2.5-1.12 2.5-2.5\" fill=\"#292f33\"/><path d=\"M7 14.738c0-3.964 4.596-9 11-9s11 5 11 9c0 0-10.333-2.756-22 0\" fill=\"#664500\"/><path d=\"M12 12.997v-6.96c0-3 2-6 6-6s6 3 6 6v6.92c-6.29-1.293-12 .04-12 .04\" fill=\"#e75a70\"/></g></svg>",
+      "entityTypes": [
+         "ASM_UI_CUSTOM_ICON"
+      ],
+      "uniqueId": "tongue-icon",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "definition": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 432 411'><path fill='#0D254C' d='M83.33 409.6L216 1.3l132.67 408.3L1.33 157.25h429.34'/></svg>",
+      "entityTypes": [
+         "ASM_UI_CUSTOM_ICON"
+      ],
+      "uniqueId": "star-svg",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "definition": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 45 45'><defs><clipPath id='a'><path d='M0 36h36V0H0v36z'/></clipPath></defs><g clip-path='url(#a)' transform='matrix(1.25 0 0 -1.25 0 45)'><path d='M36 18c0-9.94-8.06-18-18-18S0 8.06 0 18s8.06 18 18 18 18-8.06 18-18' fill='#da2f47'/><path d='M25.485 6.12C25.44 6.3 24.317 10.5 18 10.5c-6.318 0-7.44-4.2-7.485-4.38-.055-.216.043-.44.237-.553.195-.11.44-.08.6.077C11.37 5.664 13.304 7.5 18 7.5c4.694 0 6.63-1.837 6.648-1.856.096-.094.224-.144.352-.144.084 0 .17.02.246.064.196.112.294.34.24.557m-9.78 12.588C12.453 21.962 7.22 22 7 22c-.552 0-1-.447-1-1 0-.55.447-1 1-1 .028 0 1.924-.022 3.982-.737C10.39 18.623 10 17.63 10 16.5c0-1.934 1.12-3.5 2.5-3.5s2.5 1.566 2.5 3.5c0 .174-.02.34-.037.507.013 0 .025-.007.037-.007.256 0 .512.098.707.293.39.39.39 1.023 0 1.414M29 22c-.22 0-5.45-.038-8.707-3.293-.39-.39-.39-1.023 0-1.414.195-.195.45-.293.707-.293.013 0 .024.007.036.007-.016-.167-.036-.333-.036-.507 0-1.934 1.12-3.5 2.5-3.5s2.5 1.566 2.5 3.5c0 1.13-.39 2.123-.982 2.763 2.058.715 3.954.737 3.984.737.55 0 .998.45.997 1-.004.553-.45 1-1 1' fill='#292f33'/></g></svg>",
+      "entityTypes": [
+         "ASM_UI_CUSTOM_ICON"
+      ],
+      "uniqueId": "to-be-changed",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "definition": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 45 45\"><defs><clipPath id=\"a\"><path d=\"M0 36h36V0H0v36z\"/></clipPath></defs><g clip-path=\"url(#a)\" transform=\"matrix(1.25 0 0 -1.25 0 45)\"><path d=\"M36 18c0-9.94-8.06-18-18-18S0 8.06 0 18s8.06 18 18 18 18-8.06 18-18\" fill=\"#ffcc4d\"/><path d=\"M1.24 24.982c.24-.24 1.437-.958 1.677-1.675.24-.717.72-4.784 2.158-5.98 1.484-1.234 7.077-.775 8.15-.24 2.396 1.194 2.69 4.53 3.114 6.22.237.957 1.675.957 1.675.957s1.44 0 1.678-.956c.424-1.69.72-5.027 3.115-6.22 1.072-.536 6.665-.995 8.15.238 1.436 1.197 1.916 5.264 2.156 5.982.238.717 1.437 1.435 1.677 1.674.24.24.24 1.196 0 1.436-.48.478-6.133.904-12.222.24-1.215-.134-1.677-.48-4.554-.48-2.875 0-3.34.346-4.553.478-6.086.666-11.743.24-12.222-.238-.24-.24-.24-1.197 0-1.436\" fill=\"#292f33\" fill-rule=\"evenodd\"/><path d=\"M27.335 12.37c-.178.162-.444.172-.635.03-.04-.03-3.922-2.9-8.7-2.9-4.766 0-8.662 2.87-8.7 2.9-.19.142-.457.13-.635-.03-.177-.16-.217-.423-.094-.627C8.7 11.528 11.79 6.5 18 6.5s9.3 5.028 9.43 5.243c.122.205.083.468-.095.628\" fill=\"#664500\"/></g></svg>",
+      "entityTypes": [
+         "ASM_UI_CUSTOM_ICON"
+      ],
+      "uniqueId": "shades",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "definition": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><path d=\"M82.5 66.3V49.8c3.3-5.2 5-11.1 5-17.3 0-6.3-1.8-12.4-5.2-17.6-.5-.7-1.3-1.1-2.1-1.1h-5.1C69.9 8.2 62.6 5 55 5s-14.9 3.2-20.1 8.8h-5.1c-.8 0-1.6.4-2.1 1.1-3.4 5.3-5.2 11.3-5.2 17.6 0 6.1 1.7 12.1 5 17.3v16.5l-10 8-1.2-65.6c0-2.1-1.7-3.7-3.8-3.7S8.7 6.7 8.7 8.7L7.5 75C6.1 75 5 76.1 5 77.5v15C5 93.9 6.1 95 7.5 95h85c1.4 0 2.5-1.1 2.5-2.5v-15c0-.8-.3-1.5-.9-2l-11.6-9.2zm-50-15h2.4l.1.1v6.2c0 .4.2.8.5 1C41.2 62.8 47.9 65 55 65s13.8-2.2 19.5-6.4c.3-.2.5-.6.5-1v-6.2l.1-.1h2.4v16.3h-45V51.3zm5 2.4c4.9 4 11.1 6.3 17.5 6.3s12.6-2.3 17.5-6.3V57c-5.1 3.6-11.2 5.5-17.5 5.5S42.6 60.6 37.5 57v-3.3zm41.3-34.9c2.4 4.2 3.7 8.9 3.7 13.8s-1.3 9.6-3.7 13.8H75V18.8h3.8zM55 10c6.6 0 12.8 2.9 17.1 7.9l.4.4v28.5c-.1.1-.3.2-.4.4C67.8 52.1 61.6 55 55 55s-12.8-2.9-17.1-7.9l-.4-.4V18.3c.1-.1.3-.2.4-.4 4.3-5 10.5-7.9 17.1-7.9zm-23.8 8.8H35v27.5h-3.8c-2.4-4.2-3.7-8.9-3.7-13.8s1.3-9.6 3.7-13.7zM30.9 70h48.2l9.4 7.5h-67l9.4-7.5zM12.5 7.5c.7 0 1.3.6 1.3 1.3l1 58.7h-4.7l1-58.7c.1-.7.7-1.3 1.4-1.3zM10.1 70h4.8l.1 5h-5l.1-5zM10 90V80h80v10H10z\"/><path d=\"M55 37.5c2.8 0 5-2.2 5-5s-2.2-5-5-5-5 2.2-5 5 2.2 5 5 5zm0-7.5c1.4 0 2.5 1.1 2.5 2.5S56.4 35 55 35s-2.5-1.1-2.5-2.5S53.6 30 55 30z\"/><path d=\"M55 47.5c8.3 0 15-6.7 15-15s-6.7-15-15-15-15 6.7-15 15 6.7 15 15 15zM55 20c6.9 0 12.5 5.6 12.5 12.5S61.9 45 55 45s-12.5-5.6-12.5-12.5S48.1 20 55 20z\"/><circle cx=\"55\" cy=\"41.3\" r=\"1.9\"/><circle cx=\"55\" cy=\"23.8\" r=\"1.9\"/><circle cx=\"59.4\" cy=\"40.1\" r=\"1.9\"/><circle cx=\"50.6\" cy=\"24.9\" r=\"1.9\"/><circle cx=\"62.6\" cy=\"36.9\" r=\"1.9\"/><circle cx=\"47.4\" cy=\"28.1\" r=\"1.9\"/><circle cx=\"63.8\" cy=\"32.5\" r=\"1.9\"/><circle cx=\"46.3\" cy=\"32.5\" r=\"1.9\"/><circle cx=\"62.6\" cy=\"28.1\" r=\"1.9\"/><circle cx=\"47.4\" cy=\"36.9\" r=\"1.9\"/><circle cx=\"59.4\" cy=\"24.9\" r=\"1.9\"/><circle cx=\"50.6\" cy=\"40.1\" r=\"1.9\"/></svg>",
+      "entityTypes": [
+         "ASM_UI_CUSTOM_ICON"
+      ],
+      "uniqueId": "camera",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "definition": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 570 720\"><path d=\"M158.38 1.656c-3.62.113-7.517 1.45-11.938 4.938-10.83-4.177-21.33-5.627-30.72 2.875-14.5-1.89-19.212 2-22.782 6.53-3.183-.07-23.82-3.28-33.282 10.84-23.78-2.81-31.298 13.99-22.78 29.66-4.858 7.52-9.89 14.94 1.468 29.28-4.018 7.98-1.528 16.64 7.937 27.12-2.498 11.22 2.412 19.14 11.22 25.31-1.648 15.36 14.083 24.28 18.78 27.47 1.804 8.95 5.563 17.39 23.53 22.06 2.965 13.33 13.763 15.64 24.22 18.44-34.562 20.09-64.2 46.52-64 111.38l-5.062 9.03c-39.63 24.1-75.28 101.56-19.53 164.52 3.65 19.71 9.75 33.86 15.19 49.53 8.14 63.13 61.22 92.69 75.22 96.19 20.52 15.62 42.37 30.45 71.94 40.84 27.88 28.75 58.08 39.7 88.44 39.69h1.35c30.37.02 60.56-10.94 88.44-39.69 29.57-10.39 51.42-25.22 71.94-40.85 14-3.5 67.09-33.06 75.22-96.19 5.44-15.67 11.55-29.83 15.19-49.54 55.76-62.97 20.1-140.43-19.53-164.53l-5.07-9.03c.2-64.85-29.44-91.29-64-111.38 10.46-2.8 21.26-5.1 24.22-18.44 17.97-4.67 21.73-13.12 23.53-22.07 4.7-3.18 20.43-12.11 18.78-27.47 8.81-6.17 13.72-14.09 11.22-25.31 9.47-10.48 11.96-19.14 7.94-27.13 11.36-14.33 6.32-21.76 1.47-29.28 8.51-15.67 1-32.47-22.79-29.65-9.46-14.12-30.09-10.91-33.28-10.84-3.57-4.53-8.28-8.42-22.78-6.53-9.39-8.5-19.89-7.05-30.72-2.88-12.86-10.15-21.37-2.01-31.09 1.06-15.57-5.086-19.13 1.88-26.78 4.72-16.98-3.59-22.14 4.224-30.28 12.47l-9.47-.186c-25.61 15.1-38.34 45.83-42.85 61.63-4.51-15.8-17.2-46.53-42.81-61.62l-9.47.185c-8.15-8.24-13.31-16.05-30.29-12.46-7.65-2.84-11.2-9.81-26.78-4.72-6.38-2.02-12.24-6.215-19.15-6z\"/><path fill=\"#75a928\" d=\"M107.39 68.056c67.948 35.03 107.45 63.37 129.09 87.504-11.082 44.418-68.896 46.445-90.036 45.2 4.328-2.016 7.94-4.43 9.22-8.137-5.304-3.77-24.112-.397-37.243-7.774 5.05-1.05 7.41-2.07 9.77-5.79-12.4-3.96-25.77-7.37-33.63-13.92 4.24.05 8.2.95 13.74-2.9-11.11-5.99-22.97-10.74-32.18-19.89 5.75-.14 11.94-.06 13.74-2.17-10.17-6.3-18.75-13.31-25.85-20.97 8.04.97 11.44.13 13.38-1.27-7.69-7.88-17.42-14.53-22.06-24.23 5.97 2.05 11.43 2.84 15.37-.18-2.61-5.9-13.8-9.37-20.25-23.15 6.29.61 12.95 1.37 14.29 0-2.92-11.88-7.92-18.56-12.83-25.48 13.45-.2 33.83.05 32.91-1.09l-8.31-8.5c13.14-3.54 26.58.57 36.34 3.61 4.39-3.46-.07-7.83-5.42-12.3 11.17 1.49 21.25 4.05 30.37 7.59 4.88-4.4-3.16-8.8-7.05-13.2 17.25 3.27 24.56 7.87 31.82 12.47 5.27-5.05.3-9.35-3.25-13.74 13 4.83 19.7 11.05 26.76 17.19 2.39-3.23 6.07-5.59 1.628-13.38 9.23 5.32 16.19 11.59 21.33 18.62 5.71-3.64 3.4-8.62 3.43-13.2 9.59 7.8 15.68 16.11 23.14 24.22 1.5-1.09 2.81-4.8 3.98-10.67 22.89 22.21 55.24 78.157 8.31 100.34-39.94-32.94-87.64-56.884-140.5-74.845zm360.53 0c-67.94 35.034-107.44 63.364-129.08 87.504 11.082 44.418 68.896 46.445 90.036 45.2-4.328-2.016-7.94-4.43-9.22-8.137 5.304-3.77 24.113-.397 37.244-7.774-5.045-1.05-7.404-2.07-9.763-5.79 12.406-3.96 25.77-7.37 33.628-13.92-4.242.05-8.202.95-13.74-2.9 11.112-5.99 22.97-10.74 32.18-19.89-5.745-.14-11.938-.06-13.74-2.17 10.17-6.3 18.752-13.31 25.855-20.97-8.04.97-11.435.13-13.38-1.27 7.688-7.88 17.42-14.53 22.058-24.23-5.97 2.05-11.43 2.84-15.368-.18 2.612-5.9 13.805-9.37 20.25-23.15-6.286.61-12.95 1.37-14.284 0 2.922-11.89 7.927-18.57 12.836-25.5-13.45-.2-33.828.05-32.905-1.09l8.316-8.5c-13.138-3.54-26.58.57-36.34 3.61-4.382-3.46.078-7.83 5.424-12.29-11.165 1.49-21.254 4.05-30.373 7.59-4.873-4.4 3.164-8.8 7.05-13.2-17.248 3.27-24.556 7.87-31.82 12.47-5.27-5.05-.3-9.34 3.255-13.74-13.01 4.82-19.71 11.04-26.76 17.18-2.39-3.23-6.08-5.6-1.63-13.38-9.24 5.32-16.19 11.59-21.34 18.62-5.72-3.64-3.41-8.61-3.44-13.2-9.6 7.81-15.69 16.11-23.14 24.222-1.51-1.09-2.82-4.8-3.98-10.667-22.9 22.21-55.25 78.16-8.32 100.34C367.35 109.9 415.04 85.96 467.91 68z\"/><path fill=\"#bc1142\" d=\"M369.94 520.362a81.39 75.05 0 1 1-162.776 0 81.39 75.05 0 1 1 162.777 0zM241.458 305.967A86.13 73-55.966 1 1 146.49 449.68a86.13 73-55.966 1 1 94.968-143.713z\"/><path fill=\"#bc1142\" d=\"M332.482 301.967A73 86.13-34.034 1 1 427.45 445.68a73 86.13-34.034 1 1-94.968-143.713zM72.91 342.09c36.41-9.76 12.292 150.63-17.333 137.47C22.99 453.35 12.494 376.59 72.91 342.09z\"/><path fill=\"#bc1142\" d=\"M493.68 340.09c-36.414-9.757-12.292 150.64 17.333 137.48 32.587-26.213 43.083-102.98-17.333-137.48zM369.97 220.65c62.835-10.61 115.12 26.722 113.01 94.858-2.067 26.12-136.16-90.97-113.01-94.858zm-173.61-2c-62.84-10.61-115.12 26.73-113.01 94.86 2.067 26.12 136.16-90.97 113.01-94.86zm90.26-15.89c-37.503-.975-73.495 27.834-73.582 44.544-.105 20.304 29.65 41.093 73.837 41.62 45.123.323 73.916-16.64 74.06-37.594.166-23.74-41.038-48.937-74.316-48.57zm2.29 416.36c32.697-1.427 76.57 10.532 76.657 26.396.543 15.405-39.79 50.21-78.826 49.538-40.42 1.744-80.06-33.116-79.55-45.2-.6-17.715 49.23-31.547 81.72-30.734zM168.14 525.1c23.28 28.046 33.89 77.32 14.464 91.844-18.38 11.088-63.012 6.522-94.736-39.052-21.395-38.242-18.638-77.157-3.616-88.59 22.464-13.683 57.173 4.8 83.89 35.798zm236.88-8.89c-25.187 29.502-39.212 83.31-20.838 100.64 17.568 13.464 64.73 11.582 99.566-36.756 25.296-32.465 16.82-86.682 2.37-101.08-21.463-16.602-52.276 4.645-81.098 37.188z\"/></svg>",
+      "entityTypes": [
+         "ASM_UI_CUSTOM_ICON"
+      ],
+      "uniqueId": "pi-svg",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "definition": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 46 46\">&gt;<defs><linearGradient id=\"d\"><stop offset=\"0\" stop-color=\"#fff\"/><stop offset=\"1\" stop-color=\"#babdb6\" stop-opacity=\".126\"/></linearGradient><linearGradient id=\"b\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\".593\"/><stop offset=\"1\" stop-color=\"#fff\" stop-opacity=\"0\"/></linearGradient><linearGradient id=\"f\"><stop offset=\"0\" stop-color=\"#2e3436\"/><stop offset=\"1\" stop-color=\"#1a1d1e\"/></linearGradient><linearGradient id=\"c\"><stop offset=\"0\" stop-color=\"#eeeeec\"/><stop offset=\"1\" stop-color=\"#babdb6\"/></linearGradient><linearGradient id=\"e\"><stop offset=\"0\" stop-color=\"#99c4e1\"/><stop offset=\".5\" stop-color=\"#3c73a7\"/><stop offset=\"1\" stop-color=\"#2c5084\"/></linearGradient><linearGradient id=\"a\"><stop offset=\"0\" stop-color=\"#cccccf\"/><stop offset=\"1\" stop-color=\"#888a85\" stop-opacity=\"0\"/></linearGradient><linearGradient xlink:href=\"#a\" id=\"i\" gradientUnits=\"userSpaceOnUse\" x1=\"23.443\" y1=\"44.599\" x2=\"23.443\" y2=\"42.796\"/><radialGradient xlink:href=\"#b\" id=\"l\" cx=\"10.156\" cy=\"10.363\" fx=\"10.156\" fy=\"10.363\" r=\"15\" gradientTransform=\"matrix(1.79192 .00955 -.00977 1.8339 -6.223 993.867)\" gradientUnits=\"userSpaceOnUse\"/><linearGradient xlink:href=\"#c\" id=\"k\" gradientUnits=\"userSpaceOnUse\" x1=\"23\" y1=\"1011.362\" x2=\"23\" y2=\"1013.362\" gradientTransform=\"translate(-1)\"/><linearGradient xlink:href=\"#d\" id=\"j\" gradientUnits=\"userSpaceOnUse\" x1=\"9\" y1=\"1008.362\" x2=\"39\" y2=\"1051.362\" gradientTransform=\"translate(-1)\"/><radialGradient xlink:href=\"#e\" id=\"g\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"rotate(45 1571.313 1602.03) scale(2.34613 2.23783)\" cx=\"29.46\" cy=\"1019.397\" fx=\"29.46\" fy=\"1019.397\" r=\"14\"/><linearGradient xlink:href=\"#f\" id=\"h\" gradientUnits=\"userSpaceOnUse\" x1=\"10\" y1=\"1011.362\" x2=\"38\" y2=\"1047.362\" gradientTransform=\"translate(-1)\"/></defs><g transform=\"translate(0 -1006.362)\"><rect width=\"33\" height=\"45\" x=\"6.5\" y=\"1006.862\" ry=\"2.808\" stroke=\"#000\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path fill=\"url(#g)\" stroke=\"url(#h)\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9.5 1010.862h27v37h-27z\"/><g transform=\"translate(-5.406 -44.645) scale(1.04186)\"><path transform=\"translate(3.85 1006.362)\" d=\"M24.353 43.69c0 .53-.43.96-.96.96s-.96-.43-.96-.96.43-.96.96-.96.96.43.96.96z\" opacity=\".671\" fill=\"url(#i)\"/><rect rx=\".158\" ry=\".158\" y=\"1049.709\" x=\"26.892\" height=\".687\" width=\".703\" opacity=\".671\" fill=\"none\" stroke=\"#eeeeec\" stroke-width=\".192\"/></g><rect ry=\"1.746\" y=\"1007.862\" x=\"7.5\" height=\"43\" width=\"31\" rx=\"1.746\" fill=\"none\" stroke=\"url(#j)\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path fill=\"url(#k)\" d=\"M10 1011.362h26v2H10z\"/><path d=\"M9.25 1008.33c-.692 0-1.25.557-1.25 1.25v37.28c6.486-20.54 10.382-21.832 15.75-19.53 3.73 1.597 9.59-4.187 14.25-9.94v-7.81c0-.693-.558-1.25-1.25-1.25H9.25z\" fill=\"url(#l)\"/></g></svg>",
+      "entityTypes": [
+         "ASM_UI_CUSTOM_ICON"
+      ],
+      "uniqueId": "ipad-svg",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "definition": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1\" viewBox=\"0 0 70 125\"><defs><linearGradient id=\"j\"><stop offset=\"0\" stop-color=\"#999\"/><stop offset=\"1\" stop-color=\"#f2f2f2\"/></linearGradient><linearGradient id=\"i\"><stop offset=\"0\" stop-color=\"#ec4cba\"/><stop offset=\"1\" stop-color=\"#c744fb\"/></linearGradient><linearGradient id=\"g\"><stop offset=\"0\" stop-color=\"#ff2a64\"/><stop offset=\".554\" stop-color=\"#ff333f\"/><stop offset=\"1\" stop-color=\"#ff5b38\"/></linearGradient><linearGradient id=\"e\"><stop offset=\"0\" stop-color=\"#5ac9f9\"/><stop offset=\"1\" stop-color=\"#53e8cd\"/></linearGradient><linearGradient id=\"d\"><stop offset=\"0\" stop-color=\"#19cdfc\"/><stop offset=\"1\" stop-color=\"#1d67f0\"/></linearGradient><linearGradient id=\"c\"><stop offset=\"0\" stop-color=\"#7ff96b\"/><stop offset=\"1\" stop-color=\"#0fd41b\"/></linearGradient><linearGradient id=\"b\"><stop offset=\"0\" stop-color=\"#161e3e\"/><stop offset=\".477\" stop-color=\"#1a506a\"/><stop offset=\"1\" stop-color=\"#3f95b7\"/></linearGradient><linearGradient id=\"a\"><stop offset=\"0\" stop-color=\"#39b0d5\"/><stop offset=\"1\" stop-color=\"#5fc1d9\"/></linearGradient><linearGradient id=\"h\"><stop offset=\"0\" stop-color=\"#1f5eeb\"/><stop offset=\"1\" stop-color=\"#1ad6fa\"/></linearGradient><linearGradient x1=\"21.1\" y1=\"1.51\" x2=\"21.1\" y2=\"10.51\" id=\"f\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(1 0 0 -1 8.4 99.01)\"><stop offset=\"0\" stop-color=\"#19e2ff\"/><stop offset=\"1\" stop-color=\"#1e55f0\"/></linearGradient><linearGradient x1=\"199\" y1=\"307.5\" x2=\"463\" y2=\"230.5\" id=\"l\" xlink:href=\"#a\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(.156 0 0 .156 -17.217 52.822)\"/><linearGradient x1=\"462.206\" y1=\"314.543\" x2=\"472.192\" y2=\"227.48\" id=\"k\" xlink:href=\"#b\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(.156 0 0 .767 -17.217 -262.483)\"/><linearGradient x1=\"235\" y1=\"-164.5\" x2=\"235\" y2=\"-114.478\" id=\"m\" xlink:href=\"#c\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(.156 0 0 .156 -17.217 52.822)\"/><linearGradient x1=\"235\" y1=\"-164.5\" x2=\"235\" y2=\"-114.478\" id=\"n\" xlink:href=\"#c\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(.156 0 0 .156 -17.217 115.732)\"/><linearGradient x1=\"235\" y1=\"-164.5\" x2=\"235\" y2=\"-114.478\" id=\"p\" xlink:href=\"#d\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(.156 0 0 .156 -6.914 -72.335)\"/><linearGradient x1=\"235\" y1=\"-164.5\" x2=\"235\" y2=\"-114.478\" id=\"q\" xlink:href=\"#d\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(.156 0 0 .156 -17.217 64.842)\"/><linearGradient x1=\"232.285\" y1=\"-36.574\" x2=\"232.285\" y2=\"-68.201\" id=\"r\" xlink:href=\"#e\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(.156 0 0 .156 14.004 52.822)\"/><linearGradient x1=\"346.377\" y1=\"263.78\" x2=\"392.245\" y2=\"263.78\" id=\"s\" xlink:href=\"#f\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(.156 0 0 .156 36.348 -81.61)\"/><linearGradient x1=\"509.117\" y1=\"237.43\" x2=\"509.117\" y2=\"289.797\" id=\"t\" xlink:href=\"#g\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(.156 0 0 .156 -28.77 52.822)\"/><linearGradient x1=\"235\" y1=\"-164.5\" x2=\"235\" y2=\"-114.478\" id=\"u\" xlink:href=\"#h\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(.156 0 0 .156 3.7 -45.485)\"/><linearGradient x1=\"235\" y1=\"-164.5\" x2=\"235\" y2=\"-114.478\" id=\"v\" xlink:href=\"#i\" gradientUnits=\"userSpaceOnUse\" gradientTransform=\"matrix(.156 0 0 .156 -6.914 88.882)\"/><linearGradient x1=\"317.139\" y1=\"335.813\" x2=\"350.851\" y2=\"386.079\" id=\"o\" xlink:href=\"#j\" gradientUnits=\"userSpaceOnUse\"/></defs><rect width=\"51.671\" height=\"108.961\" rx=\"8.117\" ry=\"8.117\" x=\"9.165\" y=\"8.02\" fill=\"#e6e6e6\"/><rect width=\"50.422\" height=\"107.658\" rx=\"7.897\" ry=\"7.897\" x=\"9.789\" y=\"8.671\" fill=\"#fff\"/><rect width=\"43.865\" height=\"64.471\" rx=\"0\" ry=\"0\" x=\"13.145\" y=\"-88.257\" transform=\"scale(1 -1)\" fill=\"url(#k)\"/><path d=\"M36.093 13.522a1.015 1.015 0 1 1-2.03 0 1.015 1.015 0 1 1 2.03 0zm-7.298 4.098a.683.683 0 1 1-1.366 0 .683.683 0 1 1 1.362 0z\" fill=\"#3e3f3f\"/><rect width=\"8.43\" height=\".937\" rx=\".468\" ry=\".468\" x=\"30.785\" y=\"17.113\" fill=\"#3e3f3f\"/><rect width=\"43.865\" height=\"13.113\" rx=\"0\" ry=\"0\" x=\"13.145\" y=\"88.257\" fill=\"url(#l)\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"15.253\" y=\"26.908\" fill=\"url(#m)\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"15.253\" y=\"89.818\" fill=\"url(#n)\"/><path d=\"M364.5 359a30 30 0 1 1-60 0 30 30 0 1 1 60 0z\" transform=\"matrix(.155 0 0 .155 -16.782 53.484)\" fill=\"url(#o)\"/><path d=\"M38.9 109.058a3.9 3.9 0 1 1-7.8 0 3.9 3.9 0 1 1 7.8 0z\" fill=\"#fff\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"25.556\" y=\"26.908\" fill=\"#fff\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"35.859\" y=\"26.908\" fill=\"#fff\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"46.474\" y=\"26.908\" fill=\"#ccc\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"25.556\" y=\"-98.248\" transform=\"scale(1 -1)\" fill=\"url(#p)\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"15.253\" y=\"38.928\" fill=\"url(#q)\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"36.171\" y=\"51.104\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"25.556\" y=\"38.928\"/><rect width=\"7.16\" height=\"7.16\" rx=\"3.497\" ry=\"3.497\" x=\"26.239\" y=\"39.529\" fill=\"#fff\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"36.171\" y=\"38.928\" fill=\"#e4ddc9\"/><path d=\"M46.474 41.758v3.492c0 1.168.94 2.108 2.107 2.108h4.22c1.167 0 2.107-.94 2.107-2.108v-3.492h-8.43z\" fill=\"url(#r)\"/><path d=\"M48.58 38.928c-1.166 0-2.106.94-2.106 2.108v.722h8.43v-.722c0-1.168-.94-2.108-2.108-2.108H48.58z\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"46.474\" y=\"51.104\" fill=\"#fff\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"25.556\" y=\"51.104\" fill=\"#fff\"/><path d=\"M15.253 53.934v3.493c0 1.167.94 2.107 2.107 2.107h4.215c1.168 0 2.107-.94 2.107-2.107v-3.493h-8.43z\" fill=\"#fff\"/><path d=\"M17.36 51.104c-1.167 0-2.107.94-2.107 2.108v.722h8.43v-.722c0-1.168-.94-2.108-2.108-2.108H17.36z\" fill=\"#ffd11b\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"36.171\" y=\"89.818\" fill=\"#fff\"/><rect width=\"7.16\" height=\"7.16\" rx=\"3.497\" ry=\"3.497\" x=\"90.419\" y=\"-44.014\" transform=\"rotate(90)\" fill=\"url(#s)\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"46.474\" y=\"89.818\" fill=\"url(#t)\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"36.171\" y=\"-71.398\" transform=\"scale(1 -1)\" fill=\"url(#u)\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"25.556\" y=\"62.968\" fill=\"url(#v)\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"15.253\" y=\"62.968\" fill=\"#fff\"/><path d=\"M48.58 62.968c-1.166 0-2.106.94-2.106 2.108v.692h8.43v-.692c0-1.168-.94-2.108-2.108-2.108H48.58z\" fill=\"#53b0e7\"/><path d=\"M46.474 65.768v2.923h8.43v-2.92h-8.43z\" fill=\"#3cc500\"/><path d=\"M46.474 68.69v.6c0 1.168.94 2.108 2.107 2.108h4.22c1.167 0 2.107-.94 2.107-2.107v-.6h-8.43z\" fill=\"#ffa100\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"15.253\" y=\"75.144\"/><rect width=\"8.43\" height=\"8.43\" rx=\"2.107\" ry=\"2.107\" x=\"25.556\" y=\"75.144\" fill=\"#ccc\"/></svg>",
+      "entityTypes": [
+         "ASM_UI_CUSTOM_ICON"
+      ],
+      "uniqueId": "iphonevg",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "definition": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 45 45\"><defs><clipPath id=\"a\"><path d=\"M0 36h36V0H0v36z\"/></clipPath></defs><g clip-path=\"url(#a)\" transform=\"matrix(1.25 0 0 -1.25 0 45)\"><path d=\"M36 18c0-9.94-8.06-18-18-18S0 8.06 0 18s8.06 18 18 18 18-8.06 18-18\" fill=\"#ffcc4d\"/><path d=\"M1.24 24.982c.24-.24 1.437-.958 1.677-1.675.24-.717.72-4.784 2.158-5.98 1.484-1.234 7.077-.775 8.15-.24 2.396 1.194 2.69 4.53 3.114 6.22.237.957 1.675.957 1.675.957s1.44 0 1.678-.956c.424-1.69.72-5.027 3.115-6.22 1.072-.536 6.665-.995 8.15.238 1.436 1.197 1.916 5.264 2.156 5.982.238.717 1.437 1.435 1.677 1.674.24.24.24 1.196 0 1.436-.48.478-6.133.904-12.222.24-1.215-.134-1.677-.48-4.554-.48-2.875 0-3.34.346-4.553.478-6.086.666-11.743.24-12.222-.238-.24-.24-.24-1.197 0-1.436\" fill=\"#292f33\" fill-rule=\"evenodd\"/><path d=\"M27.335 12.37c-.178.162-.444.172-.635.03-.04-.03-3.922-2.9-8.7-2.9-4.766 0-8.662 2.87-8.7 2.9-.19.142-.457.13-.635-.03-.177-.16-.217-.423-.094-.627C8.7 11.528 11.79 6.5 18 6.5s9.3 5.028 9.43 5.243c.122.205.083.468-.095.628\" fill=\"#664500\"/></g></svg>",
+      "entityTypes": [
+         "ASM_UI_CUSTOM_ICON"
+      ],
+      "uniqueId": "shades-icon",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "definition": "<?xml version=\"1.0\" ?><svg enable-background=\"new 0 0 52 52\" id=\"Layer_1\" version=\"1.1\" viewBox=\"0 0 52 52\" xml:space=\"preserve\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><g><g><path d=\"M13.79492,4.2329311c8.4055443-0.0006657,16.8110867-0.0013309,25.2166309-0.0019965    c-0.4166679-0.4166665-0.8333321-0.833333-1.25-1.2499998c0.9448128,15.280591,0.4522705,30.6723862,0.4291306,45.9750366    c0.4166679-0.4166641,0.8333359-0.8333321,1.25-1.25c-8.9476604,0.0210304-17.8953228,0.0420609-26.8429832,0.0630913    c0.416667,0.4166679,0.833333,0.8333321,1.25,1.25c0.0069981-7.5801659,0.0139971-15.1603279,0.0209951-22.7404938    c0.006875-7.4456825-0.809762-15.434701,0.2768354-22.8036404c0.2320662-1.5737985-2.1764765-2.2530122-2.4106979-0.6645992    c-1.031147,6.9928951-0.3577986,14.4364529-0.3643112,21.4908047c-0.0076075,8.2393093-0.0152149,16.4786167-0.0228214,24.7179279    c-0.0006227,0.6745567,0.5731955,1.2515907,1.25,1.25c8.9476614-0.0210304,17.8953247-0.0420609,26.8429832-0.0630913    c0.6764755-0.0015869,1.2489738-0.5714264,1.25-1.25c0.02314-15.3027344,0.5156822-30.6943951-0.4291306-45.9750366    c-0.0417023-0.6744447-0.5389061-1.2500563-1.25-1.25C30.6060066,1.7316002,22.2004642,1.7322656,13.79492,1.7329309    C12.1862946,1.7330583,12.1836195,4.2330585,13.79492,4.2329311L13.79492,4.2329311z\" fill=\"#231F20\"/></g><g><path d=\"M18.7115688,8.3156261c0.4444447,0,0.8888874,0,1.3333321,0c1.6086311,0,1.6112957-2.5000005,0-2.5000005    c-0.4444447,0-0.8888874,0-1.3333321,0C17.1029377,5.8156257,17.1002731,8.3156261,18.7115688,8.3156261L18.7115688,8.3156261z\" fill=\"#231F20\"/></g><g><path d=\"M31.7115688,8.3989592c0.8888874,0,1.7777767,0,2.666666,0c1.6086311,0,1.6112938-2.5,0-2.5    c-0.8888893,0-1.7777786,0-2.666666,0C30.1029377,5.8989592,30.1002731,8.3989592,31.7115688,8.3989592L31.7115688,8.3989592z\" fill=\"#231F20\"/></g><g><path d=\"M30.1309643,18.5636215c-0.323267,2.1266499-1.3817158,3.1540184-3.6144485,3.0989799    c-2.1769733-0.0536652-4.2638397-2.0707016-3.8854694-4.3507404c0.3493538-2.1051931,2.2732372-3.2986422,4.3036098-3.1254358    c1.3826618,0.1179514,1.9668446,0.3652468,2.5577545,1.5571766c0.5339394,1.0770178,0.7239761,2.2667952,0.5552216,3.4559145    c-0.2233162,1.5735893,2.1852016,2.25354,2.410696,0.6645985c0.4249306-2.9942398-0.5546379-7.4619808-4.0726032-8.0567904    c-1.6734142-0.282937-3.9475822-0.4433708-5.3568535,0.6639271c-1.2478943,0.9805021-2.4255333,2.4726543-2.8079586,4.0295496    c-0.7980919,3.2491112,1.7273731,6.9431534,4.9857674,7.5263844c3.6936283,0.6611328,6.760807-1.0217094,7.3349838-4.7989635    C32.7809067,17.6543236,30.3723412,16.9757137,30.1309643,18.5636215L30.1309643,18.5636215z\" fill=\"#231F20\"/></g><g><path d=\"M26.6806831,35.3942413c0.1195869,0.4124489,0.4504452,1.4511528-0.2703037,1.5542145    c0.056036-0.0080109-0.6488285-0.3742485-0.7011204-0.4055176c-0.2571144-0.153759-0.3051167-0.0844269-0.4095116-0.3879623    c-0.1082668-0.3147888,0.0591469-0.6348381,0.0326366-0.9415817c0.1567802-0.4803352-0.0307789-0.4274597-0.5626774,0.1586304    c0.1701164-0.0122185,0.3402309-0.0244331,0.5103474-0.0366516c0.3669777-0.0263557,1.1808357-0.2314186,1.4696426,0.0596008    c1.1349239,1.1436119,2.9028091-0.6240349,1.767767-1.7677689c-1.0342178-1.0421371-2.9799099-1.040947-4.3278713-0.6703949    c-1.6776447,0.4611816-1.6927242,3.236763-1.050396,4.4977951c0.4155731,0.8158646,1.0142117,1.0329781,1.7547112,1.4577026    c0.8036003,0.4609184,1.4939499,0.706852,2.4120293,0.3556633c1.9461384-0.7444534,2.3163223-2.7073784,1.7854443-4.5383263    C28.6442204,33.1874313,26.2310333,33.8434448,26.6806831,35.3942413L26.6806831,35.3942413z\" fill=\"#231F20\"/></g><g><path d=\"M32.6002274,37.0295906c0.1633186,2.9383125-3.4908829,5.5143356-6.1649685,5.667717    c-3.8126736,0.2186852-7.2903957-2.9079437-7.009428-6.8968887c0.2287331-3.2473488,2.7241631-6.2309494,5.9912949-6.250536    c4.4774075-0.0268421,8.4103012,2.5509129,7.5275383,7.5418949c-0.2782745,1.5733147,2.1305275,2.2486458,2.4106979,0.6645966    c0.8799477-4.9750595-2.0397224-10.015192-7.2995453-10.6117821c-2.3345928-0.2647991-5.0550976-0.5276413-6.9429932,1.0486565    c-2.0319481,1.6965771-3.8461781,4.0908318-4.1397686,6.7716789c-0.5570793,5.0868034,2.9870014,9.5562782,7.9609165,10.1138916    c2.9801159,0.334095,4.4904022-0.0930786,6.7032127-1.982914c2.2255974-1.900753,3.635376-2.9658241,3.4630432-6.0663147    C35.0113029,35.4297562,32.5107269,35.4194031,32.6002274,37.0295906L32.6002274,37.0295906z\" fill=\"#231F20\"/></g></g></svg>",
+      "entityTypes": [
+         "ASM_UI_CUSTOM_ICON"
+      ],
+      "uniqueId": "speaker-svg",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "definition": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 45 45'><defs><clipPath id='a'><path d='M0 36h36V0H0v36z'/></clipPath></defs><g clip-path='url(#a)' transform='matrix(1.25 0 0 -1.25 0 45)'><path d='M36 18c0-9.94-8.06-18-18-18S0 8.06 0 18s8.06 18 18 18 18-8.06 18-18' fill='#da2f47'/><path d='M25.485 6.12C25.44 6.3 24.317 10.5 18 10.5c-6.318 0-7.44-4.2-7.485-4.38-.055-.216.043-.44.237-.553.195-.11.44-.08.6.077C11.37 5.664 13.304 7.5 18 7.5c4.694 0 6.63-1.837 6.648-1.856.096-.094.224-.144.352-.144.084 0 .17.02.246.064.196.112.294.34.24.557m-9.78 12.588C12.453 21.962 7.22 22 7 22c-.552 0-1-.447-1-1 0-.55.447-1 1-1 .028 0 1.924-.022 3.982-.737C10.39 18.623 10 17.63 10 16.5c0-1.934 1.12-3.5 2.5-3.5s2.5 1.566 2.5 3.5c0 .174-.02.34-.037.507.013 0 .025-.007.037-.007.256 0 .512.098.707.293.39.39.39 1.023 0 1.414M29 22c-.22 0-5.45-.038-8.707-3.293-.39-.39-.39-1.023 0-1.414.195-.195.45-.293.707-.293.013 0 .024.007.036.007-.016-.167-.036-.333-.036-.507 0-1.934 1.12-3.5 2.5-3.5s2.5 1.566 2.5 3.5c0 1.13-.39 2.123-.982 2.763 2.058.715 3.954.737 3.984.737.55 0 .998.45.997 1-.004.553-.45 1-1 1' fill='#292f33'/></g></svg>",
+      "entityTypes": [
+         "ASM_UI_CUSTOM_ICON"
+      ],
+      "uniqueId": "angry",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "definition": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 45 45'><defs><clipPath id='a'><path d='M0 36h36V0H0v36z'/></clipPath></defs><g clip-path='url(#a)' transform='matrix(1.25 0 0 -1.25 0 45)'><path d='M36 18c0-9.94-8.06-18-18-18S0 8.06 0 18s8.06 18 18 18 18-8.06 18-18' fill='#da2f47'/><path d='M25.485 6.12C25.44 6.3 24.317 10.5 18 10.5c-6.318 0-7.44-4.2-7.485-4.38-.055-.216.043-.44.237-.553.195-.11.44-.08.6.077C11.37 5.664 13.304 7.5 18 7.5c4.694 0 6.63-1.837 6.648-1.856.096-.094.224-.144.352-.144.084 0 .17.02.246.064.196.112.294.34.24.557m-9.78 12.588C12.453 21.962 7.22 22 7 22c-.552 0-1-.447-1-1 0-.55.447-1 1-1 .028 0 1.924-.022 3.982-.737C10.39 18.623 10 17.63 10 16.5c0-1.934 1.12-3.5 2.5-3.5s2.5 1.566 2.5 3.5c0 .174-.02.34-.037.507.013 0 .025-.007.037-.007.256 0 .512.098.707.293.39.39.39 1.023 0 1.414M29 22c-.22 0-5.45-.038-8.707-3.293-.39-.39-.39-1.023 0-1.414.195-.195.45-.293.707-.293.013 0 .024.007.036.007-.016-.167-.036-.333-.036-.507 0-1.934 1.12-3.5 2.5-3.5s2.5 1.566 2.5 3.5c0 1.13-.39 2.123-.982 2.763 2.058.715 3.954.737 3.984.737.55 0 .998.45.997 1-.004.553-.45 1-1 1' fill='#292f33'/></g></svg>",
+      "entityTypes": [
+         "ASM_UI_CUSTOM_ICON"
+      ],
+      "uniqueId": "angry-icon",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "style": {
+         "strokeDasharray": "return asmProperties.kbps >= 100000 ? '5, 5, 1, 5' : '10 1';"
+      },
+      "entityTypes": [
+         "ASM_UI_LINK_TYPE_DEFINITION"
+      ],
+      "type": "connectedTo",
+      "uniqueId": "connectedTo",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "style": {
+         "strokeWidth": "return asmProperties.width > 9 ? '9px' : asmProperties.width + 'px';"
+      },
+      "entityTypes": [
+         "ASM_UI_LINK_TYPE_DEFINITION"
+      ],
+      "type": "attachedTo",
+      "uniqueId": "attachedTo",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "style": {
+         "strokeDasharray": "return '3 4 5';"
+      },
+      "entityTypes": [
+         "ASM_UI_LINK_TYPE_DEFINITION"
+      ],
+      "type": "contains",
+      "uniqueId": "contains",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "requiredProperties": [
+         { "property": "ipAddress", "tooltip": true },
+         { "property": "netMask", "tooltip": true },
+         { "property": "networkType", "tooltip": true },
+         { "property": "macAddress", "tooltip": true },
+         { "property": "width", "tooltip": true },
+         { "property": "msdn", "tooltip": true }
+      ],
+      "maxHops": 10,
+      "entityTypes": [
+         "ASM_UI_GLOBAL_SETTINGS"
+      ],
+      "uniqueId": "globalSettings",
+      "trustedSites": [
+         "asm-develop-svt.fyre.ibm.com"
+      ],
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   }
+]

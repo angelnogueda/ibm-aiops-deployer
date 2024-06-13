@@ -1,0 +1,342 @@
+
+
+
+- name: 🛰️  START - CREATE LOG GOLDEN SIGNALS ANALYSIS DEFINITIONS
+  debug: 
+    msg="{{ lookup('pipe','date +%d.%m.%Y---%H:%M:%S') }}"
+
+
+
+
+- name: Log
+  shell: |
+    export MESSAGE="Create LAGS Training Definition"
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "$MESSAGE  >> ../install_{{current_ibmaiops_feature.kind}}.log
+  ignore_errors: true
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ffd500'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - Create LAGS Training Definition'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+
+
+
+
+- name: 🌏 CONNECTIONS - Check Existing KAFKA Connections
+  shell: |
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+
+    oc create route passthrough -n $AIOPS_NAMESPACE --service aimanager-aio-controller
+
+
+    export AI_PLATFORM_ROUTE=$(oc get route -n $AIOPS_NAMESPACE ai-platform-api  -o jsonpath={.spec.host})
+    export AIO_PLATFORM_ROUTE=$(oc get route -n $AIOPS_NAMESPACE aimanager-aio-controller -o jsonpath={.spec.host})
+
+
+
+    echo "        Namespace:          $AIOPS_NAMESPACE"
+    echo "        AI_PLATFORM_ROUTE:  $AI_PLATFORM_ROUTE"
+    echo "        AIO_PLATFORM_ROUTE: $AIO_PLATFORM_ROUTE"
+    echo ""
+
+    echo "       🛠️   Getting ZEN Token"
+
+
+    ZEN_API_HOST=$(oc get route -n $AIOPS_NAMESPACE cpd -o jsonpath='{.spec.host}')
+    ZEN_LOGIN_URL="https://${ZEN_API_HOST}/v1/preauth/signin"
+    LOGIN_USER=admin
+    LOGIN_PASSWORD="$(oc get secret admin-user-details -n $AIOPS_NAMESPACE -o jsonpath='{ .data.initial_admin_password }' | base64 --decode)"
+
+    ZEN_LOGIN_RESPONSE=$(
+    curl -k \
+    -H 'Content-Type: application/json' \
+    -XPOST \
+    "${ZEN_LOGIN_URL}" \
+    -d '{
+        "username": "'"${LOGIN_USER}"'",
+        "password": "'"${LOGIN_PASSWORD}"'"
+    }' 2> /dev/null
+    )
+
+    ZEN_LOGIN_MESSAGE=$(echo "${ZEN_LOGIN_RESPONSE}" | jq -r .message)
+
+    if [ "${ZEN_LOGIN_MESSAGE}" != "success" ]; then
+        echo "Login failed: ${ZEN_LOGIN_MESSAGE}"
+
+    fi
+
+    ZEN_TOKEN=$(echo "${ZEN_LOGIN_RESPONSE}" | jq -r .token)
+    #echo "${ZEN_TOKEN}"
+    #echo "        AI_PLATFORM_ROUTE:  $ZEN_TOKEN"
+
+    echo "Sucessfully logged in" 
+    echo ""
+
+    export result=$(curl -X 'GET' --insecure \
+    "https://$AIO_PLATFORM_ROUTE/v3/connections" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+      -H "authorization: Bearer $ZEN_TOKEN" |jq|grep inference|grep -v ELKGoldenSignal|wc -l|tr -d ' ')
+
+    echo $result
+
+    if [ $result -gt 0 ];
+    then
+    oc delete ConsoleNotification ibm-aiops-notification
+    OPENSHIFT_ROUTE=$(oc get route -n openshift-console console -o jsonpath={.spec.host})    
+
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+        name: ibm-aiops-notification-main
+    spec:
+        backgroundColor: '#9a0000'
+        color: '#fff'
+        location: "BannerTop"
+        text: "❌ FATAL ERROR: Please check the Installation Logs and re-run the installer by deleting the Pod"
+        link:
+            href: "https://$OPENSHIFT_ROUTE/k8s/ns/ibm-aiops-installer/pods/$INSTALL_POD/logs"
+            text: Open Logs
+    EOF
+    exit 1
+    fi
+
+  #ignore_errors: true
+  when: current_ibmaiops_feature.create_log_connection | default(true) == true and current_ibmaiops_feature.training_enable_log_golden_signals | default(false) == true
+  register: output_string
+  args:
+    executable: /bin/bash
+  
+- name: 🟣  OUTPUT
+  debug: 
+    var: output_string.stdout_lines
+    #verbosity: 1
+
+
+
+- name: 🌏 CONNECTIONS - Create KAFKA Connections for LAGS
+  shell: |
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+
+    oc create route passthrough -n $AIOPS_NAMESPACE --service aimanager-aio-controller
+
+
+    export AI_PLATFORM_ROUTE=$(oc get route -n $AIOPS_NAMESPACE ai-platform-api  -o jsonpath={.spec.host})
+    export AIO_PLATFORM_ROUTE=$(oc get route -n $AIOPS_NAMESPACE aimanager-aio-controller -o jsonpath={.spec.host})
+
+
+
+    echo "        Namespace:          $AIOPS_NAMESPACE"
+    echo "        AI_PLATFORM_ROUTE:  $AI_PLATFORM_ROUTE"
+    echo "        AIO_PLATFORM_ROUTE: $AIO_PLATFORM_ROUTE"
+    echo ""
+
+    echo "       🛠️   Getting ZEN Token"
+
+
+    ZEN_API_HOST=$(oc get route -n $AIOPS_NAMESPACE cpd -o jsonpath='{.spec.host}')
+    ZEN_LOGIN_URL="https://${ZEN_API_HOST}/v1/preauth/signin"
+    LOGIN_USER=admin
+    LOGIN_PASSWORD="$(oc get secret admin-user-details -n $AIOPS_NAMESPACE -o jsonpath='{ .data.initial_admin_password }' | base64 --decode)"
+
+    ZEN_LOGIN_RESPONSE=$(
+    curl -k \
+    -H 'Content-Type: application/json' \
+    -XPOST \
+    "${ZEN_LOGIN_URL}" \
+    -d '{
+        "username": "'"${LOGIN_USER}"'",
+        "password": "'"${LOGIN_PASSWORD}"'"
+    }' 2> /dev/null
+    )
+
+    ZEN_LOGIN_MESSAGE=$(echo "${ZEN_LOGIN_RESPONSE}" | jq -r .message)
+
+    if [ "${ZEN_LOGIN_MESSAGE}" != "success" ]; then
+        echo "Login failed: ${ZEN_LOGIN_MESSAGE}"
+
+    fi
+
+    ZEN_TOKEN=$(echo "${ZEN_LOGIN_RESPONSE}" | jq -r .token)
+    #echo "${ZEN_TOKEN}"
+    #echo "        AI_PLATFORM_ROUTE:  $ZEN_TOKEN"
+
+    echo "Sucessfully logged in" 
+    echo ""
+
+    export result=$(curl -X 'POST' --insecure \
+    "https://$AIO_PLATFORM_ROUTE/v3/connections" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+      -H "authorization: Bearer $ZEN_TOKEN"  \
+    -d '
+    {
+      "application_group_id": "1000",
+      "application_id": "1000",
+      "connection_config": {
+        "data_flow": true,
+        "collection_mode": "live",
+        "json_option": "none",
+        "connection_type": "kafka",
+        "creator_user_name": "",
+        "description": "Automatically created by Nicks scripts",
+        "topic": "cp4waiops-cartridge-logs-elk-iuacrepx",
+        "base_parallelism": 5,
+        "num_partitions": 1,
+        "display_name": "ELKGoldenSignal",
+        "json_option": "none",
+        "logs_per_second": 2000
+      },
+      "connection_type": "kafka",
+      "connection_updated_at": "2021-07-26T15:18:25.43602Z",
+      "datasource_type": "logs",
+        "data_flow": true,
+        "mapping": {
+          "codec": "elk",
+          "message_field": "message",
+          "log_entity_types": "kubernetes.container_image_id, kubernetes.host, kubernetes.pod_name, kubernetes.namespace_name",
+          "resource_id": "kubernetes.container_name",
+          "instance_id_field": "kubernetes.container_name",
+          "rolling_time": 10,
+          "timestamp_field": "@timestamp"
+      },
+      "request_action": "create"
+    }')
+
+    echo $result | jq -r '.connection_id'
+    export connection_id=$(echo $result | jq -r '.connection_id')
+
+    echo "Enabling Flow"
+    export result=$(curl -X 'PUT' --insecure "https://$AIO_PLATFORM_ROUTE/v3/connections/$connection_id/enable" -H 'accept: application/json' -H 'Content-Type: application/json' -H "authorization: Bearer $ZEN_TOKEN")
+    echo $result
+
+    echo $result | jq -r '.connection_id'
+    export connection_id=$(echo $result | jq -r '.connection_id')
+
+    echo "Enabling Flow"
+    export result=$(curl -X 'PUT' --insecure "https://$AIO_PLATFORM_ROUTE/v3/connections/$connection_id/enable" -H 'accept: application/json' -H 'Content-Type: application/json' -H "authorization: Bearer $ZEN_TOKEN")
+    echo $result
+  ignore_errors: true
+  when: current_ibmaiops_feature.create_log_connection | default(true) == true and current_ibmaiops_feature.training_enable_log_golden_signals | default(false) == true
+  register: output_string
+  args:
+    executable: /bin/bash
+  
+- name: 🟣  OUTPUT
+  debug: 
+    var: output_string.stdout_lines
+    #verbosity: 1
+
+
+
+- name: 🚀 TRAINING CREATE LAGS - CREATE LAGS CONFIGURATION
+  shell: |
+    set -x
+    export ROUTE=""
+    pwd
+
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+    echo "       ✅ OK - IBMAIOps:    $AIOPS_NAMESPACE"
+
+    echo "***************************************************************************************************************************************************"
+    echo "   🛠️   Turn off RSA - Log Anomaly Statistical Baseline"
+    export FILE_NAME=check-RSA.graphql
+    export FILE_PATH="{{role_path}}/templates/training/training-definitions/"
+    export result=$({{role_path}}/templates/training/scripts/execute-graphql.sh)
+    echo $result
+
+    if [[ $result =~ "true" ]]; then
+      echo "      ❌ RSA Enabled: Turning Off"	
+      export FILE_NAME=deactivate-analysis-RSA.graphql
+      export FILE_PATH="{{role_path}}/templates/training/training-definitions/"
+      {{role_path}}/templates/training/scripts/execute-graphql.sh
+    else
+      echo "      ❌ RSA already Disabled: Nothing to do"	
+    fi
+
+    echo "***************************************************************************************************************************************************"
+    echo "   🛠️   Create Analysis Definiton: Log Anomaly Golden Signals"
+    export FILE_NAME=create-analysis-LAGS.graphql
+    export FILE_PATH="{{role_path}}/templates/training/training-definitions/"
+    #{{role_path}}/templates/training/scripts/execute-graphql.sh
+    export result="algorithm not found"
+    while [[ $result =~ "algorithm not found" ]]; do
+      export result=$({{role_path}}/templates/training/scripts/execute-graphql.sh)
+      echo $result
+    done
+
+
+    export GS_DEPLOYMENT=""
+    while [[ $GS_DEPLOYMENT == "" ]]; do
+      export GS_DEPLOYMENT=$(oc get deployment -n $AIOPS_NAMESPACE aimanager-aio-log-anomaly-golden-signals)
+    done
+    echo "GS_DEPLOYMENT: "$GS_DEPLOYMENT
+
+
+
+    echo "***************************************************************************************************************************************************"
+    echo "   🛠️   CONFIG - LAGS POD"
+    oc set env deploy -n $AIOPS_NAMESPACE aimanager-aio-log-anomaly-golden-signals --overwrite BUCKET_SIZE_IN_MILLIS="3600000" 
+    oc set env deploy -n $AIOPS_NAMESPACE aimanager-aio-log-anomaly-golden-signals --overwrite HISTORIC_START_TIMESTAMP-
+    oc set env deploy -n $AIOPS_NAMESPACE aimanager-aio-log-anomaly-golden-signals --overwrite HISTORIC_TIME_RANGE-
+    
+    oc create ns $AIOPS_NAMESPACE-demo-ui
+
+  register: output_string
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+    
+- name: 🟣 TRAINING CREATE LAGS - RESULT
+  debug: 
+    var: output_string.stdout_lines
+    #verbosity: 1
+
+  
+
+- name: 📥 TRAINING LOAD LAD - DELETE EXISTING JOB
+  kubernetes.core.k8s:
+    state: absent
+    namespace: turbonomic
+    template: ./templates/training/stream-inject-lags.j2
+
+
+- name: 📥 TRAINING LOAD LAD - CREATE CLUSTERROLE
+  kubernetes.core.k8s:
+    state: present
+    namespace: default
+    src: ./templates/training/default-clusterrole.yaml
+    
+
+- name: 📥 TRAINING LOAD LAD - LOAD KAFKA LAGS DATA 
+  kubernetes.core.k8s:
+    state: present
+    namespace: turbonomic
+    template: ./templates/training/stream-inject-lags.j2
+
+
+- name: 🚀 TRAINING CREATE LAGS - WAIT 5 MINUTES
+  shell: |
+    set -x
+    sleep 300
+
+  register: output_string
+  ignore_errors: true
+  args:
+    executable: /bin/bash

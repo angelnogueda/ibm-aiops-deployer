@@ -1,0 +1,6 @@
+
+"container_name":"shipping","message":"2023-11-08 07:03:03.882  INFO 1 --- [io-8080-exec-10] c.instana.robotshop.shipping.Controller  : Calculation for 5861918"
+"container_name":"shipping","message":"2023-11-08 07:03:03.892  INFO 1 --- [nio-8080-exec-6] c.instana.robotshop.shipping.Controller  : confirm id: anonymous-28297"
+"container_name":"shipping","message":"2023-11-08 07:03:03.892  INFO 1 --- [nio-8080-exec-6] c.instana.robotshop.shipping.Controller  : body {\"distance\": 879, \"cost\": 43.95, \"location\": \"Sweden L_u00e5ngevik\"}"
+"container_name":"shipping","message":"2023-11-08 07:03:03.892  INFO 1 --- [nio-8080-exec-6] c.instana.robotshop.shipping.CartHelper  : add shipping to cart anonymous-28297"
+"container_name":"shipping","message":"2023-11-08 07:03:03.895  INFO 1 --- [io-8080-exec-10] c.instana.robotshop.shipping.Controller  : shipping Distance: 3587 Cost: 179.350000"

@@ -1,0 +1,78 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ibm-aiops-create-lags-anomaly
+  namespace: ibm-aiops-demo-ui
+spec:
+  template:
+    spec:
+      serviceAccountName: ibm-aiops-demo-ui-admin
+      serviceAccount: ibm-aiops-demo-ui-admin
+
+      containers:
+        - name: lags-anomaly
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ STARTING: Inject LAGS Anomaly  "
+              echo "*****************************************************************************************************************************"
+
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              echo "    📥 Downloading log files"
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              export TRAINING_REPO=https://github.com/niklaushirt/ibm-aiops-trainingdata.git
+              git clone $TRAINING_REPO
+              cd ibm-aiops-trainingdata
+
+              echo ""
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🔎 This Repo includes those latestet Commits"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              echo "    📶 Stream Data for $ITERATIONS_MAX iterations"
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              ./training/stream-gs-logs-kafka-anomaly.sh
+
+              if [ "${PERSISTENT}" != "true" ]; then
+                echo "*****************************************************************************************************************************"
+                echo " ✅ DONE - JOB WILL BE DELETED IN 15 SECONDS"
+                echo "*****************************************************************************************************************************"
+                sleep 15
+                oc delete job -n ibm-aiops-demo-ui ibm-aiops-create-lags-anomaly --ignore-not-found 
+              else
+                echo "*****************************************************************************************************************************"
+                echo " ✅ DONE - JOB PERSISTENT"
+                echo "*****************************************************************************************************************************"
+                while true
+                do
+                  sleep 600
+                done
+              fi
+          env:
+            - name: ITERATIONS_MAX
+              value : "10"
+            - name: PERSISTENT
+              value : "false"
+            - name: VERSION
+              value : "latest"
+      restartPolicy: Never
+
+  backoffLimit: 500

@@ -1,0 +1,346 @@
+
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#         ________  __  ___     ___    ________       
+#        /  _/ __ )/  |/  /    /   |  /  _/ __ \____  _____
+#        / // __  / /|_/ /    / /| |  / // / / / __ \/ ___/
+#      _/ // /_/ / /  / /    / ___ |_/ // /_/ / /_/ (__  ) 
+#     /___/_____/_/  /_/    /_/  |_/___/\____/ .___/____/  
+#                                           /_/
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------------------------"
+#  Installing IBM AIOps
+#
+#  IBM AIOps
+#
+#  ©2024 nikh@ch.ibm.com
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Installs:
+#
+#  - Turbonomic
+#  - Turbonomic Demo Content
+#     - Demo User
+#     - RobotShop Demo App with synthetic metric
+#     - Instana target (if Instana is installed - you have to enter the API Token Manually)
+#     - Groups for vCenter and RobotShop
+#     - Groups for licensing
+#     - Resource Hogs
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+ 
+ 
+ 
+- name: 🟣🟣🟣 INSTALLATION MODULE START - {{current_ibmaiops_feature.kind}}
+  debug: 
+    msg: 
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "                                                                                                                                                   "
+    - "      🟡🟡🟡🟡🟡  🚀 IBM AIOps - INSTALLING {{current_ibmaiops_feature.kind}} 🟡🟡🟡🟡🟡                                                        "
+    - "                                                                                                                                                   "
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Check Login
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+
+
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+    appURL=$(oc get routes -n $AIOPS_NAMESPACE-demo-ui ibm-aiops-demo-ui  -o jsonpath="{['spec']['host']}")|| true
+    OPENSHIFT_ROUTE=$(oc get route -n openshift-console console -o jsonpath={.spec.host})    
+    INSTALL_POD=$(oc get po -n ibm-aiops-installer -l app=ibm-aiops-installer --no-headers|grep "Running"|grep "1/1"|grep 'install-instana'|awk '{print$1}')
+
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification-main
+    spec:
+      backgroundColor: '#141a6b'
+      color: '#fff'
+      location: {{global_config.position_final_ocp_notification | default("BannerBottom")}}
+      text: 'Installing  {{current_ibmaiops_feature.kind}} - Version {{current_ibmaiops_feature.instana_version}} - '    
+      link:
+          href: "https://$OPENSHIFT_ROUTE/k8s/ns/ibm-aiops-installer/pods/$INSTALL_POD/logs"
+          text: Open Logs  
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+
+
+- name:   🚀 INITIALIZATION - Get Cluster FQDN
+  shell: |
+    CLUSTER_ROUTE=$(oc get routes console -n openshift-console | tail -n 1 2>&1 ) 
+    CLUSTER_FQDN=$( echo $CLUSTER_ROUTE | awk '{print $2}')
+    echo ${CLUSTER_FQDN##*console.}
+  register: CLUSTER_NAME
+
+
+- name:   🚀 INITIALIZATION - Check Cluster Connectivity
+  fail: msg="You must be logged in to the server!"
+  when: CLUSTER_NAME.stdout==""
+
+
+
+- name: 🟣 Installing {{current_ibmaiops_feature.kind}} with the following configuration
+  debug:
+    var: current_ibmaiops_feature
+
+
+- name:  🟣 Storage Class Parameters - SPECIFIC INSTANCE"
+  debug:
+    msg:
+    - "** Installation Options for SPECIFIC INSTANCE ***********************************************************************"
+    - " Storage Class File Override:      {{ current_ibmaiops_feature.storage_class_file}}"
+    - " Storage Class Block Override:     {{ current_ibmaiops_feature.storage_class_block}}"
+    - ""
+  when: current_ibmaiops_feature.storage_class_file is defined
+
+
+- name:  🟣 Storage Class Parameters - GLOBAL"
+  debug:
+    msg:
+    - "** Installation Options from GLOBAL ***********************************************************************"
+    - " Storage Class File Override:      {{ ocp_storage_class_file }}"
+    - " Storage Class Block Override:     {{ ocp_storage_class_block }}"
+    - ""
+  when: current_ibmaiops_feature.storage_class_file is not defined and ocp_storage_class_file is defined
+
+
+
+
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Check Encrypted Licenses
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+
+- name: Get Licenses from Config
+  block:
+  - name: 💾 SET sales_key from Config File - {{current_ibmaiops_feature.sales_key | default("NONE")}} 
+    set_fact: current_sales_key={{current_ibmaiops_feature.sales_key| default("NONE")}}
+
+  - name: 💾 SET agent_key from Config File  - {{current_ibmaiops_feature.agent_key | default("NONE")}} 
+    set_fact: current_agent_key={{current_ibmaiops_feature.agent_key| default("NONE")}}
+
+
+
+
+- name: Get Licenses from Env Variable
+  block:
+    - name: 💾 SET sales_key from Env Variable - {{ lookup('ansible.builtin.env', 'INSTANA_SALES_KEY', default='NONE') }}
+      set_fact: current_sales_key={{ lookup('ansible.builtin.env', 'INSTANA_SALES_KEY', default='NONE') }}
+
+    - name: 💾 SET agent_key from Env Variable - {{ lookup('ansible.builtin.env', 'INSTANA_AGENT_KEY', default='NONE') }}
+      set_fact: current_agent_key={{ lookup('ansible.builtin.env', 'INSTANA_AGENT_KEY', default='NONE') }}
+  when: current_sales_key == "NONE" or current_agent_key == "NONE" 
+
+
+
+
+
+
+- name: Decrypt Licenses 
+  block:
+  - name: Create Token File
+    shell: |
+      echo {{global_config.license_token}} > /tmp/pwd.yaml
+    ignore_errors: true
+
+  - name: Get License from Vault
+    shell: |
+      OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+      if [ "${OS}" == "darwin" ]; then
+            echo "MAC"
+            LICENSE_FILE=$(pwd)"/roles/ibm-aiops-instana/vars/lic.yaml"
+      else
+            LICENSE_FILE="{{role_path}}/vars/lic.yaml"
+      fi    
+      echo $LICENSE_FILE
+      ansible-vault decrypt --vault-password-file /tmp/pwd.yaml --output /tmp/license.yaml "$LICENSE_FILE"
+    register: OUTPUT
+    ignore_errors: true
+
+  - name: Include License from Vault
+    ansible.builtin.include_vars:
+      file: /tmp/license.yaml
+      name: licenses
+    ignore_errors: true
+
+  - name: Cleanup
+    shell: |
+      rm /tmp/pwd.yaml
+      rm /tmp/license.yaml
+    ignore_errors: true
+
+  - name: 💾 SET sales_key from Vault
+    set_fact: current_sales_key={{licenses.sales_key }} 
+
+  - name: 💾 SET agent_key from Vault
+    set_fact: current_agent_key={{licenses.agent_key }} 
+
+  when: global_config.license_token is defined 
+
+
+
+
+- name:  🟣 Check Sales and Agent Key"
+  debug:
+    msg:
+    - "** Missing License Information ***********************************************************************"
+    - " Sales Key:      {{ current_sales_key}}"
+    - " Agent Key:      {{ current_agent_key}}"
+    - "❌ Skipping installation...."
+    - ""
+  when: current_sales_key == "NONE" or current_agent_key == "NONE"
+
+
+- name:  🟣 Check Sales and Agent Key
+  fail: msg="❌ Missing License Information - Aborting"
+  when: current_sales_key == "NONE" or current_agent_key == "NONE"
+
+
+
+- name:  🟢 Sales and Agent Key - OK"
+  debug:
+    msg:
+    - "** License Information ***********************************************************************"
+    - " Sales Key:      {{ current_sales_key}}"
+    - " Agent Key:      {{ current_agent_key}}"
+    - " ✅ OK...."
+    - ""
+    #verbosity: 2
+  when: current_sales_key != "NONE" and current_agent_key != "NONE"
+
+
+
+
+- name: Install Instana if sales and agent key provided
+  block:
+
+  # ---------------------------------------------------------------------------------------------------------------------------------------------------"
+  # INITIALIZATION
+  # ---------------------------------------------------------------------------------------------------------------------------------------------------"
+  # Placeholder for customization
+  - name: 🟡🟡🟡 Initialize Custom Hook
+    include_tasks: 00_init-custom-hook.yaml
+
+  # Initialize Logging
+  - name: 🟡🟡🟡 Initialize Logging
+    include_tasks: "{{role_path}}/../ibm-aiops-global/tasks/01_init-logging.yaml"
+
+  - name: 🟡🟡🟡 Get Storage Class
+    include_tasks: "{{role_path}}/../ibm-aiops-global/tasks/05_init-get-storage-class.yaml"
+
+    
+  # Start block
+  - name: 🟡🟡🟡 Start Logging
+    include_tasks: "{{role_path}}/../ibm-aiops-global/tasks/90-log-start.yaml"
+
+
+  # ---------------------------------------------------------------------------------------------------------------------------------------------------"
+  # INSTALL INSTANA
+  # ---------------------------------------------------------------------------------------------------------------------------------------------------"
+  # Install INSTANA
+  - name: 🟡🟡🟡 Install Instana
+    include_tasks: 10_addons-instana.yaml
+
+
+  # Install INSTANA AGENT
+  - name: 🟡🟡🟡 Install Instana Agent
+    include_tasks: 11_addons-instana-agent.yaml
+    when: current_ibmaiops_feature.install_agent == true
+
+
+  # Install INSTANA IBMAIOps Connection
+  - name: 🟡🟡🟡 Install IBMAIOps to Instana Connection
+    include_tasks: 12_addons-instana-create-connections.yaml
+    when: current_ibmaiops_feature.integrate_ibmaiops == true
+
+
+  - name: 🟡🟡🟡 Restart Demo UI
+    include_tasks: 21_addons-instana-restart-demoui.yaml
+
+
+  - name: 🟡🟡🟡 Install OCP Menu Item
+    include_tasks: 91_addons-instana-create-ocp-tools-menu.yaml
+    when: global_config.create_ocp_items | default(true) == true  
+
+  # Update IBMAIOps Cards
+  - name: 🟡🟡🟡 Update IBMAIOps Cards
+    include_tasks: "{{role_path}}/../ibm-aiops-global/tasks/99_update_cards.yaml"
+
+
+  - name: 🌏 INSTANA - LOGINS
+    shell: |
+      export DEMOUI_ROUTE=$(oc get routes -n instana-core dev-aiops  -o jsonpath="{['spec']['host']}")
+      echo "                🌏 URL:       http://$DEMOUI_ROUTE"
+      echo ""
+      echo "                🧑‍🦳 USER:      {{current_ibmaiops_feature.instana_admin_user}}"
+      echo "                🔐 LOGIN:     {{current_ibmaiops_feature.instana_admin_pass  | default('using global')}}"
+    ignore_errors: true
+    register: LOGINS
+
+
+  - name: 🌏 INSTANA - LOGINS
+    debug: 
+      var: LOGINS.stdout_lines
+
+  - name: Log
+    shell: |
+      export MESSAGE=" 🌏 INSTANA - LOGINS"
+      export currentDate=$(date +%Y-%m-%d_%H:%M)
+      echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+      echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+      appURL=$(oc get routes -n instana-core dev-aiops  -o jsonpath="{['spec']['host']}")|| true
+      echo "            📥 Demo UI:"     >> ../install_{{current_ibmaiops_feature.kind}}.log
+      echo "    "   >> ../install_{{current_ibmaiops_feature.kind}}.log
+      echo "                🌏 URL:           http://$appURL/"  >> ../install_{{current_ibmaiops_feature.kind}}.log
+      echo "                🧑‍🦳 USER:          {{current_ibmaiops_feature.instana_admin_user}}"  >> ../install_{{current_ibmaiops_feature.kind}}.log
+      echo "                🔐 PASSWORD:      {{current_ibmaiops_feature.instana_admin_pass| default('using global')}}"  >> ../install_{{current_ibmaiops_feature.kind}}.log
+      echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+      echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    ignore_errors: true
+  # ---------------------------------------------------------------------------------------------------------------------------------------------------"
+  # CHECKS
+  # ---------------------------------------------------------------------------------------------------------------------------------------------------"
+
+  when: current_sales_key != "NONE" and current_agent_key != "NONE"
+  ignore_errors: true
+
+
+- name: 🟡🟡🟡 End Logging
+  include_tasks: "{{role_path}}/../ibm-aiops-global/tasks/91-log-end.yaml"
+
+
+
+- name: ✅ INSTALLATION MODULE DONE - {{current_ibmaiops_feature.kind}}
+  debug: 
+    msg:  
+
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "                                                                                                                                                   "
+    - "       ✅ IBM AIOps - DONE INSTALLING {{current_ibmaiops_feature.kind}}                                                                                 "
+    - "                                                                                                                                                   "
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"

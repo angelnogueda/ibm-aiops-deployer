@@ -1,0 +1,90 @@
+---
+apiVersion: v1                     
+kind: Namespace
+metadata:
+  name: ibm-aiops-experimental
+---  
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ibm-aiops-experimental-admin
+  namespace: ibm-aiops-experimental
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-experimental-admin-crb
+subjects:
+  - kind: ServiceAccount
+    name: ibm-aiops-experimental-admin
+    namespace: ibm-aiops-experimental
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ibm-aiops-discord-incident-pusher-pvc
+  namespace: ibm-aiops-experimental
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 32Mi
+  volumeMode: Filesystem
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibm-aiops-discord-incident-pusher
+  namespace: ibm-aiops-experimental
+  labels:
+      app:  ibm-aiops-discord-incident-pusher
+spec:
+  serviceAccountName: ibm-aiops-discord-incident-pusher
+  replicas: 1
+  selector:
+    matchLabels:
+      app:  ibm-aiops-discord-incident-pusher
+  template:
+    metadata:
+      labels:
+        app:  ibm-aiops-discord-incident-pusher
+    spec:
+      containers:
+      - image: quay.io/niklaushirt/ibm-aiops-discord-incident-pusher:2.0
+        imagePullPolicy: Always
+        name: gateway
+        command:
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "50Mi"
+          limits:
+            cpu: "550m"
+            memory: "550Mi"
+        volumeMounts:
+          - mountPath: /home/app/db
+            name: ibm-aiops-discord-incident-pusher-store
+        env:
+          - name: ACTIVE
+            value: "False"
+          - name: DEBUG_ME
+            value : "False"
+          - name: MIN_RANK
+            value : "1"
+          - name: POLL_DELAY
+            value : "5"
+        envFrom:
+        - configMapRef:
+            name:  ibm-aiops-simulation-config
+      volumes:
+        - persistentVolumeClaim:
+            claimName: ibm-aiops-discord-incident-pusher-pvc
+          name: ibm-aiops-discord-incident-pusher-store
+      serviceAccountName: ibm-aiops-experimental-admin

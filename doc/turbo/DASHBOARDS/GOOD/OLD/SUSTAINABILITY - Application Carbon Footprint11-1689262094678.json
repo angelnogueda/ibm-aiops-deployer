@@ -1,0 +1,2971 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_TURBO_TIMESCALE",
+      "label": "Turbo Timescale",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "postgres",
+      "pluginName": "PostgreSQL"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "9.5.2"
+    },
+    {
+      "type": "datasource",
+      "id": "postgres",
+      "name": "PostgreSQL",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 2,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "This shows the latest data point for the total number of VMs in the selected scope.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "light-blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 1,
+        "y": 0
+      },
+      "id": 35,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^count$/",
+          "values": false
+        },
+        "text": {
+          "valueSize": 100
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  count(m.current)\nFROM metric m\nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'CONTAINER_POD' AND\n  m.type = 'VCPU'\nGROUP BY m.time\nORDER BY 1\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total Number of Pods",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "List of all applications in the selected scope sorted by the ones with the most carbon emissions over the selected period at the top. Carbon emissions associated with application groups are of the VMs that are part of each application group. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CO2e (t)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "masst"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Grouping Type"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Application Name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 274
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 16,
+        "x": 7,
+        "y": 0
+      },
+      "id": 36,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "frameIndex": 1,
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "CO2e (t)"
+          }
+        ]
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  e.name as \"Container Name\",\n  s.scoped_oid as \"OID\"\nFROM scope s\njoin entity e on e.oid = s.seed_oid\n\n\nwhere\ne.type = 'CONTAINER_POD' \n",
+          "refId": "Groups",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.entity_oid as \"OID\",\n  sum(m.current)*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}/1000 as \"CO2e (t)\"\nFROM metric m\nwhere \n  $__timeFilter(m.time) AND\n  m.entity_type = 'CONTAINER_POD' AND\n  m.type = 'VCPU' AND\n  m.current>0\nGROUP BY \"OID\"\nORDER BY 1",
+          "refId": "VM metrics",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Top Applications by CO2e emissions",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "OID",
+            "mode": "inner"
+          }
+        },
+        {
+          "disabled": true,
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "CO2e (t)": false,
+              "OID": true
+            },
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 34,
+      "panels": [],
+      "title": "Pod Resize",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Current number of pending VM Resize actions. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-yellow",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 5,
+        "x": 3,
+        "y": 13
+      },
+      "id": 37,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^count$/",
+          "values": false
+        },
+        "text": {
+          "valueSize": 100
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  count(*)\nFROM pending_action a\njoin entity e on e.oid = a.target_entity_id\njoin scope s on e.oid = s.seed_oid\njoin entity ns on ns.oid = s.scoped_oid\n\nwhere\ne.type = 'WORKLOAD_CONTROLLER' AND\nns.type = 'NAMESPACE' AND\nns.name in (${NAMESPACE})",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Current Number of Resize Actions",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Net impact on vCPU resources from pending VM Resize Actions.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "semi-dark-yellow",
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 0.01
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 8,
+        "y": 13
+      },
+      "id": 38,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 100
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n   ((a.attrs->'resizeInfo'->'VCPU'->>'to')::float - (a.attrs->'resizeInfo'->'VCPU'->>'from')::float)/1000 as \"Difference\"\r\nFROM pending_action a\r\njoin entity e on e.oid = a.target_entity_id\r\njoin scope s on e.oid = s.seed_oid\r\njoin entity ns on ns.oid = s.scoped_oid\r\n\r\nwhere\r\ne.type = 'WORKLOAD_CONTROLLER' AND\r\nns.type = 'NAMESPACE' AND\r\nns.name in (${NAMESPACE})",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Resize Actions Impact on VCPU Limits",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Net impact on vMem resources from pending VM Resize Actions.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "semi-dark-yellow",
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 0.01
+              }
+            ]
+          },
+          "unit": "deckbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 13,
+        "y": 13
+      },
+      "id": 39,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 100
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "\r\nSELECT\r\n  ((a.attrs->'resizeInfo'->'VMEM'->>'to')::float - (a.attrs->'resizeInfo'->'VMEM'->>'from')::float)/1000 as \"Difference\"\r\nFROM pending_action a\r\njoin entity e on e.oid = a.target_entity_id\r\njoin scope s on e.oid = s.seed_oid\r\njoin entity ns on ns.oid = s.scoped_oid\r\n\r\nwhere\r\ne.type = 'WORKLOAD_CONTROLLER' AND\r\nns.type = 'NAMESPACE' AND\r\nns.name in (${NAMESPACE})",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Resize Actions Impact on VMem Limits",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Net impact on vCPU resources from pending VM Resize Actions.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "semi-dark-yellow",
+            "mode": "thresholds"
+          },
+          "decimals": 3,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-purple",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 0.01
+              }
+            ]
+          },
+          "unit": "masst"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 18,
+        "y": 13
+      },
+      "id": 47,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 100
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n   ((a.attrs->'resizeInfo'->'VCPU_REQUEST'->>'to')::float - (a.attrs->'resizeInfo'->'VCPU_REQUEST'->>'from')::float)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*24*365/1000 as \"Difference\"\r\nFROM pending_action a\r\njoin entity e on e.oid = a.target_entity_id\r\njoin scope s on e.oid = s.seed_oid\r\njoin entity ns on ns.oid = s.scoped_oid\r\n\r\nwhere\r\ne.type = 'WORKLOAD_CONTROLLER' AND\r\nns.type = 'NAMESPACE' \r\nAND ns.name in (${NAMESPACE})",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Request Resize Actions Impact on CO2",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Net impact on vCPU resources from pending VM Resize Actions.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "semi-dark-yellow",
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 0.01
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 8,
+        "y": 18
+      },
+      "id": 43,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 100
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n   ((a.attrs->'resizeInfo'->'VCPU_REQUEST'->>'to')::float - (a.attrs->'resizeInfo'->'VCPU_REQUEST'->>'from')::float)/1000 as \"Difference\"\r\nFROM pending_action a\r\njoin entity e on e.oid = a.target_entity_id\r\njoin scope s on e.oid = s.seed_oid\r\njoin entity ns on ns.oid = s.scoped_oid\r\n\r\nwhere\r\ne.type = 'WORKLOAD_CONTROLLER' AND\r\nns.type = 'NAMESPACE' AND\r\nns.name in (${NAMESPACE})",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Resize Actions Impact on VCPU Requests",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Net impact on vMem resources from pending VM Resize Actions.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "semi-dark-yellow",
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 0.01
+              }
+            ]
+          },
+          "unit": "deckbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 13,
+        "y": 18
+      },
+      "id": 44,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 100
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "\r\nSELECT\r\n  ((a.attrs->'resizeInfo'->'VMEM_REQUEST'->>'to')::float - (a.attrs->'resizeInfo'->'VMEM_REQUEST'->>'from')::float)/1000 as \"Difference\"\r\nFROM pending_action a\r\njoin entity e on e.oid = a.target_entity_id\r\njoin scope s on e.oid = s.seed_oid\r\njoin entity ns on ns.oid = s.scoped_oid\r\n\r\nwhere\r\ne.type = 'WORKLOAD_CONTROLLER' AND\r\nns.type = 'NAMESPACE' AND\r\nns.name in (${NAMESPACE})",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Resize Actions Impact on VMem Requests",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Current number of pending VM Resize actions. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-yellow",
+            "mode": "fixed"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "id": 40,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "VCPU Requests"
+          }
+        ]
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  e.name as \"Name\",\n  ns.name as \"Namespace\",\n  a.severity as \"Severity\",\n  a.description as \"Description\",\n   ((a.attrs->'resizeInfo'->'VCPU'->>'to')::float - (a.attrs->'resizeInfo'->'VCPU'->>'from')::float)/1000 as \"VCPU Limits\",\n   ((a.attrs->'resizeInfo'->'VMEM'->>'to')::float - (a.attrs->'resizeInfo'->'VMEM'->>'from')::float)/1000 as \"MEMORY Limits\",\n  ((a.attrs->'resizeInfo'->'VCPU_REQUEST'->>'to')::float - (a.attrs->'resizeInfo'->'VCPU_REQUEST'->>'from')::float)/1000 as \"VCPU Requests\",\n   ((a.attrs->'resizeInfo'->'VMEM_REQUEST'->>'to')::float - (a.attrs->'resizeInfo'->'VMEM_REQUEST'->>'from')::float)/1000 as \"MEMORY Requests\"\n\nFROM pending_action a\njoin entity e on e.oid = a.target_entity_id\njoin scope s on e.oid = s.seed_oid\njoin entity ns on ns.oid = s.scoped_oid\n\nwhere\ne.type = 'WORKLOAD_CONTROLLER' AND\nns.type = 'NAMESPACE' AND\nns.name in (${NAMESPACE})",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Current Resize Actions",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "action_oid": true,
+              "attrs": false,
+              "category": true,
+              "involved_entities": true,
+              "recommendation_time": true,
+              "savings": true,
+              "target_entity_id": true,
+              "type": true
+            },
+            "indexByName": {
+              "Description": 2,
+              "Difference": 3,
+              "Name": 1,
+              "Namespace": 0,
+              "Severity": 4
+            },
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Net impact on vCPU resources from pending VM Resize Actions.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "semi-dark-yellow",
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-purple",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 0.01
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 18,
+        "y": 34
+      },
+      "id": 49,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 100
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n   ((a.attrs->'resizeInfo'->'VCPU_REQUEST'->>'to')::float - (a.attrs->'resizeInfo'->'VCPU_REQUEST'->>'from')::float)/1000 as \"Difference\"\r\nFROM pending_action a\r\njoin entity e on e.oid = a.target_entity_id\r\njoin scope s on e.oid = s.seed_oid\r\njoin entity ns on ns.oid = s.scoped_oid\r\n\r\nwhere\r\ne.type = 'WORKLOAD_CONTROLLER' AND\r\nns.type = 'NAMESPACE' \r\nAND ns.name in (${NAMESPACE})",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Request Resize Actions Impact on CO2",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 44
+      },
+      "id": 19,
+      "panels": [],
+      "title": "Global",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "This shows the latest data point for the total number of VMs in the selected scope.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "light-blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 45
+      },
+      "id": 15,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^count$/",
+          "values": false
+        },
+        "text": {
+          "valueSize": 100
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  count(m.current)\nFROM metric m\nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_oid IN (${VM_ENERGY_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY m.time\nORDER BY 1\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total Number of VMs",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Net impact on vCPU resources from pending VM Resize Actions.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "semi-dark-yellow",
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 45
+      },
+      "id": 25,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 100
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  (a.attrs->'resizeInfo'->'VCPU'->>'to')::float - (a.attrs->'resizeInfo'->'VCPU'->>'from')::float as \"Difference\"\r\nFROM pending_action a\r\nwhere\r\n  a.target_entity_id IN (${VM_ENERGY_LIST}) AND\r\n  a.\"type\" = 'RESIZE' AND\r\n  a.description like '%VCPU%' AND a.description not like '%limit%'\r\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "VM Resize Actions Impact on VCPU",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "List of all applications in the selected scope sorted by the ones with the most carbon emissions over the selected period at the top. Carbon emissions associated with application groups are of the VMs that are part of each application group. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CO2e (t)"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "masst"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Grouping Type"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Application Name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 274
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 45
+      },
+      "id": 14,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "frameIndex": 1,
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "CO2e (t)"
+          }
+        ]
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  concat(eapp.name, ' (', eapp.oid,')') as \"Application Name\",\n  eapp.oid as \"Application OID\",\n  s.scoped_oid as \"VM OID\",\n  eapp.type as \"Grouping Type\"\nFROM scope s\njoin entity eapp on eapp.oid = s.seed_oid\nwhere\n  s.scoped_type = 'VIRTUAL_MACHINE'\n  AND s.finish > now()\n  AND eapp.last_seen > now()\n  AND ((eapp.type = 'GROUP' AND eapp.attrs->'member_types' ? 'VIRTUAL_MACHINE' AND '${INCLUDE_GROUPS}') OR (eapp.type = 'BUSINESS_APPLICATION'))\nORDER BY 1",
+          "refId": "Groups",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  --mvm.time as \"Time\",\n  mvm.entity_oid as \"VM OID\",\n  sum(mvm.current)*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}/1000 as \"CO2e (t)\"\nFROM metric mvm\nwhere \n  $__timeFilter(mvm.time) AND\n  mvm.entity_oid IN (${VM_ENERGY_LIST}) AND\n  mvm.entity_type = 'VIRTUAL_MACHINE' AND\n  mvm.type = 'VCPU' AND\n  mvm.current>0\nGROUP BY \"VM OID\"\nORDER BY 1",
+          "refId": "VM metrics",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Top Applications by CO2e emissions",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Application OID": true,
+              "VM OID": true
+            },
+            "indexByName": {},
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Application Name": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Application OID": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "CO2e (t)": {
+                "aggregations": [
+                  "sum"
+                ],
+                "operation": "aggregate"
+              },
+              "Carbon Footprint (kg of CO2)": {
+                "aggregations": [
+                  "sum"
+                ],
+                "operation": "aggregate"
+              },
+              "Grouping Type": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Application OID": false
+            },
+            "indexByName": {},
+            "renameByName": {
+              "CO2e (t) (sum)": "CO2e (t)",
+              "Carbon Footprint (kg of CO2) (sum)": "Carbon Footprint (kg of CO2)"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": true,
+                "field": "CO2e (t)"
+              }
+            ]
+          }
+        },
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "config": {
+                  "id": "isNull",
+                  "options": {}
+                },
+                "fieldName": "Application Name"
+              },
+              {
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": ""
+                  }
+                },
+                "fieldName": "CO2e (t)"
+              }
+            ],
+            "match": "any",
+            "type": "exclude"
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Current number of pending VM Resize actions. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-yellow",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 49
+      },
+      "id": 26,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^count$/",
+          "values": false
+        },
+        "text": {
+          "valueSize": 100
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  count(*)\nFROM pending_action a\nwhere\na.target_entity_id IN (${VM_ENERGY_LIST})",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Current Number of Resize Actions",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Net impact on vMem resources from pending VM Resize Actions.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "semi-dark-yellow",
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "deckbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 49
+      },
+      "id": 27,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 100
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  (a.attrs->'resizeInfo'->'VMEM'->>'to')::float - (a.attrs->'resizeInfo'->'VMEM'->>'from')::float as \"Difference\"\r\nFROM pending_action a\r\nwhere\r\n  a.target_entity_id IN (${VM_ENERGY_LIST}) AND\r\n  a.\"type\" = 'RESIZE' AND\r\n  a.description like '%VMem%'",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "VM Resize Actions Impact on VMem",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Net impact on vCPU resources from pending VM Resize Actions.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "semi-dark-yellow",
+            "mode": "thresholds"
+          },
+          "decimals": 3,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-purple",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 0.01
+              }
+            ]
+          },
+          "unit": "masst"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 0,
+        "y": 54
+      },
+      "id": 48,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 100
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "\r\n\r\nSELECT\r\n(a.attrs->'resizeInfo'->'VCPU'->>'to')::float - (a.attrs->'resizeInfo'->'VCPU'->>'from')::float as \"Difdference\",\r\n  (a.attrs->'resizeInfo'->'VCPU'->>'to')::float - (a.attrs->'resizeInfo'->'VCPU'->>'from')::float*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*24*365/1000 as \"Difference\" \r\nFROM pending_action a\r\nwhere\r\n  a.target_entity_id IN (${VM_ENERGY_LIST}) AND\r\n  a.\"type\" = 'RESIZE' AND\r\n  a.description like '%VCPU%' AND a.description not like '%limit%'",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Request Resize Actions Impact on CO2",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Current number of pending VM Resize actions. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-yellow",
+            "mode": "fixed"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 64
+      },
+      "id": 41,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  e.name as \"Name\",\n  a.severity as \"Severity\",\n  a.description as \"Description\",\n  (a.attrs->'resizeInfo'->'VCPU'->>'to')::float - (a.attrs->'resizeInfo'->'VCPU'->>'from')::float as \"Difference\"\nFROM pending_action a\njoin entity e on e.oid = a.target_entity_id\nwhere\na.target_entity_id IN (${VM_ENERGY_LIST})\nAND a.category != 'COMPLIANCE'",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Current Resize Actions",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "action_oid": true,
+              "attrs": true,
+              "category": true,
+              "involved_entities": true,
+              "recommendation_time": true,
+              "savings": true,
+              "target_entity_id": true,
+              "type": true
+            },
+            "indexByName": {
+              "Description": 1,
+              "Name": 0,
+              "Severity": 2
+            },
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Shows the total energy consumption in Wh for VMs in the selected scope and over the selected time period. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "watth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 75
+      },
+      "id": 21,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "8.5.16",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)\nFROM metric m\n--JOIN entity e on m.entity_oid = e.\"oid\" AND e.environment = 'ON_PREM' AND e.type = 'VIRTUAL_MACHINE' and m.entity_type = e.type\nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_oid IN (${VM_ENERGY_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY m.time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total Energy Consumption (Wh) - All VMs",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Shows the total carbon footprint in tons of CO2e emissions for VMs in the selected scope and over the selected time period. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "masst"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 75
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "8.5.16",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}/1000 as \"CO2e (t)\"\nFROM metric m\n--JOIN entity e on m.entity_oid = e.\"oid\" AND e.environment = 'ON_PREM' AND e.type = 'VIRTUAL_MACHINE' and m.entity_type = e.type\nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_oid IN (${VM_ENERGY_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY m.time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total Carbon Footprint CO2e (t) - All VMs",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 84
+      },
+      "id": 31,
+      "panels": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 1
+          },
+          "id": 33,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "# **Applications Carbon Footprint - Private Cloud**\n***\n## **Summary**\nThis dashboard shows the impact of IBM Turbonomic application resource manager on Energy consumption and Carbon Footprint in your private cloud data center environment. \n\nThis dashboard focuses on the calculated Energy and Carbon Footprint data for Virtual Machines (VMs) running in a vSphere environment and includes Energy consumption and Carbon Footprint emissions for VMs, optimization opportunities and their associated net impact on resources, as well as a table comparison of Carbon Footprint across VM groups and Business Applications (see \"Top Applications by CO2e Emissions\" section).\n***\n\n## **Data and Methodology**\n---\n### Energy (Wh) \nVirtual Machine (VM) Energy consumption data is being calculated for individual VM based on the distribution of Host's power data among the VMs running on it. The following methodology is used to quantify Energy consumption for VMs:\n\nConsider the following notation:\n\n**n** - Number of VMs deployed on a Host\\\n**VM_i** - The i-th VM deployed on a Host\\\n**vCPU_i** - The number of vCPUs allocated to  VM~i~ \\\n**P** - Total power consumed by the Host\\\n**U** - Total CPU utilization at the Host (due to hypervisor, OSs, and applications running on all the VMs) \\\n**u_i** - CPU utilization of VM~i~ \\\n**P_idle** - is the power consumed by the Host during active idle state when no process is actively executing \\\n**P_overhead** - is the power consumed due to the hypervisor or other processes that are not specific to any single VM\\\n**P_active** - is the power consumed by the OSs and user processes executing on the VMs \\ \n\n**Host power can be divided into 3 components:**\n\n    P = P_idle + P_overhead + P_active\n\n**The instantaneous power at or over a time interval t for VM_i is then determined as follows:**\n\n    P_VM_i = [(vCPU_i / ∑_(k=1)^n {vCPU_k}) * (P_idle + P_overhead)] + [(u_i / ∑_(k=1)^n {u_k}) * P_active]\n\n\n**Splitting total power into idle, overhead, and active components:** \n\nThe idle power of a Host is determined by fitting a model between the total host utilization U and host power P time series. \n\nThe overhead power P_overhead is given by the power consumption at overhead utilization less P_idle, given by [U - (∑_k{u_k})] . \n\nThat is - **P_overhead** = P * [U - (∑_k{u_k})] - P_idle.\n\n\nFollowing the aforementioned methodology we are able to calculate Power consumption for each individual VM that is running on a Host with available Power data. Then, we are converting Power data into Energy data and showing Energy in Wh units in the \"Energy Consumption (Wh)\" graphs. \n\n---\n### CO2e emissions (t)\nCalculations for Carbon Dioxide equivalents (CO2e in metric tons) emissions are made following an open source methodology outlined in Cloud Carbon Footprint website - [www.cloudcarbonfootprint.org](https://www.cloudcarbonfootprint.org/).\\\nSpecifically, in this dashboard CO2e are calculated using the following formula:\n\n    Operational Emissions = CO2e (t) = (energy consumption [Wh]) x [(private cloud average PUE) x (private cloud emissions factor) / 1000]\n\nWhere:\n\n- ***Private Cloud Power Usage Effectiveness (PUE)*** = An average PUE of 1.67 is used in our calculations. This [451 report](https://d39w7f4ix9f5s9.cloudfront.net/e3/79/42bf75c94c279c67d777f002051f/carbon-reduction-opportunity-of-moving-to-aws.pdf) notes: \"Adding it all up, the power usage effectiveness (PUE, the ratio of total datacenter power and the IT power) ranged from 1.63 to 1.70 in the survey sample and was consistent across company sizes. This is in line with broader industry data collected by the Uptime Institute but well below the efficiency of AWS operations.\" - 451 Research Report. We use the average of 1.63 and 1.70, which is 1.67.\n\n- ***Private Cloud Emissions Factor*** = `1,562.4 lbs CO2/MWh × (4.536 × 10^(-4) metric tons/lb) × 0.001 MWh/kWh = 7.09 × 10^(-4) metric tons CO2/kWh`. We are using `0.000709` (rounded) in our calculations. ***Note:*** Emission equivalents vary slightly vs. EPA calculation because we are using the rounded numbers of the emissions factor (7.09x10^(-4)).\n\n---\n### Graphs and dashboard functionality\n\n- **Top Applications by CO2e emissions** - this table shows the total CO2e emissions over the chosen dashboard period for groups of VMs that are manually created by end users in Turbonomic as well as total CO2e emissions over the chosen dashboard period for VMs within Business Applications groups that are discovred by APM targets added to Turbonomic such as Dynatrace, AppDynamics, Instana, etc.\n\n- **Total Number of VMs** - this graph shows the total number of VMs, both active and idle, discovered by Turbonomnic. \n\n- **Current Number of Resize Actions** - this graph shows the total number VM optimization opportunities, also know as pending VM Resize actions in Turbonomic.\n\n- **VM Resize Actions Impact on VCPU** - this graph shows the net impact on VCPU resources from all the pending VM Resize actions in Turbonomic. \n\n- **VM Resize Actions Impact on VMem** - this graph shows the net impact on VMEM resources from all the pending VM Resize actions in Turbonomic. \n\n- **Global** and **Scoped Information** sections:\n    - **Global** - this section includes inforamation of the global environment over the selected period of time\n    - **Scoped Information** - this section shows information of the scoped environment which can be controlled by the dashboard's top scope selectors such as \"Data Center\" , \"Application(s)\", and \"Virtual Machine(s)\". For each scope selector, one or multiple entries may be selected. \n\n- **PUE** and **Emissions Factor** - these parameters can be adjusted by the user of this dashboard and impact the calculated CO2e in various graphs of this dashboard. See \"CO2e emissions (t)\" section.\n\n\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.5.1",
+          "title": "Read Me",
+          "type": "text"
+        }
+      ],
+      "title": "Help",
+      "type": "row"
+    }
+  ],
+  "refresh": "",
+  "revision": 1,
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_TURBO_TIMESCALE}"
+        },
+        "definition": "select\n    CONCAT(name, ' - ', oid) AS __text,\n    oid AS __value\nfrom entity\nwhere\n    type = 'DATACENTER'\n    --and attrs->>'targets' like '%vCenter%'\n    and last_seen > now()\norder by 1",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Data Center",
+        "multi": true,
+        "name": "DATACENTER",
+        "options": [],
+        "query": "select\n    CONCAT(name, ' - ', oid) AS __text,\n    oid AS __value\nfrom entity\nwhere\n    type = 'DATACENTER'\n    --and attrs->>'targets' like '%vCenter%'\n    and last_seen > now()\norder by 1",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "Yes",
+          "value": "Yes"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Include Groups",
+        "multi": false,
+        "name": "INCLUDE_GROUPS",
+        "options": [
+          {
+            "selected": true,
+            "text": "Yes",
+            "value": "Yes"
+          },
+          {
+            "selected": false,
+            "text": "No",
+            "value": "No"
+          }
+        ],
+        "query": "Yes, No",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_TURBO_TIMESCALE}"
+        },
+        "definition": "select\n    CONCAT(e.name, ' - ', e.type, ' (', e.oid, ')') AS __text,\n    e.oid AS __value\nfrom entity e\njoin scope s on e.oid = s.scoped_oid and s.seed_oid IN (${DATACENTER})\nwhere\n    ((e.type = 'GROUP' AND e.attrs->'member_types' ? 'VIRTUAL_MACHINE' AND '${INCLUDE_GROUPS}')\n    OR (e.type = 'BUSINESS_APPLICATION'))\n    and last_seen > now()\norder by 1",
+        "description": "This represents all Virtual Machine groups created in Turbonomic, including VMs that are part of a Business Application or default/user created groups in Turbonomic. ",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Application(s)",
+        "multi": true,
+        "name": "APPLICATION",
+        "options": [],
+        "query": "select\n    CONCAT(e.name, ' - ', e.type, ' (', e.oid, ')') AS __text,\n    e.oid AS __value\nfrom entity e\njoin scope s on e.oid = s.scoped_oid and s.seed_oid IN (${DATACENTER})\nwhere\n    ((e.type = 'GROUP' AND e.attrs->'member_types' ? 'VIRTUAL_MACHINE' AND '${INCLUDE_GROUPS}')\n    OR (e.type = 'BUSINESS_APPLICATION'))\n    and last_seen > now()\norder by 1",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_TURBO_TIMESCALE}"
+        },
+        "definition": "SELECT\n  distinct e.oid\nFROM entity e\nWHERE\n  (e.first_seen, e.last_seen) OVERLAPS ($__timeFrom(), $__timeTo()) AND\n  e.type = 'VIRTUAL_MACHINE' ",
+        "hide": 2,
+        "includeAll": true,
+        "label": "",
+        "multi": true,
+        "name": "VM_ENERGY_LIST",
+        "options": [],
+        "query": "SELECT\n  distinct e.oid\nFROM entity e\nWHERE\n  (e.first_seen, e.last_seen) OVERLAPS ($__timeFrom(), $__timeTo()) AND\n  e.type = 'VIRTUAL_MACHINE' ",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_TURBO_TIMESCALE}"
+        },
+        "definition": "SELECT\n    concat(e.name, ' (', e.oid, ')') AS __text,\n    e.oid AS __value\nFROM entity e\njoin scope s on e.oid = s.scoped_oid and s.scoped_type = 'VIRTUAL_MACHINE' \nWHERE\n  (e.first_seen, e.last_seen) OVERLAPS ($__timeFrom(), $__timeTo()) AND\n  e.type = 'VIRTUAL_MACHINE' AND\n  e.oid IN (${VM_ENERGY_LIST})\nORDER BY e.name",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Virtual Machine(s)",
+        "multi": true,
+        "name": "VM_LIST",
+        "options": [],
+        "query": "SELECT\n    concat(e.name, ' (', e.oid, ')') AS __text,\n    e.oid AS __value\nFROM entity e\njoin scope s on e.oid = s.scoped_oid and s.scoped_type = 'VIRTUAL_MACHINE' \nWHERE\n  (e.first_seen, e.last_seen) OVERLAPS ($__timeFrom(), $__timeTo()) AND\n  e.type = 'VIRTUAL_MACHINE' AND\n  e.oid IN (${VM_ENERGY_LIST})\nORDER BY e.name",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "1.67",
+          "value": "1.67"
+        },
+        "description": "Maximum consumption of your Private Cloud hosts in Watts. You can refer the the \"All Published SPECpower_ssh2008 Results\" link to get the values for your specific host.",
+        "hide": 0,
+        "label": "PUE",
+        "name": "PRIVATE_CLOUD_AVG_PUE",
+        "options": [
+          {
+            "selected": true,
+            "text": "1.67",
+            "value": "1.67"
+          }
+        ],
+        "query": "1.67",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "0.000709",
+          "value": "0.000709"
+        },
+        "description": "Private Cloud Emissions Factor corresponds to 1,562.4 lbs CO2/MWh × (4.536 × 10^(-4) metric tons/lb) × 0.001 MWh/kWh = 7.09 × 10^(-4) metric tons CO2/kWh",
+        "hide": 0,
+        "label": "Emissions Factor",
+        "name": "PRIVATE_CLOUD_EMISSIONS_FACTOR",
+        "options": [
+          {
+            "selected": true,
+            "text": "0.000709",
+            "value": "0.000709"
+          }
+        ],
+        "query": "0.000709",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "definition": "SELECT\n  distinct e.oid\nFROM entity e\nWHERE\n  (e.first_seen, e.last_seen) OVERLAPS ($__timeFrom(), $__timeTo()) AND\n  e.type = 'WORKLOAD_CONTROLLER' ",
+        "description": "All Deployments",
+        "hide": 0,
+        "includeAll": false,
+        "label": "All Deployments",
+        "multi": false,
+        "name": "DEPLOYMENT_LIST",
+        "options": [],
+        "query": "SELECT\n  distinct e.oid\nFROM entity e\nWHERE\n  (e.first_seen, e.last_seen) OVERLAPS ($__timeFrom(), $__timeTo()) AND\n  e.type = 'WORKLOAD_CONTROLLER' ",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": "%",
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_TURBO_TIMESCALE}"
+        },
+        "definition": "SELECT DISTINCT name FROM entity WHERE (type = 'NAMESPACE' AND name NOT LIKE '%kube-%' AND name NOT LIKE '%openshift-%' AND name NOT LIKE '%open-cluster%' ) LIMIT 50 ",
+        "description": "Namespace",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Namespace",
+        "multi": false,
+        "name": "NAMESPACE",
+        "options": [],
+        "query": "SELECT DISTINCT name FROM entity WHERE (type = 'NAMESPACE' AND name NOT LIKE '%kube-%' AND name NOT LIKE '%openshift-%' AND name NOT LIKE '%open-cluster%' ) LIMIT 50 ",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "300",
+          "value": "300"
+        },
+        "description": "CPU_CONSUMPTION",
+        "hide": 0,
+        "label": "CPU_CONSUMPTION",
+        "name": "CPU_CONSUMPTION",
+        "options": [
+          {
+            "selected": true,
+            "text": "300",
+            "value": "300"
+          }
+        ],
+        "query": "300",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "8",
+          "value": "8"
+        },
+        "description": "CORES_CPU",
+        "hide": 0,
+        "label": "CORES_CPU",
+        "name": "CORES_CPU",
+        "options": [
+          {
+            "selected": true,
+            "text": "8",
+            "value": "8"
+          }
+        ],
+        "query": "8",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "0.166",
+          "value": "0.166"
+        },
+        "description": "W_WH_RATIO",
+        "hide": 0,
+        "label": "W_WH_RATIO",
+        "name": "W_WH_RATIO",
+        "options": [
+          {
+            "selected": true,
+            "text": "0.166",
+            "value": "0.166"
+          }
+        ],
+        "query": "0.166",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "SUSTAINABILITY - Application Carbon Footprint11",
+  "uid": "eYdPNuQVs",
+  "version": 14,
+  "weekStart": ""
+}

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibm-aiops-tools
+  namespace: default
+  labels:
+      app: ibm-aiops-tools
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ibm-aiops-tools
+  template:
+    metadata:
+      labels:
+        app: ibm-aiops-tools
+    spec:
+      containers:
+      - image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+        imagePullPolicy: IfNotPresent
+        name: tools
+        command:
+        ports:
+        - containerPort: 22
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "50Mi"
+          limits:
+            cpu: "250m"
+            memory: "250Mi"
+        env:
+          - name: INSTALL_REPO
+            value : "https://github.com/niklaushirt/ibm-aiops-deployer.git"
+

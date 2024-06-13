@@ -1,0 +1,109 @@
+---
+apiVersion: v1                     
+kind: Namespace
+metadata:
+  name: ibm-aiops-experimental
+---  
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ibm-aiops-experimental-admin
+  namespace: ibm-aiops-experimental
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-experimental-admin-crb
+subjects:
+  - kind: ServiceAccount
+    name: ibm-aiops-experimental-admin
+    namespace: ibm-aiops-experimental
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibm-aiops-incident-simulator
+  namespace: ibm-aiops-experimental
+  labels:
+      app: ibm-aiops-incident-simulator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ibm-aiops-incident-simulator
+  template:
+    metadata:
+      labels:
+        app: ibm-aiops-incident-simulator
+    spec:
+      containers:
+      - image: quay.io/niklaushirt/ibm-aiops-incident-simulator:2.0
+        imagePullPolicy: Always
+        name: ibm-aiops-incident-simulator
+        command:
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "50Mi"
+          limits:
+            cpu: "550m"
+            memory: "550Mi"
+          readinessProbe:                 
+            failureThreshold: 9           
+            httpGet:                      
+              path: /health          
+              port: 8000                  
+              scheme: HTTP           
+            initialDelaySeconds: 60       
+            periodSeconds: 10             
+            successThreshold: 1           
+            timeoutSeconds: 3
+        env:
+          - name: ACTIVE
+            value: "False"
+        envFrom:
+        - configMapRef:
+            name:  ibm-aiops-simulation-config
+        - configMapRef:
+            name:  ibm-aiops-simulation-config-events
+        - configMapRef:
+            name:  ibm-aiops-simulation-config-logs
+        - configMapRef:
+            name:  ibm-aiops-simulation-config-metrics
+      serviceAccountName: ibm-aiops-experimental-admin
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ibm-aiops-incident-simulator-service
+  namespace: ibm-aiops-experimental
+spec:
+  selector:
+    app: ibm-aiops-incident-simulator
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name:  ibm-aiops-incident-simulator
+  namespace: ibm-aiops-experimental
+spec:
+  to:
+    kind: Service
+    name: ibm-aiops-incident-simulator-service
+    weight: 100
+  port:
+    targetPort: 8000
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
+  wildcardPolicy: None

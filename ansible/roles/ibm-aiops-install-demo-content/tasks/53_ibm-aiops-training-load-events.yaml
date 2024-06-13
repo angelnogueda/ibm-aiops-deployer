@@ -1,0 +1,54 @@
+
+
+- name: 🛰️  START - LOAD EVENTS TRAINING DATA
+  debug: 
+    msg="{{ lookup('pipe','date +%d.%m.%Y---%H:%M:%S') }}"
+
+
+- name: Log
+  shell: |
+    export MESSAGE="Load Events Training Data into Cassandra"
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "$MESSAGE  >> ../install_{{current_ibmaiops_feature.kind}}.log
+  ignore_errors: true
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ffd500'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - Load Events Training Data into Cassandra'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+
+
+- name: 📥 TRAINING LOAD EVENTS - DELETE EXISTING JOB
+  kubernetes.core.k8s:
+    state: absent
+    namespace: default
+    template: ./templates/training/load-job-events.j2
+
+
+- name: 📥 TRAINING LOAD EVENTS - CREATE CLUSTERROLE
+  kubernetes.core.k8s:
+    state: present
+    namespace: default
+    src: ./templates/training/default-clusterrole.yaml
+    
+
+- name: 📥 TRAINING LOAD EVENTS - LOAD CASSANDRA EVENTS DATA 
+  kubernetes.core.k8s:
+    state: present
+    namespace: default
+    template: ./templates/training/load-job-events.j2
+  

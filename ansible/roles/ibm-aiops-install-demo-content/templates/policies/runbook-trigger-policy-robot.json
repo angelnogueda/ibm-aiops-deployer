@@ -1,0 +1,92 @@
+{
+    "metadata": {
+        "labels": {
+            "ibm.com/aiops/uitemplate": "alert:assignrunbook",
+            "ibm.com/is-default": "false"
+        },
+        "name": "DEMO RobotShop Mitigation",
+        "description": "Created by Nicks scripts",
+        "createdBy": {
+            "id": "system",
+            "type": "system"
+        },
+        "lastUpdatedBy": {
+            "changeDetails": "Created",
+            "id": "demo",
+            "type": "user"
+        }
+    },
+    "state": "enabled",
+    "executionPriority": 50,
+    "spec": {
+        "triggers": [{
+            "entityId": "alert",
+            "triggerId": "aiops.ibm.com/trigger/alert-created",
+            "arguments": {
+                "condition": {
+                    "$variable": "constants.baseTriggerCondition"
+                }
+            }
+        }, {
+            "entityId": "alert",
+            "triggerId": "aiops.ibm.com/trigger/alert-updated",
+            "arguments": {
+                "condition": {
+                    "actionId": "lang/condition/and",
+                    "arguments": {
+                        "conditions": [{
+                            "$variable": "constants.baseTriggerCondition"
+                        }, {
+                            "actionId": "lang/condition/template",
+                            "arguments": {
+                                "template": "{{prevAlert.suppressed}} != {{alert.suppressed}} or {{prevAlert.eventCount}} != {{alert.eventCount}}"
+                            }
+                        }]
+                    }
+                }
+            }
+        }],
+        "constants": {
+            "baseTriggerCondition": {
+                "actionId": "lang/condition/template",
+                "arguments": {
+                    "template": "{{alert.state}} != \"clear\" and {{alert.state}} != \"closed\" and {{alert.suppressed}} == false"
+                }
+            }
+        },
+        "actions": [{
+            "actionId": "lang/if",
+            "arguments": {
+                "name": "Condition set 1",
+                "conditions": {
+                    "actionId": "lang/condition/and",
+                    "arguments": {
+                        "conditions": [{
+                            "actionId": "lang/condition/template",
+                            "arguments": {
+                                "template": "({{contains alert.resource.name \"mysql\"}})"
+                            }
+                        }]
+                    }
+                },
+                "then": [{
+                    "actionId": "aiops.ibm.com/action/internal/runbooks/add",
+                    "output": "alert.insights.[]",
+                    "arguments": {
+                        "entity": {
+                            "$variable": "alert"
+                        },
+                        "runbookId": "MY_RUNBOOK_ID",
+                        "isAutomated": false,
+                        "mappings": [{
+                            "mappingType": "useDefault",
+                            "runbookParameterName": "clusterCredentials",
+                            "parameterValue": []
+                        }]
+                    }
+                }]
+            }
+        }]
+    },
+    "hotfields": []
+}

@@ -1,0 +1,140 @@
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#         ________  __  ___     ___    ________       
+#        /  _/ __ )/  |/  /    /   |  /  _/ __ \____  _____
+#        / // __  / /|_/ /    / /| |  / // / / / __ \/ ___/
+#      _/ // /_/ / /  / /    / ___ |_/ // /_/ / /_/ (__  ) 
+#     /___/_____/_/  /_/    /_/  |_/___/\____/ .___/____/  
+#                                           /_/
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------------------------"
+#  TOOL POD
+#
+#  IBM AIOps
+#
+#  ©2024 nikh@ch.ibm.com
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+
+
+apiVersion: v1                     
+kind: Namespace
+metadata:
+  name: ibm-aiops-installer
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: ibm-aiops-installer-admin
+  namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: ibm-aiops-installer-admin
+    namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-default-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: ibm-aiops-installer
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ibm-aiops-installer
+  name: ibm-aiops-tool-pod
+  annotations: {}
+spec:
+  selector:
+    matchLabels:
+      app: test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+        - name: tools
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env: []
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ STARTING: TOOL POD"
+              echo "*****************************************************************************************************************************"
+              echo ""
+              echo "  ⏳ INSTALLATION START TIMESTAMP: $(date)"
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+    
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Getting Installation source from GitHub"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   📥 Clone Repo https://github.com/niklaushirt/ibm-aiops-deployer.git -b dev_latest"
+              git clone https://github.com/niklaushirt/ibm-aiops-deployer.git -b dev_latest
+              cd ibm-aiops-deployer
+
+              echo ""
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🔎 This Repo includes those latestet Commits"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+              echo ""
+              echo ""
+              echo "  ⏳ INSTALLATION END TIMESTAMP: $(date)"
+              echo ""
+              echo "*****************************************************************************************************************************"
+              echo " ✅ INITIALIZATION - WAITING FOREVER"
+              echo "*****************************************************************************************************************************"
+
+
+              while true
+              do
+                sleep 1000
+              done
+
+      imagePullSecrets: []
+  paused: false
+
+

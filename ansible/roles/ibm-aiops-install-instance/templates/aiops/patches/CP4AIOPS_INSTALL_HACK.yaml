@@ -1,0 +1,198 @@
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#         ________  __  ___     ___    ________       
+#        /  _/ __ )/  |/  /    /   |  /  _/ __ \____  _____
+#        / // __  / /|_/ /    / /| |  / // / / / __ \/ ___/
+#      _/ // /_/ / /  / /    / ___ |_/ // /_/ / /_/ (__  ) 
+#     /___/_____/_/  /_/    /_/  |_/___/\____/ .___/____/  
+#                                           /_/
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------------------------"
+#  Install Hack for 4.5
+#
+#  IBM AIOps
+#
+#  ©2024 nikh@ch.ibm.com
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+
+
+apiVersion: v1                     
+kind: Namespace
+metadata:
+  name: ibm-aiops-installer
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: ibm-aiops-installer-admin
+  namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: ibm-aiops-installer-admin
+    namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-default-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: ibm-aiops-installer
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ibm-aiops-install-hack
+  namespace: ibm-aiops-installer
+spec:
+  serviceAccountname: ibm-aiops-installer-admin
+  template:
+    spec:
+      containers:
+        - name: install
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ STARTING: Install Hack for 4.5"
+              echo "*****************************************************************************************************************************"
+              echo ""
+              echo "  ⏳ INSTALLATION START TIMESTAMP: $(date)"
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+
+              export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+
+              echo "Creating CronJob and ConfigMap for Kafka Connection Secret management in namespace ${AIOPS_NAMESPACE}"
+
+              cat << EOF | oc apply -f -
+              apiVersion: v1
+              kind: ConfigMap
+              metadata:
+                name: aiops-set-kafka-connection-secret-cm
+                namespace: ${AIOPS_NAMESPACE}
+              data:
+                set-kafka-secret.sh: |
+                  #!/bin/bash
+
+                  AIOPS_NAMESPACE=${AIOPS_NAMESPACE}
+                  AIOPS_NAME="\$(/hack/preload_im_data/util/kubectl get installations.orchestrator.aiops.ibm.com -o jsonpath='{.items[0].metadata.name}')"
+                  AIOPS_UID="\$(/hack/preload_im_data/util/kubectl get installation.orchestrator.aiops.ibm.com \$AIOPS_NAME -o jsonpath='{.metadata.uid}')"
+
+                  while : ; do
+                    KAFKA_READY="\$(/hack/preload_im_data/util/kubectl get kafkauser.ibmevents.ibm.com cp4waiops-cartridge-kafka-auth-0 -n "\${AIOPS_NAMESPACE}" && /hack/preload_im_data/util/kubectl get secret iaf-system-cluster-ca-cert -n "\${AIOPS_NAMESPACE}")"
+                    if [[ $? -ne 0 ]]; then
+                      echo "Kafka user cp4waiops-cartridge-kafka-auth-0 or secret iaf-system-cluster-ca-cert not yet ready... Waiting 5 minutes to retry"
+                      sleep 300
+                    else
+                      break
+                    fi
+                  done
+
+                  AUTH_SECRET="\$(/hack/preload_im_data/util/kubectl get kafkauser.ibmevents.ibm.com cp4waiops-cartridge-kafka-auth-0 -n "\${AIOPS_NAMESPACE}" -o jsonpath='{.status.secret}')"
+
+                  while : ; do
+                    KAFKA_READY="\$(/hack/preload_im_data/util/kubectl get secret "\${AUTH_SECRET}" -n "\${AIOPS_NAMESPACE}")"
+                    if [[ $? -ne 0 ]]; then
+                      echo "Kafka auth secret \${AUTH_SECRET} not yet ready... Waiting 5 minutes to retry"
+                      sleep 300
+                    else
+                      break
+                    fi
+                  done
+
+                  AUTH_MECHANISM="\$(/hack/preload_im_data/util/kubectl get kafkauser.ibmevents.ibm.com cp4waiops-cartridge-kafka-auth-0 -n "\${AIOPS_NAMESPACE}" -o jsonpath='{.spec.authentication.type}')"
+                  AUTH_MECHANISM="\${AUTH_MECHANISM^^}"
+                  KAFKA_CERT="\$(/hack/preload_im_data/util/kubectl get secret iaf-system-cluster-ca-cert -n "\${AIOPS_NAMESPACE}" -o go-template='{{index .data "ca.crt" | base64decode}}')"
+                  HOST="iaf-system-kafka-bootstrap.\${AIOPS_NAMESPACE}.svc"
+                  PORT="9093"
+                  BOOTSTRAP_SERVERS="\${HOST}:\${PORT}"
+                  USER="\$(/hack/preload_im_data/util/kubectl get kafkauser.ibmevents.ibm.com cp4waiops-cartridge-kafka-auth-0 -n "\${AIOPS_NAMESPACE}" -o jsonpath='{.status.username}')" 
+                  PASSWORD="\$(/hack/preload_im_data/util/kubectl get secret "\${AUTH_SECRET}" -n "\${AIOPS_NAMESPACE}" -o go-template='{{index .data "password" | base64decode}}')"
+                  /hack/preload_im_data/util/kubectl create secret generic "\${AIOPS_NAME}-kafka-secret" --from-literal "authMechanism"="\${AUTH_MECHANISM}" --from-literal "bootstrapServers"=\${BOOTSTRAP_SERVERS} --from-literal "caCertificate"="\${KAFKA_CERT}" --from-literal "host"=\${HOST} --from-literal "port"=\${PORT} --from-literal "username"="\${USER}" --from-literal "password"="\${PASSWORD}"
+                  /hack/preload_im_data/util/kubectl patch secret "\${AIOPS_NAME}-kafka-secret" --type=json -p='[{"op":"add","path":"/metadata/ownerReferences","value":[{"apiVersion":"orchestrator.aiops.ibm.com/v1alpha1","kind":"Installation","name":"'\${AIOPS_NAME}'","uid":"'\${AIOPS_UID}'","controller":true,"blockOwnerDeletion":true}]}]'
+              EOF
+
+              cat << EOF | oc apply -f -
+              apiVersion: batch/v1
+              kind: CronJob
+              metadata:
+                name: aiops-set-kafka-connection-secret
+                namespace: ${AIOPS_NAMESPACE}
+              spec:
+                schedule: '@hourly'
+                jobTemplate:
+                  spec:
+                    template:
+                      spec:
+                        containers:
+                        - name: kafkaconnection
+                          image: 'icr.io/cpopen/ibm-aiops-orchestrator@sha256:3236e6342b2c04ab7a710cc7e408d79ddaa446486d3d71f4fc6a30d0bbf9305b'
+                          command: ["/script/set-kafka-secret.sh"]
+                          volumeMounts:
+                          - name: script
+                            mountPath: "/script"
+                          securityContext:
+                              allowPrivilegeEscalation: false
+                              privileged: false
+                              capabilities:
+                                  drop: ["ALL"]
+                              runAsNonRoot: true
+                              seccompProfile:
+                                  type: "RuntimeDefault"
+                        volumes:
+                        - name: script
+                          configMap:
+                            name: aiops-set-kafka-connection-secret-cm
+                            defaultMode: 0777
+                        restartPolicy: OnFailure
+                        serviceAccountName: ibm-aiops-orchestrator-controller-manager
+              EOF
+
+              timestamp=$(date +%s)
+
+              oc create job --from=cronjob/aiops-set-kafka-connection-secret "aiops-set-kafka-connection-secret-${timestamp}" -n ${AIOPS_NAMESPACE}
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ DONE"
+              echo "*****************************************************************************************************************************"
+
+
+              while true
+              do
+                sleep 1000
+              done
+
+      restartPolicy: Never
+  backoffLimit: 500

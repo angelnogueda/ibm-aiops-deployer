@@ -1,0 +1,75 @@
+
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Connection Details
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Get Cluster FQDN
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+- name: Log
+  shell: |
+    export MESSAGE=" 🔐 Getting Access Details"
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "$MESSAGE  >> ../install_{{current_ibmaiops_feature.kind}}.log
+  ignore_errors: true
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ffd500'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - Getting Access Details'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+
+
+
+- name: 🚀 LOGIN - AIOPS - Get Logins (please ignore any errors)
+  shell: |
+    ../tools/20_get_logins.sh > ../LOGINS.txt
+  ignore_errors: true
+
+
+- name: 🚀 LOGIN - AIOPS - Print Logins
+  shell: |
+    cat ../LOGINS.txt
+  ignore_errors: true
+  register: logins
+
+
+- name: 🌏 LOGINS
+  debug: 
+    var: logins.stdout_lines
+
+
+- name: Log
+  shell: |
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - ""Access Details:"  >> ../install_{{current_ibmaiops_feature.kind}}.log
+    cat ../LOGINS.txt  >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+
+  ignore_errors: true
+

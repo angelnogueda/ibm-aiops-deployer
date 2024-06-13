@@ -1,0 +1,229 @@
+{
+  "state": "enabled",
+  "executionPriority": 2,
+  "metadata": {
+    "labels": {
+      "ibm.com/aiops/uitemplate": "alert:createstory",
+      "ibm.com/is-default": "false"
+    },
+    "name": "DEMO Incident - catchall",
+    "description": "",
+    "createdBy": {
+      "id": "demo",
+      "type": "user"
+    },
+    "lastUpdatedBy": {
+      "id": "demo",
+      "type": "user",
+      "changeDetails": "Updated"
+    }
+  },
+  "spec": {
+    "constants": {
+      "baseTriggerCondition": {
+        "actionId": "lang/condition/template",
+        "arguments": {
+          "template": "{{alert.state}} != \"clear\" and {{alert.state}} != \"closed\" and {{alert.suppressed}} == false"
+        }
+      }
+    },
+    "triggers": [
+      {
+        "triggerId": "aiops.ibm.com/trigger/alert-created",
+        "entityId": "alert",
+        "arguments": {
+          "condition": {
+            "$variable": "constants.baseTriggerCondition"
+          }
+        }
+      },
+      {
+        "triggerId": "aiops.ibm.com/trigger/alert-updated",
+        "entityId": "alert",
+        "arguments": {
+          "condition": {
+            "actionId": "lang/condition/and",
+            "arguments": {
+              "conditions": [
+                {
+                  "$variable": "constants.baseTriggerCondition"
+                },
+                {
+                  "actionId": "lang/condition/template",
+                  "arguments": {
+                    "template": "{{prevAlert.suppressed}} != {{alert.suppressed}} or {{prevAlert.eventCount}} != {{alert.eventCount}} or {{prevAlert.lastOccurrenceTime}} != {{alert.lastOccurrenceTime}}"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "actions": [
+      {
+        "actionId": "lang/if",
+        "arguments": {
+          "name": "Condition set 1",
+          "conditions": {
+            "actionId": "lang/condition/and",
+            "arguments": {
+              "conditions": [
+                {
+                  "actionId": "lang/condition/template",
+                  "arguments": {
+                    "template": "({{alert.severity}} == 6) and ({{alert.resource.application}} != \"acme\") and ({{alert.resource.application}} != \"robot-shop\") and ({{alert.resource.application}} != \"sock-shop\") and ({{alert.resource.application}} != \"telco-demo1\") and ({{alert.resource.application}} != \"tube\")"
+                  }
+                }
+              ]
+            }
+          },
+          "then": [
+            {
+              "actionId": "aiops/stories/deriveFromAlert",
+              "arguments": {
+                "entity": {
+                  "$variable": "alert"
+                },
+                "priority": 3,
+                "retentionDays": 30,
+                "title": {
+                  "$template": "{{ alert.summary }}"
+                },
+                "description": {
+                  "$template": "{{ alert.summary }}"
+                },
+                "holdoffSec": 10,
+                "notification": [
+                  {
+                    "type": "snow",
+                    "name": "AIOPSSystemDefault",
+                    "details": {}
+                  },
+                  {
+                    "type": "chatops",
+                    "name": "AIOPSSystemDefault",
+                    "details": {}
+                  }
+                ],
+                "assignment": {
+                  "owner": "demo",
+                  "team": "All users"
+                },
+                "addRelatedAlerts": {
+                  "update": false
+                }
+              },
+              "output": "global.proposedStories.[]"
+            }
+          ]
+        }
+      },
+      {
+        "actionId": "lang/if",
+        "arguments": {
+          "name": "Condition set 2",
+          "conditions": {
+            "actionId": "lang/condition/and",
+            "arguments": {
+              "conditions": [
+                {
+                  "actionId": "lang/condition/template",
+                  "arguments": {
+                    "template": "({{alert.severity}} == 5) and ({{alert.resource.application}} != \"acme\") and ({{alert.resource.application}} != \"robot-shop\") and ({{alert.resource.application}} != \"sock-shop\") and ({{alert.resource.application}} != \"telco-demo1\") and ({{alert.resource.application}} != \"tube\")"
+                  }
+                }
+              ]
+            }
+          },
+          "then": [
+            {
+              "actionId": "aiops/stories/deriveFromAlert",
+              "arguments": {
+                "entity": {
+                  "$variable": "alert"
+                },
+                "priority": 4,
+                "retentionDays": 30,
+                "title": {
+                  "$template": "{{ alert.summary }}"
+                },
+                "description": {
+                  "$template": "{{ alert.summary }}"
+                },
+                "holdoffSec": 15,
+                "notification": [
+                  {
+                    "type": "snow",
+                    "name": "AIOPSSystemDefault",
+                    "details": {}
+                  },
+                  {
+                    "type": "chatops",
+                    "name": "AIOPSSystemDefault",
+                    "details": {}
+                  }
+                ],
+                "assignment": {
+                  "owner": "demo",
+                  "team": "All users"
+                },
+                "addRelatedAlerts": {
+                  "update": false
+                }
+              },
+              "output": "global.proposedStories.[]"
+            }
+          ]
+        }
+      },
+      {
+        "actionId": "lang/if",
+        "arguments": {
+          "name": "Condition set 2",
+          "conditions": {
+            "actionId": "lang/condition/and",
+            "arguments": {
+              "conditions": [
+                {
+                  "actionId": "lang/condition/template",
+                  "arguments": {
+                    "template": "({{alert.severity}} < 5) and ({{alert.resource.application}} != \"acme\") and ({{alert.resource.application}} != \"robot-shop\") and ({{alert.resource.application}} != \"sock-shop\") and ({{alert.resource.application}} != \"telco-demo1\") and ({{alert.resource.application}} != \"tube\")"
+                  }
+                }
+              ]
+            }
+          },
+          "then": [
+            {
+              "actionId": "aiops/stories/deriveFromAlert",
+              "arguments": {
+                "entity": {
+                  "$variable": "alert"
+                },
+                "priority": 5,
+                "retentionDays": 30,
+                "title": {
+                  "$template": "{{ alert.summary }}"
+                },
+                "description": {
+                  "$template": "{{ alert.summary }}"
+                },
+                "holdoffSec": 15,
+                "notification": [],
+                "assignment": {
+                  "owner": "",
+                  "team": ""
+                },
+                "addRelatedAlerts": {
+                  "update": false
+                }
+              },
+              "output": "global.proposedStories.[]"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

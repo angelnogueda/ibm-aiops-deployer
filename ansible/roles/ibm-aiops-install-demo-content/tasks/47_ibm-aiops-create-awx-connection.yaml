@@ -1,0 +1,113 @@
+
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Patches
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+
+- name: 🛰️  START - CREATE AWX CONNECTION
+  debug: 
+    msg="{{ lookup('pipe','date +%d.%m.%Y---%H:%M:%S') }}"
+
+
+- name: Log
+  shell: |
+    export MESSAGE="Create AWX Connection"
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "$MESSAGE  >> ../install_{{current_ibmaiops_feature.kind}}.log
+  ignore_errors: true
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ffd500'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - Create AWX Connection'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+
+
+- name: 🚀 ROUTES - Create AWX Connection (you can ignore problems in this step)
+  shell: |
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+    oc create route passthrough -n $AIOPS_NAMESPACE --service aimanager-aio-controller
+
+    export AI_PLATFORM_ROUTE=$(oc get route -n $AIOPS_NAMESPACE ai-platform-api  -o jsonpath={.spec.host})
+    export AIO_PLATFORM_ROUTE=$(oc get route -n $AIOPS_NAMESPACE aimanager-aio-controller -o jsonpath={.spec.host})
+
+
+
+    echo "        Namespace:          $AIOPS_NAMESPACE"
+    echo "        AI_PLATFORM_ROUTE:  $AI_PLATFORM_ROUTE"
+    echo "        AIO_PLATFORM_ROUTE: $AIO_PLATFORM_ROUTE"
+    echo ""
+
+    echo "       🛠️   Getting ZEN Token"
+
+    export CONSOLE_ROUTE=$(oc get route -n $AIOPS_NAMESPACE cp-console  -o jsonpath={.spec.host})          
+    echo ""
+    export CPD_ROUTE=$(oc get route -n $AIOPS_NAMESPACE cpd  -o jsonpath={.spec.host})          
+    export CPADMIN_PWD=$(oc -n $AIOPS_NAMESPACE get secret platform-auth-idp-credentials -o jsonpath='{.data.admin_password}' | base64 -d && echo)
+    export CPADMIN_USER=$(oc -n $AIOPS_NAMESPACE get secret platform-auth-idp-credentials -o jsonpath='{.data.admin_username}' | base64 -d && echo)
+    export ACCESS_TOKEN=$(curl -s -k -H "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" -d "grant_type=password&username=$CPADMIN_USER&password=$CPADMIN_PWD&scope=openid" https://$CONSOLE_ROUTE/idprovider/v1/auth/identitytoken|jq -r '.access_token')
+    export ZEN_API_HOST=$(oc get route -n $AIOPS_NAMESPACE cpd -o jsonpath='{.spec.host}')
+    export ZEN_TOKEN=$(curl -k -XGET https://$ZEN_API_HOST/v1/preauth/validateAuth \
+    -H "username: $CPADMIN_USER" \
+    -H "iam-token: $ACCESS_TOKEN"|jq -r '.accessToken')
+    echo "        ACCESS_TOKEN: $ZEN_TOKEN"
+
+    echo "${ZEN_TOKEN}"
+    echo "        AI_PLATFORM_ROUTE:  $ZEN_TOKEN"
+
+    echo "Sucessfully logged in" 
+    echo ""
+
+    export AWX_URL="https://"$(oc get route -n awx awx -o jsonpath={.spec.host})
+    export AWX_USER=admin
+    export AWX_PWD=$(oc -n awx get secret awx-admin-password -o jsonpath='{.data.password}' | base64 --decode && echo)
+    echo "                🌏 URL:           $AWX_URL"
+    echo "                🧑 User:          $AWX_USER"
+    echo "                🔐 Password:      $AWX_PWD"
+    echo "    "
+
+
+
+
+    curl -X 'POST' --insecure \
+    "https://$AIO_PLATFORM_ROUTE/v1/runbooks/connections/ansible" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+      -H "authorization: Bearer $ZEN_TOKEN"  \
+    -d "{
+        \"type\": \"AWX\",
+        \"connection_config\": \"userpass\",
+        \"agentAccessData\": {
+            \"url\": \"$AWX_URL\",
+            \"username\": \"$AWX_USER\",
+            \"password\": \"$AWX_PWD\"
+        }
+      }"
+  
+
+
+  ignore_errors: true
+  register: output_string
+  args:
+    executable: /bin/bash
+  
+- name: 🟣  OUTPUT
+  debug: 
+    var: output_string.stdout_lines
+    #verbosity: 1
+
+

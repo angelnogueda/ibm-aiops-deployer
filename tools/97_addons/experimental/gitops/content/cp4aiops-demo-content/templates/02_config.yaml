@@ -1,0 +1,209 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ibm-aiops-install-configuration-aiops-demo-content
+  namespace: ibm-aiops-installer
+  annotations:
+    argocd.argoproj.io/sync-wave: "020"
+immutable: false
+data:
+  INSTALLATION_CONFIG.yaml: >+
+    #*************************************************************************************************************************************************
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    # Global Configuration
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    #*************************************************************************************************************************************************
+
+    global_config:
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Passwords and Licenses
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Use this Password for all Instances
+      global_password: {{ .Values.cp4aiops.global.globalPassword }}
+
+
+      environment_name: {{ .Values.cp4aiops.global.instanaceName }}
+      cloud_platform: existing-ocp
+      # Set this value to True to accept all licenses
+      accept_all_licenses: False
+      # Key to decrypt Licenses
+      #license_token: NONE
+
+
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Pull Registires
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      entitled_registry: cp.icr.io
+      entitled_registry_user: cp
+      catalog_image: icr.io/cpopen/ibm-operator-catalog:latest
+
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Notifications and Cards
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Create Welcome Cards in ibm-aiops
+      create_cards: {{ .Values.cp4aiops.additional.create_cards }}
+      # Create App Menu Items in OCP
+      create_ocp_items: {{ .Values.cp4aiops.global.create_ocp_items }}
+      # Create Notifications in OCP
+      create_ocp_notifications: {{ .Values.cp4aiops.global.create_ocp_notifications }}
+      position_ocp_notifications: BannerBottom
+      position_final_ocp_notification: BannerTop
+
+
+
+
+
+    # *************************************************************************************************************************************************
+    # -------------------------------------------------------------------------------------------------------------------------------------
+    # OpenShift Configuration
+    # --------------------------------------------------------------------------------------------------------------------------------------
+    # *************************************************************************************************************************************************
+
+    openshift:
+
+    - name: "mycluster"
+      ocp_version: "4.15"
+      cluster_name: "mycluster"
+      domain_name: example.com
+      openshift_storage:
+      - storage_name: auto-storage
+        storage_type: auto
+        # Alternatively use
+        #storage_name: ibm-roks-storage
+        #storage_type: custom
+        #ocp_storage_class_file: ibmc-file-gold-gid
+        #ocp_storage_class_block: ibmc-block-gold
+
+
+
+
+    #*************************************************************************************************************************************************
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    # IBM AIOPS Configuration
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    #*************************************************************************************************************************************************
+
+    ibmaiops:
+
+
+    #--------------------------------------------------------------------------------------------------------------------------------------
+
+    # CloudPak for AIOps Base Install
+
+    #--------------------------------------------------------------------------------------------------------------------------------------
+
+    - project: ibm-aiops
+      instances:
+
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    # CloudPak for AIOps Demo Content Install
+    #--------------------------------------------------------------------------------------------------------------------------------------
+      - name: ibm-aiops-demo-content
+        kind: IBMAIOpsDemoContent
+        install: true
+
+
+        # ---------------------------------------------------------------------
+        # TRAINING
+        # Train the Models based on pre-canned content
+
+        training_create_training_temporal: {{ .Values.cp4aiops.training.temporal_enabled }}
+
+
+        training_load_data_snow: {{ .Values.cp4aiops.training.snow_enabled }}
+        training_create_training_snow: {{ .Values.cp4aiops.training.snow_enabled }}
+        training_run_training_snow: {{ .Values.cp4aiops.training.snow_enabled }}
+
+        training_load_data_metrics: {{ .Values.cp4aiops.training.metric_enabled }}
+        training_create_training_metrics: {{ .Values.cp4aiops.training.metric_enabled }}
+        training_run_training_metrics: {{ .Values.cp4aiops.training.metric_enabled }}
+
+        # Create feature flag Training (Seasonality and XinY)
+        training_create_season_xiny: {{ .Values.cp4aiops.training.experimental_enabled }}
+
+        training_data_url: {{ .Values.cp4aiops.training.training_data_url }}
+        training_data_repo: {{ .Values.cp4aiops.training.training_data_repo }}
+
+
+        # ---------------------------------------------------------------------
+        # TOPOLOGY
+        # Install DemoApps Application
+        install_demoapps: {{ .Values.cp4aiops.topology.enable_demo_apps }}
+        # RobotShop interface color (classic/white)
+        robotshop_color: {{ .Values.cp4aiops.topology.robotshop_color }}
+        # Install DemoApps K8s Observer
+        install_demoapps_observer: {{ .Values.cp4aiops.topology.enable_demo_apps }}
+        # Create Topology
+        create_topology_templates: {{ .Values.cp4aiops.topology.enable_demo_apps }}
+        create_topology_apps: {{ .Values.cp4aiops.topology.enable_demo_apps }}
+        # Create Custom overlay topology
+        install_custom_topology: {{ .Values.cp4aiops.topology.enable_demo_apps }}
+
+
+        # ---------------------------------------------------------------------
+        # RUNBOOKS
+        # Install AWX and create Runbooks
+        install_awx: {{ .Values.cp4aiops.runbooks.enable_runbooks }}
+        load_awx_playbooks: {{ .Values.cp4aiops.runbooks.enable_runbooks }}
+        integrate_awx: {{ .Values.cp4aiops.runbooks.enable_runbooks }}
+        load_runbooks: {{ .Values.cp4aiops.runbooks.enable_runbooks }}
+        create_runbook_policy: {{ .Values.cp4aiops.runbooks.enable_runbooks }}
+
+
+        # ---------------------------------------------------------------------
+        # Demo UI
+        install_demo_ui: {{ .Values.cp4aiops.demoui.install_demo_ui }}
+        demoui_slack_url: https://aiopsdemohq.slack.com/sign_in_with_password
+        # demoui_slack_url: https://aiops-fry2953.slack.com/x-p1624757694871-3716524482480-3705437209041/messages/C01JZLFJFMJ
+        demoui_slack_user: ibm-aiopsdemo@gmail.com
+        demoui_slack_pwd: CHANGEME
+        demoui_admin_mode: "{{ .Values.cp4aiops.demoui.demoui_admin_mode }}"
+        demoui_simulation_mode: "{{ .Values.cp4aiops.demoui.demoui_simulation_mode }}"
+
+        demoui_user: {{ .Values.cp4aiops.demoui.demoui_user }}
+        # Password for the Demo UI (OVERRIDES GLOBAL PASSWORD)
+        #demoui_pwd: CHANGEME
+
+
+        # ---------------------------------------------------------------------
+        # LDAP
+        install_ldap: {{ .Values.cp4aiops.ldap.install_ldap }}
+        # ldap domain
+        ldap_domain: {{ .Values.cp4aiops.ldap.ldap_domain }}
+        # ldap base
+        ldap_base: {{ .Values.cp4aiops.ldap.ldap_base }}
+        # LDAP Admin Password (OVERRIDES GLOBAL PASSWORD)
+        #ldap_admin_password: CHANGEME
+        # LDAP Password for all Users (OVERRIDES GLOBAL PASSWORD)
+        #ldap_user_password: CHANGEME
+        # ldap namespace
+        ldap_namespace: {{ .Values.cp4aiops.ldap.ldap_namespace }}
+        # ldap namespace
+        ldap_register: {{ .Values.cp4aiops.ldap.install_ldap }}
+
+        # ---------------------------------------------------------------------
+        # MISC PARAMETERS (you should not modify those)
+        # Create external routes (needed to create demo content)
+        create_external_routes: {{ .Values.cp4aiops.additional.create_external_routes }}
+
+        # Create a valid ingress certificate (needed for Slack integration)
+        create_valid_ingress_certificate: {{ .Values.cp4aiops.additional.create_valid_ingress_certificate }}
+
+        # Create Policy for Story Creation
+        create_incident_policy: {{ .Values.cp4aiops.additional.create_incident_policy }}
+
+        # Create Kafka connection for Log inception (needed to create log anomalies in the demo environment)
+        create_log_connection: {{ .Values.cp4aiops.additional.create_log_connection }}
+
+        # Create Service Account
+        create_account: {{ .Values.cp4aiops.additional.create_account }}
+
+
+
+  INSTALL_REPO: 'https://github.com/niklaushirt/ibm-aiops-deployer.git -b main'
+
+
+
+
+

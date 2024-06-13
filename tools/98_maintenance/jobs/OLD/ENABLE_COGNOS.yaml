@@ -1,0 +1,147 @@
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#         ________  __  ___     ___    ________       
+#        /  _/ __ )/  |/  /    /   |  /  _/ __ \____  _____
+#        / // __  / /|_/ /    / /| |  / // / / / __ \/ ___/
+#      _/ // /_/ / /  / /    / ___ |_/ // /_/ / /_/ (__  ) 
+#     /___/_____/_/  /_/    /_/  |_/___/\____/ .___/____/  
+#                                           /_/
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------------------------"
+#  ENABLE_COGNOS
+#
+#  IBM AIOps
+#
+#  ©2024 nikh@ch.ibm.com
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+
+
+apiVersion: v1                     
+kind: Namespace
+metadata:
+  name: ibm-aiops-installer
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: ibm-aiops-installer-admin
+  namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: ibm-aiops-installer-admin
+    namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-default-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: ibm-aiops-installer
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: aiops-enable-cognos
+  namespace: ibm-aiops-installer
+spec:
+  serviceAccountname: ibm-aiops-installer-admin
+  template:
+    spec:
+      containers:
+        - name: install
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ STARTING: ENABLE COGNOS"
+              echo "*****************************************************************************************************************************"
+              echo ""
+              echo "  ⏳ INSTALLATION START TIMESTAMP: $(date)"
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+    
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Getting Installation source from GitHub"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   📥 Clone Repo https://github.com/niklaushirt/ibm-aiops-deployer.git -b dev_latest"
+              git clone https://github.com/IBM/cp4waiops-samples.git
+              cd cp4waiops-samples/aiops-cognos-analytics/4.5/
+
+              echo ""
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🔎 This Repo includes those latestet Commits"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🚀 🛰️  START - LOAD LOG TRAINING DATA"
+
+              apt install python3-kubernetes
+
+              #  Prereqs:
+              # - Python / pip 3.11+
+              # - Ansible 2.15+ - https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+              # - Logged in with oc/kubectl to an active/accessible Openshift Cluster; it will use the local kubeconfig to perform the actions
+              # - Authentication for cp.icr.io in global pull secret
+              # - For more detailed information on system requirements & prereqs, please visit https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.5.0?topic=analytics-installing-cognos
+              # - Download the ibm.mas_devops collection - for use to install DB2
+              ansible-galaxy collection install ibm.mas_devops
+
+              # Configure the variables in vars.yml - Storage, Namespace
+              # Review the product license; it is accepted by running the playbook
+              # - https://ibm.biz/cp4aiops-450-license
+              # Execute playbook - variables defined in vars.yml, license accepted at command execution
+              ansible-playbook aiops-cognos-playbook.yaml --extra-vars='{licenseaccept: true}'
+
+
+              echo ""
+              echo ""
+              echo "  ⏳ INSTALLATION END TIMESTAMP: $(date)"
+              echo ""
+              echo "*****************************************************************************************************************************"
+              echo " ✅ DONE"
+              echo "*****************************************************************************************************************************"
+
+
+              while true
+              do
+                sleep 1000
+              done
+
+      restartPolicy: Never
+  backoffLimit: 500

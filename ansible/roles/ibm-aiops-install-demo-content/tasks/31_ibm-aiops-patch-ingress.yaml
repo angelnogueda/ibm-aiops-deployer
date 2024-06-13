@@ -1,0 +1,274 @@
+
+
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Patching some stuff
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+    
+
+- name: 🛰️  START - PATCH INGRESS
+  debug: 
+    msg="{{ lookup('pipe','date +%d.%m.%Y---%H:%M:%S') }}"
+
+
+- name: Log
+  shell: |
+    export MESSAGE="Create valid Ingress Certificates"
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "$MESSAGE  >> ../install_{{current_ibmaiops_feature.kind}}.log
+  ignore_errors: true
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ffd500'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - Create valid Ingress Certificates'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+   
+
+# - name: 🌏 NETWORK - CHECK Ingress already patched
+#   shell: |
+#     set -x
+
+#     export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+#     SECRET_COUNT=$(oc get AutomationUIConfig -n $AIOPS_NAMESPACE -oyaml|grep 'secretName: external-tls-secret'|wc -l|tr -d ' ')
+#     if [ $SECRET_COUNT -gt 0 ]; then
+#       echo "true"
+#     else
+#       echo "false"
+#     fi
+#   register: output_string
+#   ignore_errors: true
+#   args:
+#     executable: /bin/bash
+    
+  
+# - name: 🌏 NETWORK - DEBUG Ingress already patched
+#   debug: 
+#     var: output_string.stdout_lines
+#     verbosity: 2
+
+# - name: 🌏 NETWORK - ☑️ CHECK Ingress already patched
+#   set_fact: INGRESS_PATCHED={{output_string.stdout_lines[0]}}
+
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Adapt Slack Welcome Message
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: 🕦 NETWORK - Wait for Slack Pod Ready
+  shell:  |
+          export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+          oc wait --namespace="$AIOPS_NAMESPACE" --for=condition=Ready pods $(oc get po -n "$AIOPS_NAMESPACE"|grep "aimanager-aio-chatops-slack-integrator"|awk '{print$1}') --timeout=600s
+  ignore_errors: true  
+  register: slack_ready
+
+
+- name: 🌏 NETWORK - Patch NetworkPolicy
+  shell: |
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+
+    cat <<EOF | oc apply -f -
+    apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-all-egress-and-ingress
+      annotations:
+        argocd.argoproj.io/sync-wave: "3"
+      namespace: $AIOPS_NAMESPACE
+    spec:
+      egress:
+      - {}
+      ingress:
+      - {}
+      podSelector: {}
+      policyTypes:
+      - Egress
+      - Ingress
+    EOF
+  register: network_patch
+  ignore_errors: true
+
+
+
+
+
+# - name: 💊 CERTIFICATES - Patch AutomationUIConfig and Nginx Certificates
+#   shell: |
+#     export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+
+#     # oc project $AIOPS_NAMESPACE
+
+#     # AUTO_UI_INSTANCE=$(oc get AutomationUIConfig -n ${AIOPS_NAMESPACE} --no-headers -o custom-columns=":metadata.name")
+
+#     # ingress_pod=$(oc get secrets -n openshift-ingress | grep tls | grep -v router-metrics-certs-default | awk '{print $1}')
+
+#     # oc get secret -n openshift-ingress ${ingress_pod} -o jsonpath='{.data.tls\.crt}'  | base64 --decode > cert.crt
+#     # oc get secret -n openshift-ingress ${ingress_pod} -o jsonpath='{.data.tls\.key}' | base64 --decode > cert.key
+
+#     # oc get secret -n ${AIOPS_NAMESPACE} external-tls-secret -o yaml > external-tls-secret.yaml
+
+#     # oc patch AutomationUIConfig ${AUTO_UI_INSTANCE} -n ${AIOPS_NAMESPACE} --type merge --patch '{"spec": {"tls": {"caSecret": {"key":"ca.crt", "secretName": "external-tls-secret"}, "certificateSecret": { "secretName": "external-tls-secret"}}}}'
+
+#     # oc create secret generic -n ${AIOPS_NAMESPACE} external-tls-secret --from-file=cert.crt=cert.crt --from-file=cert.key=cert.key -o yaml --dry-run=client | oc apply -f -
+
+#     # oc delete pod -n ${AIOPS_NAMESPACE} -l component=ibm-nginx
+#   when: INGRESS_PATCHED==false
+#   register: certificate_patch
+#   ignore_errors: true
+#   args:
+#     executable: /bin/bash
+
+
+# - name: 🟢 DEBUG - Patch AutomationUIConfig Certificates
+#   debug: 
+#     var: certificate_patch
+#     verbosity: 2
+
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ffd500'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - 💊 Patch Certificates for TechZone IPI/UPI'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+
+
+# NEW
+# https://ibmdocs-test.dcs.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.4.0?topic=certificates-using-custom-certificate
+# - name: 💊 CERTIFICATES - Patch Certificates for TechZone IPI/UPI
+#   shell: |
+
+#     export PROJECT=<project>
+#     oc get route cp-console -n ${PROJECT} -o jsonpath="{.spec.host}"
+#     oc get route cpd -n ${PROJECT} -o jsonpath="{.spec.host}"
+#     oc project ${PROJECT}
+#     oc create secret generic customer-tls-secret --from-file=ca.crt=./cachain.pem --from-file=tls.crt=./aiops.pem --from-file=tls.key=./aiops.key.pem
+
+
+#     apiVersion: v1
+#     kind: ConfigMap
+#     metadata:
+#       name: cs-onprem-tenant-config
+#     labels:
+#       cs_onprem_tenant_config: "true"
+#     data:
+#       custom_host_certificate_secret: customer-tls-secret
+
+#     oc delete pod -l component=ibm-nginx
+#     oc patch ZenService/iaf-zen-cpdservice --type merge -p '{"spec":{"zenCustomRoute":{"route_reencrypt":true,"route_secret": "customer-tls-secret"}}}'
+#     oc -n $PROJECT delete pod -l app.kubernetes.io/component=usermgmt
+#     oc delete pod -l app=platform-auth-service;oc -n $PROJECT delete pod -l name=operand-deployment-lifecycle-manager
+
+#     oc get zenservice iaf-zen-cpdservice -o jsonpath='{.status.Progress}'
+#     oc get zenservice iaf-zen-cpdservice -o jsonpath='{.status.ProgressMessage}'
+
+
+
+
+
+
+- name: 💊 CERTIFICATES - Patch Certificates for TechZone IPI/UPI
+  shell: |
+    CLUSTER_ROUTE=$(oc get routes console -n openshift-console | tail -n 1 2>&1 )
+    CLUSTER_FQDN=$( echo $CLUSTER_ROUTE | awk '{print $2}')
+    CLUSTER_NAME=${CLUSTER_FQDN##*console.}
+    echo $CLUSTER_NAME
+
+
+    if [[ $CLUSTER_NAME =~ "cloud.techzone.ibm.com" ]];
+    then
+        echo "✅ Seems that you're on Techzone IPI/UPI"  
+        echo "✅ Let's patch the certificates"  
+
+        mkdir backup
+        echo "Extracting signed cert"
+
+
+        oc get secret -n openshift-ingress letsencrypt-certs -o jsonpath='{.data.tls\.crt}'| base64 -d > cert.crt
+        oc get secret -n openshift-ingress letsencrypt-certs -o jsonpath='{.data.tls\.key}'| base64 -d > cert.key
+        sed -e '1,33d' cert.crt > ca.crt
+
+        oc -n ibm-common-services patch managementingress default --type merge --patch '{"spec":{"ignoreRouteCert":true}}'
+        oc -n ibm-common-services get secret route-tls-secret -o yaml > backup/route-tls-secret.yaml 
+        echo "Common Service signed cert"
+
+        oc -n ibm-common-services delete certificates.v1alpha1.certmanager.k8s.io route-cert
+        oc -n ibm-common-services delete secret route-tls-secret
+        oc -n ibm-common-services create secret generic route-tls-secret   --from-file=ca.crt=./ca.crt --from-file=tls.crt=./cert.crt --from-file=tls.key=./cert.key
+        oc -n ibm-common-services delete secret ibmcloud-cluster-ca-cert
+        oc -n ibm-common-services delete pod -l app=auth-idp
+        oc -n ibm-common-services delete pod -l name=operand-deployment-lifecycle-manager
+
+        export podname=$(oc -n ibm-common-services get pods | grep '^management-ingress' | awk '{print$1}')
+        oc -n ibm-common-services delete pod $podname
+        echo "Wait for the management-ingress pod to come up"
+
+        sleep 60
+        echo "CPD signed cert"
+    else
+        echo "✅ Seems that you're NOT on Techzone IPI/UPI"  
+        echo "✅ No need to patch the certificates any further"  
+    fi
+  register: certificate_patch
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.create_valid_ingress_itz | default(false) == true
+
+
+- name: 🟢 DEBUG - Patch Certificates for TechZone IPI/UPI
+  debug: 
+    var: certificate_patch
+  when: current_ibmaiops_feature.create_valid_ingress_itz | default(false) == true
+
+
+
+# # --------------------------------------------------------------------------------------------------------------------------------------
+# # Wait for nginx Pods
+# # --------------------------------------------------------------------------------------------------------------------------------------
+# - name: CERTIFICATES -           🕦 Wait for nginx coming back up
+#   shell: |
+#     export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+#     oc get po -n $AIOPS_NAMESPACE | grep nginx|grep -v ibm-nginx-tester|grep -v setup-nginx-job |grep "1/1"|grep -c ""
+#   register: kubectl_get_pods
+#   until: kubectl_get_pods.stdout == "2"
+#   retries: 50
+#   delay: 15
+
+
+
+
+- name: SLACK -                  🩹 Patch Slack Welcome Message
+  shell: |
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+
+    oc set env -n $AIOPS_NAMESPACE deployment/$(oc get deploy -n $AIOPS_NAMESPACE -l app.kubernetes.io/component=chatops-slack-integrator -o jsonpath='{.items[*].metadata.name }') SLACK_WELCOME_COMMAND_NAME=/welcome
+    oc delete pod $(oc get po -n $AIOPS_NAMESPACE|grep slack|awk '{print$1}'):-notfound  --ignore-not-found -n $AIOPS_NAMESPACE --grace-period 0 --force
+  ignore_errors: true
+
+

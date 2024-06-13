@@ -1,0 +1,327 @@
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#         ________  __  ___     ___    ________       
+#        /  _/ __ )/  |/  /    /   |  /  _/ __ \____  _____
+#        / // __  / /|_/ /    / /| |  / // / / / __ \/ ___/
+#      _/ // /_/ / /  / /    / ___ |_/ // /_/ / /_/ (__  ) 
+#     /___/_____/_/  /_/    /_/  |_/___/\____/ .___/____/  
+#                                           /_/
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------------------------"
+#  Installing IBM AIOps
+#
+#  CloudPak for AIOps
+#
+#  ©2024 nikh@ch.ibm.com
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Get a Cluster from TechZone: https://techzone.ibm.com/collection/tech-zone-certified-base-images
+#   Type:               VMWare on IBM Cloud / UPI Public
+#   Worker node count:  5
+#   Flavour:            b3c.32x128 ❗ 
+#   OpenShift Version:  4.12
+#   ODF:                5TB
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Installs:
+#
+#     - Create Runbooks
+#     - Create Policy Creation for Stories and Runbooks 
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+---
+apiVersion: v1                     
+kind: Namespace
+metadata:
+  name: ibm-aiops-installer
+---
+
+
+
+
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# DO NOT MODIFY BELOW
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: ibm-aiops-installer-admin
+  namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: ibm-aiops-installer-admin
+    namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-default-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: ibm-aiops-installer
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ibm-aiops-aiops-create-missing-kafka
+  namespace: ibm-aiops-installer
+spec:
+  serviceAccountname: ibm-aiops-installer-admin
+  template:
+    metadata:
+      labels:
+        app: ibm-aiops-installer
+    spec:
+      serviceAccountName: ibm-aiops-installer-admin
+      containers:
+        - name: install
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+              echo "***************************************************************************************************************************************************"
+              echo "***************************************************************************************************************************************************"
+              echo "                                                                                                                                                   "
+              echo " 🚀 Create missing Kafka Inception                                                                                                                                                 "
+              echo "                                                                                                                                                   "
+              echo "***************************************************************************************************************************************************"
+
+
+              echo "🌏 CONNECTIONS - Create KAFKA Connections for Inception (ELK)"
+              export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+
+              oc create route passthrough -n $AIOPS_NAMESPACE --service aimanager-aio-controller
+
+
+              export AI_PLATFORM_ROUTE=$(oc get route -n $AIOPS_NAMESPACE ai-platform-api  -o jsonpath={.spec.host})
+              export AIO_PLATFORM_ROUTE=$(oc get route -n $AIOPS_NAMESPACE aimanager-aio-controller -o jsonpath={.spec.host})
+
+
+
+              echo "        Namespace:          $AIOPS_NAMESPACE"
+              echo "        AI_PLATFORM_ROUTE:  $AI_PLATFORM_ROUTE"
+              echo "        AIO_PLATFORM_ROUTE: $AIO_PLATFORM_ROUTE"
+              echo ""
+
+              echo "       🛠️   Getting ZEN Token"
+
+
+              ZEN_API_HOST=$(oc get route -n $AIOPS_NAMESPACE cpd -o jsonpath='{.spec.host}')
+              ZEN_LOGIN_URL="https://${ZEN_API_HOST}/v1/preauth/signin"
+              LOGIN_USER=admin
+              LOGIN_PASSWORD="$(oc get secret admin-user-details -n $AIOPS_NAMESPACE -o jsonpath='{ .data.initial_admin_password }' | base64 --decode)"
+
+              ZEN_LOGIN_RESPONSE=$(
+              curl -k \
+              -H 'Content-Type: application/json' \
+              -XPOST \
+              "${ZEN_LOGIN_URL}" \
+              -d '{
+                  "username": "'"${LOGIN_USER}"'",
+                  "password": "'"${LOGIN_PASSWORD}"'"
+              }' 2> /dev/null
+              )
+
+              ZEN_LOGIN_MESSAGE=$(echo "${ZEN_LOGIN_RESPONSE}" | jq -r .message)
+
+              if [ "${ZEN_LOGIN_MESSAGE}" != "success" ]; then
+                  echo "Login failed: ${ZEN_LOGIN_MESSAGE}"
+
+              fi
+
+              ZEN_TOKEN=$(echo "${ZEN_LOGIN_RESPONSE}" | jq -r .token)
+              #echo "${ZEN_TOKEN}"
+              #echo "        AI_PLATFORM_ROUTE:  $ZEN_TOKEN"
+
+              echo "Sucessfully logged in" 
+              echo ""
+
+
+              export result=$(curl -X 'POST' --insecure \
+              "https://$AIO_PLATFORM_ROUTE/v3/connections" \
+              -H 'accept: application/json' \
+              -H 'Content-Type: application/json' \
+                -H "authorization: Bearer $ZEN_TOKEN"  \
+              -d '
+              {
+                "application_group_id": "1000",
+                "application_id": "1000",
+                "connection_config": {
+                  "data_flow": true,
+                  "collection_mode": "inference",
+                  "json_option": "none",
+                  "connection_type": "kafka",
+                  "creator_user_name": "",
+                  "description": "Automatically created by Nicks scripts",
+                  "topic": "cp4waiops-cartridge-logs-elk-iuacrepx",
+                  "base_parallelism": 5,
+                  "num_partitions": 1,
+                  "display_name": "ELKInception",
+                  "json_option": "none",
+                  "logs_per_second": 2000
+                },
+                "connection_type": "kafka",
+                "connection_updated_at": "2021-07-26T15:18:25.43602Z",
+                "datasource_type": "logs",
+                  "data_flow": true,
+                  "mapping": {
+                    "codec": "elk",
+                    "message_field": "message",
+                    "log_entity_types": "kubernetes.container_image_id, kubernetes.host, kubernetes.pod_name, kubernetes.namespace_name",
+                    "resource_id": "kubernetes.container_name",
+                    "instance_id_field": "kubernetes.container_name",
+                    "rolling_time": 10,
+                    "timestamp_field": "@timestamp"
+                },
+                "request_action": "create"
+              }')
+
+              echo $result | jq -r '.connection_id'
+              export connection_id=$(echo $result | jq -r '.connection_id')
+
+              echo "Enabling Flow"
+              export result=$(curl -X 'PUT' --insecure "https://$AIO_PLATFORM_ROUTE/v3/connections/$connection_id/enable" -H 'accept: application/json' -H 'Content-Type: application/json' -H "authorization: Bearer $ZEN_TOKEN")
+              echo $result
+
+          
+              echo "🌏 CONNECTIONS - Create KAFKA Connections for Inception (NONE)"
+              export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+
+              oc create route passthrough -n $AIOPS_NAMESPACE --service aimanager-aio-controller
+
+
+              export AI_PLATFORM_ROUTE=$(oc get route -n $AIOPS_NAMESPACE ai-platform-api  -o jsonpath={.spec.host})
+              export AIO_PLATFORM_ROUTE=$(oc get route -n $AIOPS_NAMESPACE aimanager-aio-controller -o jsonpath={.spec.host})
+
+
+
+              echo "        Namespace:          $AIOPS_NAMESPACE"
+              echo "        AI_PLATFORM_ROUTE:  $AI_PLATFORM_ROUTE"
+              echo "        AIO_PLATFORM_ROUTE: $AIO_PLATFORM_ROUTE"
+              echo ""
+
+              echo "       🛠️   Getting ZEN Token"
+
+
+              ZEN_API_HOST=$(oc get route -n $AIOPS_NAMESPACE cpd -o jsonpath='{.spec.host}')
+              ZEN_LOGIN_URL="https://${ZEN_API_HOST}/v1/preauth/signin"
+              LOGIN_USER=admin
+              LOGIN_PASSWORD="$(oc get secret admin-user-details -n $AIOPS_NAMESPACE -o jsonpath='{ .data.initial_admin_password }' | base64 --decode)"
+
+              ZEN_LOGIN_RESPONSE=$(
+              curl -k \
+              -H 'Content-Type: application/json' \
+              -XPOST \
+              "${ZEN_LOGIN_URL}" \
+              -d '{
+                  "username": "'"${LOGIN_USER}"'",
+                  "password": "'"${LOGIN_PASSWORD}"'"
+              }' 2> /dev/null
+              )
+
+              ZEN_LOGIN_MESSAGE=$(echo "${ZEN_LOGIN_RESPONSE}" | jq -r .message)
+
+              if [ "${ZEN_LOGIN_MESSAGE}" != "success" ]; then
+                  echo "Login failed: ${ZEN_LOGIN_MESSAGE}"
+
+              fi
+
+              ZEN_TOKEN=$(echo "${ZEN_LOGIN_RESPONSE}" | jq -r .token)
+              #echo "${ZEN_TOKEN}"
+              #echo "        AI_PLATFORM_ROUTE:  $ZEN_TOKEN"
+
+              echo "Sucessfully logged in" 
+              echo ""
+
+
+              export result=$(curl -X 'POST' --insecure \
+              "https://$AIO_PLATFORM_ROUTE/v3/connections" \
+              -H 'accept: application/json' \
+              -H 'Content-Type: application/json' \
+                -H "authorization: Bearer $ZEN_TOKEN"  \
+              -d '
+              {
+                "aiopsedge_id": "null",
+                "application_group_id": "1000",
+                "application_id": "1000",
+                "connection_config": {
+                  "data_flow": true,
+                  "connection_type": "kafka",
+                  "creator_user_name": "",
+                  "description": "Automatically created by Nicks scripts",
+                  "collection_mode": "inference",
+                  "logs_per_second": 1000,
+                  "topic": "cp4waiops-cartridge-logs-none-fanxygx9",
+                  "intermediate_logs_topic": "cp4waiops-cartridge-logs-f8wzr2p2-intermediate",
+                  "base_parallelism": 1,
+                  "json_option": "none",
+                  "num_partitions": 1,
+                  "display_name": "NONEInception"
+                },
+                "connection_type": "kafka",
+                "connection_updated_at": "2023-09-04T07:49:18.657873Z",
+                "created_at": "null",
+                "created_by": "null",
+                "data_flow": true,
+                "datasource_type": "logs",
+                "mapping": {
+                  "codec": "null"
+                },
+                "name": "null",
+                "request_action": "get",
+                "state": "null",
+                "updated_by": "null"
+              }')
+
+              echo $result | jq -r '.connection_id'
+              export connection_id=$(echo $result | jq -r '.connection_id')
+
+              echo "Enabling Flow"
+              export result=$(curl -X 'PUT' --insecure "https://$AIO_PLATFORM_ROUTE/v3/connections/$connection_id/enable" -H 'accept: application/json' -H 'Content-Type: application/json' -H "authorization: Bearer $ZEN_TOKEN")
+              echo $result
+
+
+
+
+
+              while true
+              do
+                sleep 1000
+              done
+
+
+          env:
+      restartPolicy: Never
+  backoffLimit: 500
+

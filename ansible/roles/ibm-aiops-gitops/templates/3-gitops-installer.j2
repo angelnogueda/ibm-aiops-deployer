@@ -1,0 +1,65 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: ibm-aiops
+  namespace: openshift-gitops
+spec:
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  destinations:
+    - namespace: '*'
+      server: '*'
+  sourceRepos:
+    - '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ibm-aiops-installer
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/niklaushirt/aiops-install-gitops-33'
+    path: charts/0_installer/installer
+    targetRevision: 
+    helm:
+      parameters:
+        - name: version
+          value: '1.0'
+        - name: activeBranch
+          value: main
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: ibm-aiops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: robot-shop
+  namespace: robot-shop
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/niklaushirt/ibm-aiops-gitops'
+    path: charts/2_addons/robotshop
+    targetRevision: 
+    helm:
+      parameters:
+        - name: version
+          value: '1.0'
+        - name: activeBranch
+          value: main
+  destination:
+    server: 'https://kubernetes.default.svc'
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+

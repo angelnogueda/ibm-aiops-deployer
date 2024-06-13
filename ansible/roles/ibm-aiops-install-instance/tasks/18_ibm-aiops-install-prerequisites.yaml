@@ -1,0 +1,100 @@
+
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Install IBM AIOPS
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+
+- name: 🛰️  START - IBM AIOPS PREREQUISITES INSTALLATION
+  debug: 
+    msg="{{ lookup('pipe','date +%d.%m.%Y---%H:%M:%S') }}"
+
+
+- name: Log
+  shell: |
+    export MESSAGE="Installing IBM AIOps Prerequisites"
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "$MESSAGE  >> ../install_{{current_ibmaiops_feature.kind}}.log
+  ignore_errors: true
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ffd500'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - Installing IBM AIOps Prerequisites'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+
+
+
+- name:  🚀 IBM AIOPS INSTALL PREREQUISITES - Install CERT MANAGER
+  kubernetes.core.k8s:
+    state: present
+    template: './templates/aiops/10_aiops-install-cert-manager.j2'
+
+
+- name:  🚀 IBM AIOPS INSTALL PREREQUISITES - Install LICENSE MANAGER
+  kubernetes.core.k8s:
+    state: present
+    template: './templates/aiops/11_aiops-install-license-manager.j2'
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Wait for CERT MANAGER Pods
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: 🕦 IBM AIOPS INSTALL PREREQUISITES - WAIT FOR 30 Seconds
+  shell: sleep 30
+
+
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ff7700'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - 🕦 Wait for IBM AIOps Prerequisites to become ready (about 5-10 minutes) - Started at $(date +%H:%M) UTC'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Wait for CERT MANAGER Pods
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: 🕦 IBM AIOPS INSTALL PREREQUISITES - WAIT FOR CERT MANAGER
+  shell: oc get po -n ibm-cert-manager | grep 1/1| grep -c ""
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout == "4"
+  retries: 50
+  delay: 15
+  ignore_errors: true
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Wait for LICENSE MANAGER Pods
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: 🕦 IBM AIOPS INSTALL PREREQUISITES - WAIT FOR LICENSE MANAGER
+  shell: oc get po -n ibm-licensing | grep 1/1| grep -c ""
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout == "2"
+  retries: 500
+  delay: 15
+  ignore_errors: true

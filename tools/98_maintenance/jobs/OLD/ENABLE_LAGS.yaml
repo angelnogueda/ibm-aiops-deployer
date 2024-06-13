@@ -1,0 +1,322 @@
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#         ________  __  ___     ___    ________       
+#        /  _/ __ )/  |/  /    /   |  /  _/ __ \____  _____
+#        / // __  / /|_/ /    / /| |  / // / / / __ \/ ___/
+#      _/ // /_/ / /  / /    / ___ |_/ // /_/ / /_/ (__  ) 
+#     /___/_____/_/  /_/    /_/  |_/___/\____/ .___/____/  
+#                                           /_/
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------------------------"
+#  ENABLE_LAGS
+#
+#  IBM AIOps
+#
+#  ©2024 nikh@ch.ibm.com
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+
+
+apiVersion: v1                     
+kind: Namespace
+metadata:
+  name: ibm-aiops-installer
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: ibm-aiops-installer-admin
+  namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: ibm-aiops-installer-admin
+    namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-default-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: ibm-aiops-installer
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: aiops-enable-lags
+  namespace: ibm-aiops-installer
+spec:
+  serviceAccountname: ibm-aiops-installer-admin
+  template:
+    spec:
+      containers:
+        - name: install
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ STARTING: ENABLE_LAGS"
+              echo "*****************************************************************************************************************************"
+              echo ""
+              echo "  ⏳ INSTALLATION START TIMESTAMP: $(date)"
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+    
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Getting Installation source from GitHub"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   📥 Clone Repo https://github.com/niklaushirt/ibm-aiops-deployer.git -b dev_latest"
+              git clone https://github.com/niklaushirt/ibm-aiops-deployer.git -b dev_latest
+              cd ibm-aiops-deployer
+
+              echo ""
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🔎 This Repo includes those latestet Commits"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🚀 🛰️  START - LOAD LOG TRAINING DATA"
+
+              oc apply -f ./tools/98_maintenance/jobs/load-job-lags.yaml
+
+
+
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🌏 CONNECTIONS - Check Existing KAFKA Connections"
+           
+              export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+
+              oc create route passthrough -n $AIOPS_NAMESPACE --service aimanager-aio-controller
+
+
+              export AI_PLATFORM_ROUTE=$(oc get route -n $AIOPS_NAMESPACE ai-platform-api  -o jsonpath={.spec.host})
+              export AIO_PLATFORM_ROUTE=$(oc get route -n $AIOPS_NAMESPACE aimanager-aio-controller -o jsonpath={.spec.host})
+
+
+
+              echo "        Namespace:          $AIOPS_NAMESPACE"
+              echo "        AI_PLATFORM_ROUTE:  $AI_PLATFORM_ROUTE"
+              echo "        AIO_PLATFORM_ROUTE: $AIO_PLATFORM_ROUTE"
+              echo ""
+
+              echo "       🛠️   Getting ZEN Token"
+
+
+              ZEN_API_HOST=$(oc get route -n $AIOPS_NAMESPACE cpd -o jsonpath='{.spec.host}')
+              ZEN_LOGIN_URL="https://${ZEN_API_HOST}/v1/preauth/signin"
+              LOGIN_USER=admin
+              LOGIN_PASSWORD="$(oc get secret admin-user-details -n $AIOPS_NAMESPACE -o jsonpath='{ .data.initial_admin_password }' | base64 --decode)"
+
+              ZEN_LOGIN_RESPONSE=$(
+              curl -k \
+              -H 'Content-Type: application/json' \
+              -XPOST \
+              "${ZEN_LOGIN_URL}" \
+              -d '{
+                  "username": "'"${LOGIN_USER}"'",
+                  "password": "'"${LOGIN_PASSWORD}"'"
+              }' 2> /dev/null
+              )
+
+              ZEN_LOGIN_MESSAGE=$(echo "${ZEN_LOGIN_RESPONSE}" | jq -r .message)
+
+              if [ "${ZEN_LOGIN_MESSAGE}" != "success" ]; then
+                  echo "Login failed: ${ZEN_LOGIN_MESSAGE}"
+
+              fi
+
+              ZEN_TOKEN=$(echo "${ZEN_LOGIN_RESPONSE}" | jq -r .token)
+              #echo "${ZEN_TOKEN}"
+              #echo "        AI_PLATFORM_ROUTE:  $ZEN_TOKEN"
+
+              echo "Sucessfully logged in" 
+              echo ""
+
+              export connections=$(curl -X 'GET' --insecure \
+              "https://$AIO_PLATFORM_ROUTE/v3/connections" \
+              -H 'accept: application/json' \
+              -H 'Content-Type: application/json' \
+                -H "authorization: Bearer $ZEN_TOKEN" |jq|grep -v ELKGoldenSignal)
+
+              echo $connections
+
+
+              export existing=$(echo $connections|grep inference|wc -l|tr -d ' ')
+
+
+              if [ $existing -gt 0 ];
+              then
+                echo "*****************************************************************************************************************************"
+                echo " ❗ ERROR: There are existing Kafka connections for inception"
+                echo " ❗ DELTEING EXISITNG FLOWS"
+                echo "*****************************************************************************************************************************"
+
+
+                export connection_id=$(echo $connections | jq -r '.[0].connection_id')
+                echo "Enabling Flow"
+                export result=$(curl -X 'PUT' --insecure "https://$AIO_PLATFORM_ROUTE/v3/connections/$connection_id/disable" -H 'accept: application/json' -H 'Content-Type: application/json' -H "authorization: Bearer $ZEN_TOKEN")
+                echo $result
+                export result=$(curl -X 'DELETE' --insecure "https://$AIO_PLATFORM_ROUTE/v3/connections/$connection_id" -H 'accept: application/json' -H 'Content-Type: application/json' -H "authorization: Bearer $ZEN_TOKEN")
+                echo $result
+
+                export connection_id=$(echo $connections | jq -r '.[1].connection_id')
+                echo "Enabling Flow"
+                export result=$(curl -X 'PUT' --insecure "https://$AIO_PLATFORM_ROUTE/v3/connections/$connection_id/disable" -H 'accept: application/json' -H 'Content-Type: application/json' -H "authorization: Bearer $ZEN_TOKEN")
+                echo $result
+                export result=$(curl -X 'DELETE' --insecure "https://$AIO_PLATFORM_ROUTE/v3/connections/$connection_id" -H 'accept: application/json' -H 'Content-Type: application/json' -H "authorization: Bearer $ZEN_TOKEN")
+                echo $result
+
+
+                #exit 1
+              fi
+
+
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🚀 CONNECTIONS - CREATE LAGS INGESTION KAFKA"
+           
+
+
+              export result=$(curl -X 'POST' --insecure \
+              "https://$AIO_PLATFORM_ROUTE/v3/connections" \
+              -H 'accept: application/json' \
+              -H 'Content-Type: application/json' \
+                -H "authorization: Bearer $ZEN_TOKEN"  \
+              -d '
+              {
+                "application_group_id": "1000",
+                "application_id": "1000",
+                "connection_config": {
+                  "data_flow": true,
+                  "collection_mode": "live",
+                  "json_option": "none",
+                  "connection_type": "kafka",
+                  "creator_user_name": "",
+                  "description": "Automatically created by Nicks scripts",
+                  "topic": "cp4waiops-cartridge-logs-elk-iuacrepx",
+                  "base_parallelism": 5,
+                  "num_partitions": 1,
+                  "display_name": "ELKGoldenSignal",
+                  "json_option": "none",
+                  "logs_per_second": 2000
+                },
+                "connection_type": "kafka",
+                "connection_updated_at": "2021-07-26T15:18:25.43602Z",
+                "datasource_type": "logs",
+                  "data_flow": true,
+                  "mapping": {
+                    "codec": "elk",
+                    "message_field": "message",
+                    "log_entity_types": "kubernetes.container_image_id, kubernetes.host, kubernetes.pod_name, kubernetes.namespace_name",
+                    "resource_id": "kubernetes.container_name",
+                    "instance_id_field": "kubernetes.namespace_name",
+                    "rolling_time": 10,
+                    "timestamp_field": "@timestamp"
+                },
+                "request_action": "create"
+              }')
+
+              echo $result | jq -r '.connection_id'
+              export connection_id=$(echo $result | jq -r '.connection_id')
+
+              echo "Enabling Flow"
+              export result=$(curl -X 'PUT' --insecure "https://$AIO_PLATFORM_ROUTE/v3/connections/$connection_id/enable" -H 'accept: application/json' -H 'Content-Type: application/json' -H "authorization: Bearer $ZEN_TOKEN")
+              echo $result
+
+
+
+
+       
+              export ROUTE=$(oc get route -n $AIOPS_NAMESPACE ai-platform-api  -o jsonpath={.spec.host})
+
+
+              echo "***************************************************************************************************************************************************"
+              echo "   🛠️   Create Analysis Definiton: Log Anomaly Golden Signals"
+              export FILE_NAME=create-analysis-LAGS.graphql
+              export FILE_PATH="./ansible/roles/ibm-aiops-install-demo-content/templates/training/training-definitions/"
+              ./ansible/roles/ibm-aiops-install-demo-content/templates/training/scripts/execute-graphql.sh
+
+
+              export GS_DEPLOYMENT=""
+              while [[ $GS_DEPLOYMENT == "" ]]; do
+                export GS_DEPLOYMENT=$(oc get deployment -n $AIOPS_NAMESPACE aimanager-aio-log-anomaly-golden-signals)
+              done
+              echo "GS_DEPLOYMENT: "$GS_DEPLOYMENT
+
+
+              echo "***************************************************************************************************************************************************"
+              echo "   🛠️   Patch Golden Signals Pod for Historical Data"
+              # Wednesday, 8 November 2023 10:27:00
+              # 20 hours of previous data
+              # https://www.epochconverter.com
+              oc set env deploy -n $AIOPS_NAMESPACE aimanager-aio-log-anomaly-golden-signals --overwrite BUCKET_SIZE_IN_MILLIS="3600000" 
+              oc set env deploy -n $AIOPS_NAMESPACE aimanager-aio-log-anomaly-golden-signals --overwrite HISTORIC_START_TIMESTAMP-
+              oc set env deploy -n $AIOPS_NAMESPACE aimanager-aio-log-anomaly-golden-signals --overwrite HISTORIC_TIME_RANGE-
+
+
+              # oc set env deploy -n $AIOPS_NAMESPACE aimanager-aio-log-anomaly-golden-signals --overwrite HISTORIC_START_TIMESTAMP="1710118860000"
+              # # HISTORIC_TIME_RANGE="360"  //60 minutes
+              # oc set env deploy -n $AIOPS_NAMESPACE aimanager-aio-log-anomaly-golden-signals --overwrite HISTORIC_TIME_RANGE="9000" 
+
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🧻  RESTART - LAGS POD"
+              oc delete pod -n $AIOPS_NAMESPACE --ignore-not-found $(oc get po -n $AIOPS_NAMESPACE|grep golden-signals|awk '{print$1}')
+
+
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🚀 🛰️  RE-START - LOAD LOG TRAINING DATA"
+              oc delete pod -n ibm-aiops-installer --ignore-not-found $(oc get po -n ibm-aiops-installer|grep load-lags-indexes|awk '{print$1}')
+
+              echo ""
+              echo ""
+              echo "  ⏳ INSTALLATION END TIMESTAMP: $(date)"
+              echo ""
+              echo "*****************************************************************************************************************************"
+              echo " ✅ DONE"
+              echo "*****************************************************************************************************************************"
+
+
+              while true
+              do
+                sleep 1000
+              done
+
+      restartPolicy: Never
+  backoffLimit: 500

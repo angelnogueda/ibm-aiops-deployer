@@ -1,0 +1,119 @@
+
+  
+# -----------------------------------------------------------------------------
+# CP4AIOps parameters
+# -----------------------------------------------------------------------------
+cp4aiops:
+  global:
+    # Available Names: Test, Demo, AIOPS, CP4AIOPS, Arya,Bear,Cersei,Cersei1,Daenerys,Groot,Hodor,Hofstadter,Howard,Jimmy,John,King,Lemmy,Nightking,Penny,Raj,Robot1,Robot2,Robot3,Robot4,Robot5,Sansa,Sheldon,Sherlock,Slash,Tormund,Tyrion,Walker,Watson
+    instanceName: Demo
+    globalPassword: CHANGEME
+    create_ocp_items: true
+    create_ocp_notifications: true
+  training:
+    # ---------------------------------------------------------------------
+    # TRAINING
+    # Train the Models based on pre-canned content
+
+    training_create_training_temporal: false
+
+
+
+    training_load_data_snow: false
+    training_create_training_snow: false
+    training_run_training_snow: false
+
+    training_load_data_metrics: false
+    training_create_training_metrics: false
+    training_run_training_metrics: false
+
+    # Create feature flag Training (Seasonality and XinY)
+    training_create_season_xiny: false
+
+    training_data_url: https://github.com/niklaushirt/
+    training_data_repo: ibm-aiops-additionaldata
+
+
+
+  topology:
+    # ---------------------------------------------------------------------
+    # TOPOLOGY
+    # Install DemoApps Application
+    install_demoapps: false
+    # RobotShop interface color (classic/white)
+    robotshop_color: white
+    # Install DemoApps K8s Observer
+    install_demoapps_observer: false
+    # Create Topology
+    create_topology_templates: false
+    create_topology_apps: false
+    # Create Custom overlay topology
+    install_custom_topology: false
+
+
+  runbooks:
+    # ---------------------------------------------------------------------
+    # RUNBOOKS
+    # Install AWX and create Runbooks
+    install_awx: false
+    load_awx_playbooks: false
+    integrate_awx: false
+    load_runbooks: false
+    create_runbook_policy: false
+
+
+
+  demoui:
+    # ---------------------------------------------------------------------
+    # Demo UI
+    install_demo_ui: false
+    demoui_admin_mode: "false"
+    demoui_simulation_mode: "false"
+    demoui_user: demo
+    # Password for the Demo UI (OVERRIDES GLOBAL PASSWORD)
+    #demoui_pwd: CHANGEME
+
+
+  ldap:
+    # ---------------------------------------------------------------------
+    # LDAP
+    install_ldap: false
+    # ldap domain
+    ldap_domain: ibm.com
+    # ldap base
+    ldap_base: dc=ibm,dc=com
+    # LDAP Admin Password (OVERRIDES GLOBAL PASSWORD)
+    #ldap_admin_password: CHANGEME
+    # LDAP Password for all Users (OVERRIDES GLOBAL PASSWORD)
+    #ldap_user_password: CHANGEME
+    # ldap namespace
+    ldap_namespace: openldap
+    # ldap namespace
+    ldap_register: false
+
+
+  additional:
+    # ---------------------------------------------------------------------
+    # MISC PARAMETERS (you should not modify those)
+
+    create_cards: false
+
+    # Create external routes (needed to create demo content)
+    create_external_routes: false
+
+    # Create a valid ingress certificate (needed for Slack integration)
+    create_valid_ingress_certificate: false
+
+    # Create Policy for Story Creation
+    create_incident_policy: false
+
+    # Create Kafka connection for Log inception (needed to create log anomalies in the demo environment)
+    create_log_connection: false
+
+    # Create Service Account
+    create_account: false
+
+
+
+
+

@@ -1,0 +1,124 @@
+{
+  "state": "enabled",
+  "executionPriority": 50,
+  "metadata": {
+    "labels": {
+      "ibm.com/aiops/uitemplate": "alert:createstory",
+      "ibm.com/is-default": "false"
+    },
+    "name": "DEMO Incident - tube",
+    "description": "",
+    "createdBy": {
+      "id": "demo",
+      "type": "user"
+    },
+    "lastUpdatedBy": {
+      "id": "demo",
+      "type": "user",
+      "changeDetails": "Created"
+    }
+  },
+  "spec": {
+    "constants": {
+      "baseTriggerCondition": {
+        "actionId": "lang/condition/template",
+        "arguments": {
+          "template": "{{alert.state}} != \"clear\" and {{alert.state}} != \"closed\" and {{alert.suppressed}} == false"
+        }
+      }
+    },
+    "triggers": [
+      {
+        "triggerId": "aiops.ibm.com/trigger/alert-created",
+        "entityId": "alert",
+        "arguments": {
+          "condition": {
+            "$variable": "constants.baseTriggerCondition"
+          }
+        }
+      },
+      {
+        "triggerId": "aiops.ibm.com/trigger/alert-updated",
+        "entityId": "alert",
+        "arguments": {
+          "condition": {
+            "actionId": "lang/condition/and",
+            "arguments": {
+              "conditions": [
+                {
+                  "$variable": "constants.baseTriggerCondition"
+                },
+                {
+                  "actionId": "lang/condition/template",
+                  "arguments": {
+                    "template": "{{prevAlert.suppressed}} != {{alert.suppressed}} or {{prevAlert.eventCount}} != {{alert.eventCount}}"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "actions": [
+      {
+        "actionId": "lang/if",
+        "arguments": {
+          "name": "Condition set 1",
+          "conditions": {
+            "actionId": "lang/condition/and",
+            "arguments": {
+              "conditions": [
+                {
+                  "actionId": "lang/condition/template",
+                  "arguments": {
+                    "template": "({{alert.resource.application}} == \"tube\")"
+                  }
+                }
+              ]
+            }
+          },
+          "then": [
+            {
+              "actionId": "aiops/stories/deriveFromAlert",
+              "arguments": {
+                "entity": {
+                  "$variable": "alert"
+                },
+                "priority": 3,
+                "retentionDays": 30,
+                "title": {
+                  "$template": "{{ alert.summary }}"
+                },
+                "description": {
+                  "$template": "{{ alert.summary }}"
+                },
+                "holdoffSec": 3,
+                "notification": [
+                  {
+                    "type": "snow",
+                    "name": "AIOPSSystemDefault",
+                    "details": {}
+                  },
+                  {
+                    "type": "chatops",
+                    "name": "AIOPSSystemDefault",
+                    "details": {}
+                  }
+                ],
+                "assignment": {
+                  "owner": "demo",
+                  "team": "All users"
+                },
+                "addRelatedAlerts": {
+                  "update": false
+                }
+              },
+              "output": "global.proposedStories.[]"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

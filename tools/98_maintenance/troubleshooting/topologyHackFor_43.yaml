@@ -1,0 +1,151 @@
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#         ________  __  ___     ___    ________       
+#        /  _/ __ )/  |/  /    /   |  /  _/ __ \____  _____
+#        / // __  / /|_/ /    / /| |  / // / / / __ \/ ___/
+#      _/ // /_/ / /  / /    / ___ |_/ // /_/ / /_/ (__  ) 
+#     /___/_____/_/  /_/    /_/  |_/___/\____/ .___/____/  
+#                                           /_/
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------------------------"
+#  Topology Probable Cause Hack for 4.3      
+#
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ibm-aiops-aiops-topology-hack-for-43
+  namespace: ibm-aiops-installer
+spec:
+  serviceAccountname: ibm-aiops-installer-admin
+  template:
+    metadata:
+      labels:
+        app: ibm-aiops-installer
+    spec:
+      serviceAccountName: ibm-aiops-installer-admin
+      containers:
+        - name: install
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+
+              # 61654
+              echo "***************************************************************************************************************************************************"
+              echo "***************************************************************************************************************************************************"
+              echo "                                                                                                                                                   "
+              echo " 🚀 Topology Probable Cause Hack for 4.3                                                                                                                                              "
+              echo "                                                                                                                                                   "
+              echo "***************************************************************************************************************************************************"
+
+
+              echo "🌏 GET ZEN TOKEN"
+
+              export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+              echo "       🛠️   Get Route"
+              export ROUTE=$(oc get route -n $AIOPS_NAMESPACE cpd  -o jsonpath={.spec.host})          
+              echo "        Route: $ROUTE"
+              echo ""
+          
+              echo "       🛠️   Getting ZEN Token"
+            
+              ZEN_API_HOST=$(oc get route -n $AIOPS_NAMESPACE cpd -o jsonpath='{.spec.host}')
+              ZEN_LOGIN_URL="https://${ZEN_API_HOST}/v1/preauth/signin"
+              LOGIN_USER=admin
+              LOGIN_PASSWORD="$(oc get secret admin-user-details -n $AIOPS_NAMESPACE -o jsonpath='{ .data.initial_admin_password }' | base64 --decode)"
+
+              ZEN_LOGIN_RESPONSE=$(
+              curl -k \
+              -H 'Content-Type: application/json' \
+              -XPOST \
+              "${ZEN_LOGIN_URL}" \
+              -d '{
+                    "username": "'"${LOGIN_USER}"'",
+                    "password": "'"${LOGIN_PASSWORD}"'"
+              }' 2> /dev/null
+              )
+
+              ZEN_LOGIN_MESSAGE=$(echo "${ZEN_LOGIN_RESPONSE}" | jq -r .message)
+
+              if [ "${ZEN_LOGIN_MESSAGE}" != "success" ]; then
+              echo "Login failed: ${ZEN_LOGIN_MESSAGE}" 1>&2
+
+              exit 2
+              fi
+
+              ZEN_TOKEN=$(echo "${ZEN_LOGIN_RESPONSE}" | jq -r .token)
+              echo "${ZEN_TOKEN}"
+
+              echo "Sucessfully logged in" 1>&2
+
+              echo "🚀 Patch Topology Probable Cause"
+
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "accesses", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "calls", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "exposedBy", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "runsOn", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "federates", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "has", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "bakerloo", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "central", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "circle", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "district", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "dlr", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "hammersmith-city", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "jubilee", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "london-overground", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "metropolitan", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "northern", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "piccadilly", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "routesVia", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "victoria", "label": "association", "outdegree": 20,"indegree": 5}]}'
+              curl -s -k -X POST -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" -d '{"edge_type_list":[{ "edge": "waterloo-city", "label": "association", "outdegree": 20,"indegree": 5}]}'
+
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep accesses
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep calls
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep exposedBy
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep runsOn
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep federates
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep has
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep bakerloo
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep central
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep circle
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep district
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep dlr
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep hammersmith-city
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep jubilee
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep london-overground
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep metropolitan
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep northern
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep piccadilly
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep routesVia
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep victoria
+              curl  -k -X GET -H "Content-Type: application/json" -H "Authorization: Bearer ${ZEN_TOKEN}" https://$ROUTE/aiops/api/issue-resolution/mime/v1/customisation/edge_type -H "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" | jq | grep waterloo-city
+              
+              oc scale deploy -n $AIOPS_NAMESPACE aiops-ir-analytics-probablecause --replicas=0
+              oc scale deploy  -n $AIOPS_NAMESPACE aiops-ir-analytics-probablecause --replicas=1
+
+              while true
+              do
+                sleep 1000
+              done
+
+
+          env:
+      restartPolicy: Never
+  backoffLimit: 500
+

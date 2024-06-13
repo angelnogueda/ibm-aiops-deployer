@@ -1,0 +1,368 @@
+
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Patches
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+
+- name: 🛰️  START - CREATE ROUTES
+  debug: 
+    msg="{{ lookup('pipe','date +%d.%m.%Y---%H:%M:%S') }}"
+
+
+- name: Log
+  shell: |
+    export MESSAGE="Create External Routes"
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "$MESSAGE  >> ../install_{{current_ibmaiops_feature.kind}}.log
+  ignore_errors: true
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ffd500'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - Create External Routes'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Patch ASM Routes
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: 🛠️ PATCH -  ASM Routes
+  shell: |
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+    oc patch ASM aiops-topology -n $AIOPS_NAMESPACE -p '{"spec":{"helmValuesASM":{"global.enableAllRoutes":true}}}' --type=merge
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Patch Ingress
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: 🚀 ROUTES - Patch Ingress policy-group
+  shell: oc patch namespace default --type=json -p '[{"op":"add","path":"/metadata/labels","value":{"network.openshift.io/policy-group":"ingress"}}]'
+  register: ingress_patched
+
+
+# - name: HACK    -             🩹 Patch AIOpsAnalyticsOrchestrator Pull Secret
+#   shell: oc patch AIOpsAnalyticsOrchestrator aiops -n $AIOPS_NAMESPACE --type merge  --patch-file ./templates/aiops/patches/analytics-pull-patch.yaml
+#   ignore_errors: true
+#   register: irorchestrator_patched
+
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Create Topology Routes
+# --------------------------------------------------------------------------------------------------------------------------------------
+# - name: 🚀 ROUTES - Check Topology Routes
+#   shell: |
+#     export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+#     oc get route --ignore-not-found -n $AIOPS_NAMESPACE topology-merge
+#   ignore_errors: true
+#   register: OBJECT_EXISTS
+
+
+
+- name: 🚀 ROUTES - Create External Routes
+  block:
+  - name: 🚀 ROUTES - Create Topology Route - topology-merge
+    shell: |
+      export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+      existing=$(oc get route topology-merge -n $AIOPS_NAMESPACE --no-headers|awk '{print$1}')
+      if [[ $existing == "" ]]; then
+        echo "Create Route"
+        # oc create route passthrough topology-merge -n $AIOPS_NAMESPACE --insecure-policy="Redirect" --service=aiops-topology-merge --port=https-merge-api
+      fi
+    ignore_errors: true
+    register: output
+    args:
+      executable: /bin/bash
+  - name: 🟣  OUTPUT
+    debug:
+      var: output.stdout_lines
+      verbosity: 1
+
+
+  - name: 🚀 ROUTES - Create Topology Route - topology-rest
+    shell: |
+      export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+      existing=$(oc get route topology-rest -n $AIOPS_NAMESPACE --no-headers|awk '{print$1}')
+      if [[ $existing == "" ]]; then
+        echo "Create Route"
+        # oc create route passthrough topology-rest -n $AIOPS_NAMESPACE --insecure-policy="Redirect" --service=aiops-topology-rest-observer --port=https-rest-observer-admin
+      fi
+    ignore_errors: true
+    register: output
+    args:
+      executable: /bin/bash
+  - name: 🟣  OUTPUT
+    debug:
+      var: output.stdout_lines
+      verbosity: 1
+
+
+  - name: 🚀 ROUTES - Create Topology Route - topology-file
+    shell: |
+      export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+      existing=$(oc get route topology-file -n $AIOPS_NAMESPACE --no-headers|awk '{print$1}')
+      if [[ $existing == "" ]]; then
+        echo "Create Route"
+        # oc create route passthrough topology-file -n $AIOPS_NAMESPACE --insecure-policy="Redirect" --service=aiops-topology-file-observer --port=https-file-observer-admin
+      fi
+    ignore_errors: true
+    register: output
+    args:
+      executable: /bin/bash
+  - name: 🟣  OUTPUT
+    debug:
+      var: output.stdout_lines
+      verbosity: 1
+
+
+  - name: 🚀 ROUTES - Create Topology Route - topology-kubernetes
+    shell: |
+      export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+      existing=$(oc get route topology-kubernetes -n $AIOPS_NAMESPACE --no-headers|awk '{print$1}')
+      if [[ $existing == "" ]]; then
+        echo "Create Route"
+        # oc create route passthrough topology-kubernetes -n $AIOPS_NAMESPACE --insecure-policy="Redirect" --service=aiops-topology-kubernetes-observer --port=https-kubernetes-observer-admin
+      fi
+    ignore_errors: true
+    register: output
+    args:
+      executable: /bin/bash
+
+
+
+
+  - name: 🟣  OUTPUT
+    debug:
+      var: output.stdout_lines
+      verbosity: 1
+  - name: 🚀 ROUTES - Create Topology Route - topology-manage
+    shell: |
+      export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+      existing=$(oc get route topology-manage -n $AIOPS_NAMESPACE --no-headers|awk '{print$1}')
+      if [[ $existing == "" ]]; then
+        echo "Create Route"
+        # oc create route passthrough topology-manage -n $AIOPS_NAMESPACE --service=aiops-topology-topology --port=https-topology-api
+      fi
+    ignore_errors: true
+    register: output
+    args:
+      executable: /bin/bash
+  - name: 🟣  OUTPUT
+    debug:
+      var: output.stdout_lines
+      verbosity: 1
+
+
+  - name: 🚀 ROUTES - Create Topology Route - topology-file-api
+    shell: |
+      export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+      existing=$(oc get route topology-file-api -n $AIOPS_NAMESPACE --no-headers|awk '{print$1}')
+      if [[ $existing == "" ]]; then
+        echo "Create Route"
+        # oc create route passthrough topology-file-api -n $AIOPS_NAMESPACE --insecure-policy="Redirect" --service=aiops-topology-file-observer --port=https-file-observer-api
+      fi
+    ignore_errors: true
+    register: output
+    args:
+      executable: /bin/bash
+  - name: 🟣  OUTPUT
+    debug:
+      var: output.stdout_lines
+      verbosity: 1
+
+
+  - name: 🚀 ROUTES - Create Topology Route - aiops-topology-kubernetes-observer
+    shell: |
+      export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+      existing=$(oc get route aiops-topology-kubernetes-observer -n $AIOPS_NAMESPACE --no-headers|awk '{print$1}')
+      if [[ $existing == "" ]]; then
+        echo "Create Route"
+        oc create route passthrough aiops-topology-kubernetes-observer -n $AIOPS_NAMESPACE --insecure-policy="Redirect" --service=aiops-topology-kubernetes-observer --port=https-kubernetes-observer-api
+      fi
+    ignore_errors: true
+    register: output
+    args:
+      executable: /bin/bash
+  - name: 🟣  OUTPUT
+    debug:
+      var: output.stdout_lines
+      verbosity: 1
+
+
+  #when: OBJECT_EXISTS.stdout|length == 0
+
+
+
+
+  - name: 🚀 ROUTES - Create external Flink Job Manager Route 
+    shell: |
+      export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+      existing=$(oc get route job-manager -n $AIOPS_NAMESPACE --no-headers|awk '{print$1}')
+      if [[ $existing == "" ]]; then
+        echo "Create Route"
+        oc create route edge job-manager -n $AIOPS_NAMESPACE --service=cp4waiops-eventprocessor-eve-29ee-ep-jobmanager --port=ui
+      fi
+    ignore_errors: true
+    register: output
+    args:
+      executable: /bin/bash
+  - name: 🟣  OUTPUT
+    debug:
+      var: output.stdout_lines
+      verbosity: 1
+
+  
+  - name: 🚀 ROUTES - Create external Flink Policy Job Manager Route 
+    shell: |
+      export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+      existing=$(oc get route job-manager-policy -n $AIOPS_NAMESPACE --no-headers|awk '{print$1}')
+      if [[ $existing == "" ]]; then
+        echo "Create Route"
+        oc create route edge job-manager-policy -n $AIOPS_NAMESPACE --service=aiops-ir-lifecycle-eventprocessor-ep-jobmanager --port=ui
+      fi
+    ignore_errors: true
+    register: output
+    args:
+      executable: /bin/bash
+  - name: 🟣  OUTPUT
+    debug:
+      var: output.stdout_lines
+      verbosity: 1
+
+
+
+
+
+
+  - name: 🚀 ROUTES - Create external IBM AIOps API Route 
+    shell: |
+      export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+      existing=$(oc get route ai-platform-api -n $AIOPS_NAMESPACE --no-headers|awk '{print$1}')
+      if [[ $existing == "" ]]; then
+        echo "Create Route"
+        oc create route passthrough ai-platform-api -n $AIOPS_NAMESPACE  --service=aimanager-aio-ai-platform-api-server --port=4000 --insecure-policy=Redirect --wildcard-policy=None
+      fi
+    ignore_errors: true
+    register: output
+    args:
+      executable: /bin/bash
+  - name: 🟣  OUTPUT
+    debug:
+      var: output.stdout_lines
+      verbosity: 1
+
+
+
+  - name: 🚀 ROUTES - Create external Datalayer API Route 
+    shell: |
+      export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+      existing=$(oc get route datalayer-api -n $AIOPS_NAMESPACE --no-headers|awk '{print$1}')
+      if [[ $existing == "" ]]; then
+        echo "Create Route"
+        oc create route passthrough datalayer-api -n $AIOPS_NAMESPACE  --service=aiops-ir-core-ncodl-api --port=secure-port --insecure-policy=Redirect --wildcard-policy=None
+      fi
+    ignore_errors: true
+    register: output
+    args:
+      executable: /bin/bash
+  - name: 🟣  OUTPUT
+    debug:
+      var: output.stdout_lines
+      verbosity: 1
+
+
+
+  - name: 🚀 ROUTES - Create external AIO Controller Route 
+    shell: |
+      export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+      existing=$(oc get route aimanager-aio-controller -n $AIOPS_NAMESPACE --no-headers|awk '{print$1}')
+      if [[ $existing == "" ]]; then
+        echo "Create Route"
+        oc create route passthrough aimanager-aio-controller -n $AIOPS_NAMESPACE  --service=aimanager-aio-controller
+      fi
+    ignore_errors: true
+    register: output
+    args:
+      executable: /bin/bash
+  - name: 🟣  OUTPUT
+    debug:
+      var: output.stdout_lines
+      verbosity: 1
+
+
+
+  - name: 🚀 ROUTES - Enable Swagger on external Datalayer API Route 
+    shell: |
+      export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+      existing=$(oc get route aiops-ir-core-ncodl-api -n $AIOPS_NAMESPACE --no-headers|awk '{print$1}')
+      if [[ $existing == "" ]]; then
+        echo "Create Route"
+        oc set env deploy -n $AIOPS_NAMESPACE aiops-ir-core-ncodl-api ENABLE_SWAGGER_UI="true" 
+      fi
+    ignore_errors: true
+    register: output
+    args:
+      executable: /bin/bash
+  - name: 🟣  OUTPUT
+    debug:
+      var: output.stdout_lines
+      verbosity: 1
+
+
+  - name: 🚀 ROUTES - Create Spark Master UI Route 
+    shell: |
+      export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+      existing=$(oc get route sparkadmin -n $AIOPS_NAMESPACE --no-headers|awk '{print$1}')
+      if [[ $existing == "" ]]; then
+        echo "Create Route"
+        oc create route edge sparkadmin -n $AIOPS_NAMESPACE  --service=aiops-ir-analytics-spark-master
+        oc expose svc aiops-ir-analytics-spark-master -n $AIOPS_NAMESPACE --name spark
+      fi
+    ignore_errors: true
+    register: output
+    args:
+      executable: /bin/bash
+  - name: 🟣  OUTPUT
+    debug:
+      var: output.stdout_lines
+      verbosity: 1
+
+  
+
+  when: current_ibmaiops_feature.create_external_routes == true
+
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Delete ImgPull error pods
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: 🚀 ROUTES - Delete Pods with ImgPull Error  
+  shell: |
+        export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+    
+        errorPods=$(oc get po -n $AIOPS_NAMESPACE|grep ImagePull|awk '{print$1}')
+        if [[ ! $errorPods == "" ]]; then
+          echo "Refreshing Pods"
+          oc delete pod $(oc get po -n $AIOPS_NAMESPACE|grep ImagePull|awk '{print$1}'):-notfound  --ignore-not-found -n $AIOPS_NAMESPACE
+        fi
+
+
+  ignore_errors: true

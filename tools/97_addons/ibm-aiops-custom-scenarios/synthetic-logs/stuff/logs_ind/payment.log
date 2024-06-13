@@ -1,0 +1,6 @@
+"container_name":"payment","message":"[2023-11-08 07:04:37,028] INFO in payment: payment for anonymous-28316"
+"container_name":"payment","message":"[2023-11-08 07:04:37,028] INFO in payment: {'total': 5253.3, 'tax': 875.5500000000002, 'items': [{'qty': 2, 'sku': 'Watson', 'name': 'Watson', 'price': 2001, 'subtotal': 4002}, {'qty': 1, 'sku': 'HPTD', 'name': 'High-Powered Travel Droid', 'price': 1200, 'subtotal': 1200}, {'qty': 1, 'sku': 'SHIP', 'name': 'shipping to Norway Skei', 'price': 51.3, 'subtotal': 51.3}]}"
+"container_name":"payment","message":"[2023-11-08 07:03:05,160] INFO in payment: cart delete returned 200"
+"container_name":"payment","message":"[2023-11-08 07:03:05,160] ERROR in payment: cart delete returned 404"
+"container_name":"payment","message":"[2023-11-08 07:03:05,160] INFO in payment: cart delete returned 200"
+"container_name":"payment","message":"[2023-11-08 07:03:05,160] ERROR in payment: cart delete returned 404"

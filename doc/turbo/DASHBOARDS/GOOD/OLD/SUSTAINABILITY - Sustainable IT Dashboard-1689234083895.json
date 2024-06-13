@@ -1,0 +1,4043 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_TURBO_TIMESCALE",
+      "label": "Turbo Timescale",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "postgres",
+      "pluginName": "PostgreSQL"
+    },
+    {
+      "name": "VAR_TREE_SEQUESTRATION_FACTOR",
+      "type": "constant",
+      "label": "TREE_SEQUESTRATION_FACTOR",
+      "value": "0.060",
+      "description": ""
+    },
+    {
+      "name": "VAR_ACRES_OF_FOREST_SEQUESTRATION_FACTOR",
+      "type": "constant",
+      "label": "ACRES_OF_FOREST_SEQUESTRATION_FACTOR",
+      "value": "0.84",
+      "description": ""
+    },
+    {
+      "name": "VAR_VEHICLE_EMISSIONS_FACTOR",
+      "type": "constant",
+      "label": "VEHICLE_EMISSIONS_FACTOR",
+      "value": "4.60",
+      "description": ""
+    },
+    {
+      "name": "VAR_HOUSEHOLD_EMISSIONS_FACTOR",
+      "type": "constant",
+      "label": "HOUSEHOLD_EMISSIONS_FACTOR",
+      "value": "5.505",
+      "description": ""
+    },
+    {
+      "name": "VAR_AWS_MIN_CONSUMPTION",
+      "type": "constant",
+      "label": "AWS_MIN_CONSUMPTION",
+      "value": "0.74",
+      "description": ""
+    },
+    {
+      "name": "VAR_AWS_MAX_CONSUMPTION",
+      "type": "constant",
+      "label": "AWS_MAX_CONSUMPTION",
+      "value": "3.5",
+      "description": ""
+    },
+    {
+      "name": "VAR_AZURE_MIN_CONSUMPTION",
+      "type": "constant",
+      "label": "AZURE_MIN_CONSUMPTION",
+      "value": "0.78",
+      "description": ""
+    },
+    {
+      "name": "VAR_AZURE_MAX_CONSUMPTION",
+      "type": "constant",
+      "label": "AZURE_MAX_CONSUMPTION",
+      "value": "3.76",
+      "description": ""
+    },
+    {
+      "name": "VAR_GCP_MIN_CONSUMPTION",
+      "type": "constant",
+      "label": "GCP_MIN_CONSUMPTION",
+      "value": "0.71",
+      "description": ""
+    },
+    {
+      "name": "VAR_GCP_MAX_CONSUMPTION",
+      "type": "constant",
+      "label": "GCP_MAX_CONSUMPTION",
+      "value": "4.26",
+      "description": ""
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "9.5.2"
+    },
+    {
+      "type": "datasource",
+      "id": "postgres",
+      "name": "PostgreSQL",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Sustainable IT Dashboard ",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "info",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": true,
+      "title": "All Published SPECpower_ssj2008 Results",
+      "tooltip": "",
+      "type": "link",
+      "url": "https://www.spec.org/power_ssj2008/results/power_ssj2008.html"
+    }
+  ],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 95,
+      "panels": [],
+      "title": "🪴 Impact",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "id": 96,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "![svg image](data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjIwMHB4IiB3aWR0aD0iMjAwcHgiIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB4bWw6c3BhY2U9InByZXNlcnZlIiBmaWxsPSIjMDAwMDAwIj48ZyBpZD0iU1ZHUmVwb19iZ0NhcnJpZXIiIHN0cm9rZS13aWR0aD0iMCI+PC9nPjxnIGlkPSJTVkdSZXBvX3RyYWNlckNhcnJpZXIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PC9nPjxnIGlkPSJTVkdSZXBvX2ljb25DYXJyaWVyIj4gPGNpcmNsZSBzdHlsZT0iZmlsbDojMjczQjdBOyIgY3g9IjI1NiIgY3k9IjI1NiIgcj0iMjU2Ij48L2NpcmNsZT4gPHBhdGggc3R5bGU9ImZpbGw6IzEyMTE0OTsiIGQ9Ik01MDYuMzgsMzA5LjUxN0wzMDAuMTI5LDEwMy4yNjVsLTYyLjIzLDExMy4zNzNsMi4zMTcsNDQuNzhsODIuNTMsODIuNTNsLTMuMzcyLDMuMzcyIGwtMzUuODM4LTM1LjgzOGwtNDUuNjA5LDIuODcyaC02NC42NzRsLTY2LjY5NiwxMDUuNDYzbDgzLjYyNyw4My42MjdDMjExLjE4NSw1MDkuMDE2LDIzMy4yNDMsNTEyLDI1Niw1MTIgQzM3OS4wMjgsNTEyLDQ4MS43NzEsNDI1LjIwOCw1MDYuMzgsMzA5LjUxN3oiPjwvcGF0aD4gPHBhdGggc3R5bGU9ImZpbGw6I0ZGRURCNTsiIGQ9Ik00MDEuNjA2LDI5MC4yODdjLTMuMzAzLTQuNTkxLTkuMzA3LTYuMzk3LTE0LjYwMS00LjQxYy0wLjA3NiwwLjAyOS0wLjE1MiwwLjA1NS0wLjIyOCwwLjA4MSBsLTg5LjYxOSwyOS44MzZjMC4wMTksMC43MjEsMC4wMDUsMS40NDUtMC4wNDMsMi4xNzRjLTAuNzQ4LDExLjQ0NS05LjU5OSwyMC42MzktMjAuOTcxLDIxLjc5MmwtNTQuMDEsNS42MSBjLTMuNDE3LDAuMzU3LTYuNDcyLTIuMTI2LTYuODI3LTUuNTQxYy0wLjM1Ny0zLjQxNywyLjEyNi02LjU1MSw1LjU0MS02LjgyN2w1NC4wMS01LjYxYzUuMzMtMC41ODEsOS40OTUtNC44Niw5Ljg0Ny0xMC4yMzUgYzAuMTkxLTIuOTM0LTAuNzcyLTUuNzY2LTIuNzEyLTcuOTc1Yy0xLjkzOS0yLjIxLTQuNjI0LTMuNTMyLTcuNTU4LTMuNzI0bC03MS43MTEtNC42NzVjLTguMDU0LTAuNTIyLTE2LjA1LDEuMjU1LTIzLjEyMSw1LjE0OCBMODUuMDI4LDM1OC4wMWwyNS42MTIsNTEuNjQ1bDIzLjc1Ny0yMC43MjVjMTAuMDktOC44MDEsMjMuNDU1LTEyLjU5MywzNi42NjctMTAuMzk3bDc5LjQxLDEzLjE5NyBjMTQuNTUxLDEuOTM0LDI5LjEzOS0xLjY5NSw0MS4wODgtMTAuMjE4bDEwOC4xMTgtNzQuNDYxQzQwNC41MTMsMzAyLjgzLDQwNS4zNzEsMjk1LjUxNyw0MDEuNjA2LDI5MC4yODd6Ij48L3BhdGg+IDxnPiA8cGF0aCBzdHlsZT0iZmlsbDojRkVFMTg3OyIgZD0iTTI3NC44NTYsMzI3LjM5NGM1LjMzLTAuNTgxLDkuNDk1LTQuODYsOS44NDctMTAuMjM1YzAuMTkxLTIuOTM0LTAuNzcyLTUuNzY2LTIuNzEyLTcuOTc1IGMtMS45MzktMi4yMS00LjYyNC0zLjUzMi03LjU1OC0zLjcyNGwtMTUuOTQ4LTEuMDR2MjQuNjczTDI3NC44NTYsMzI3LjM5NHoiPjwvcGF0aD4gPHBhdGggc3R5bGU9ImZpbGw6I0ZFRTE4NzsiIGQ9Ik00MDEuNjA2LDI5MC4yODdjLTMuMzAzLTQuNTkxLTkuMzA3LTYuMzk3LTE0LjYwMS00LjQxYy0wLjA3NiwwLjAyOS0wLjE1MiwwLjA1NS0wLjIyOCwwLjA4MSBsLTg5LjYxOSwyOS44MzZjMC4wMTksMC43MjEsMC4wMDUsMS40NDUtMC4wNDMsMi4xNzRjLTAuNzQ4LDExLjQ0NS05LjU5OSwyMC42MzktMjAuOTcxLDIxLjc5MmwtMTcuNjUzLDEuODM0djUwLjY0MSBjMTEuODEyLTAuMDcyLDIzLjMyMy0zLjc2NSwzMy4wNzMtMTAuNzIxbDEwOC4xMTgtNzQuNDU5QzQwNC41MTMsMzAyLjgzLDQwNS4zNzEsMjk1LjUxNyw0MDEuNjA2LDI5MC4yODd6Ij48L3BhdGg+IDwvZz4gPHBhdGggc3R5bGU9ImZpbGw6I0ZGQzYxQjsiIGQ9Ik0zMTcuNDMzLDE0NS45ODRjMC0zNC43NDktMjguODUtNjIuNzU3LTYzLjkwMi02MS4zODVjLTMxLjQwNiwxLjIzMS01Ny4xMywyNi41MDgtNTguODY4LDU3Ljg5MiBjLTEuMTkzLDIxLjU1Niw4LjczNSw0MC44NTUsMjQuNTY3LDUyLjdjMTAuMTA3LDcuNTYxLDE2LjI5MSwxOS4yNDcsMTYuMjkxLDMxLjg2OHYyMS4zMTRjMCwxMS4zMDksOS4xNjgsMjAuNDc4LDIwLjQ3OCwyMC40NzhsMCwwIGMxMS4zMDksMCwyMC40NzgtOS4xNjgsMjAuNDc4LTIwLjQ3OFYyMjcuNGMwLTEyLjc5Myw2LjI0Ny0yNC42NDIsMTYuNDY1LTMyLjM0QzMwNy44MTUsMTgzLjg1MSwzMTcuNDMzLDE2Ni4wNDMsMzE3LjQzMywxNDUuOTg0eiI+PC9wYXRoPiA8cGF0aCBzdHlsZT0iZmlsbDojRUFBMjJGOyIgZD0iTTI1NS40MjYsODQuNTczdjE4NC4yNDhjMC4xOTMsMC4wMDUsMC4zODEsMC4wMjksMC41NzQsMC4wMjljMTEuMzA5LDAsMjAuNDc4LTkuMTY4LDIwLjQ3OC0yMC40NzggVjIyNy40YzAtMTIuNzkzLDYuMjQ3LTI0LjY0MiwxNi40NjUtMzIuMzRjMTQuODc0LTExLjIwOSwyNC40OTItMjkuMDE3LDI0LjQ5Mi00OS4wNzYgQzMxNy40MzMsMTExLjg2NiwyODkuNjE2LDg0LjI2MywyNTUuNDI2LDg0LjU3M3oiPjwvcGF0aD4gPHBhdGggc3R5bGU9ImZpbGw6I0E2QThBQTsiIGQ9Ik0yMzUuNTIyLDIyNy44OTV2MjAuNDc4YzAsMTEuMzA5LDkuMTY4LDIwLjQ3OCwyMC40NzgsMjAuNDc4bDAsMCBjMTEuMzA5LDAsMjAuNDc4LTkuMTY4LDIwLjQ3OC0yMC40Nzh2LTIwLjQ4TDIzNS41MjIsMjI3Ljg5NXoiPjwvcGF0aD4gPHBhdGggc3R5bGU9ImZpbGw6IzgwODE4MzsiIGQ9Ik0yNTUuNDI2LDIyNy44OTN2NDAuOTI3YzAuMTkzLDAuMDA1LDAuMzgxLDAuMDI5LDAuNTc0LDAuMDI5YzExLjMwOSwwLDIwLjQ3OC05LjE2OCwyMC40NzgtMjAuNDc4IHYtMjAuNDhMMjU1LjQyNiwyMjcuODkzeiI+PC9wYXRoPiA8cGF0aCBzdHlsZT0iZmlsbDojRkY1NDE5OyIgZD0iTTI0NC4yMDUsMTgzLjgzN2MtMS4xNDMsMC0yLjI5Ni0wLjM0OC0zLjI5MS0xLjA3NmMtMi40OTEtMS44MTktMy4wMzQtNS4zMTMtMS4yMTQtNy44MDQgbDE3LjA5MS0yMy4zODhIMjQ0LjIxYy0yLjEwMywwLTQuMDI3LTEuMTgxLTQuOTgtMy4wNTZjLTAuOTUyLTEuODc2LTAuNzY5LTQuMTI1LDAuNDcxLTUuODIzbDIzLjU4LTMyLjI2OCBjMS44MTktMi40OTEsNS4zMTEtMy4wMzgsNy44MDQtMS4yMTRjMi40OTEsMS44MTksMy4wMzQsNS4zMTMsMS4yMTQsNy44MDRMMjU1LjIwNywxNDAuNGgxMi41ODFjMi4xMDMsMCw0LjAyNywxLjE4MSw0Ljk4LDMuMDU2IGMwLjk1MiwxLjg3NiwwLjc2OSw0LjEyNS0wLjQ3MSw1LjgyM2wtMjMuNTgxLDMyLjI2OEMyNDcuNjI1LDE4My4wNDQsMjQ1LjkyNywxODMuODM3LDI0NC4yMDUsMTgzLjgzN3oiPjwvcGF0aD4gPGc+IDxwYXRoIHN0eWxlPSJmaWxsOiNDOTJGMDA7IiBkPSJNMjcyLjMsMTE3LjAxYzEuODItMi40OTEsMS4yNzctNS45ODUtMS4yMTQtNy44MDRjLTIuNDkxLTEuODI0LTUuOTg1LTEuMjc3LTcuODA0LDEuMjE0IGwtNy44NTYsMTAuNzV2MTguOTMyTDI3Mi4zLDExNy4wMXoiPjwvcGF0aD4gPHBhdGggc3R5bGU9ImZpbGw6I0M5MkYwMDsiIGQ9Ik0yNjcuNzksMTQwLjM5OGgtMTIuMzY0djExLjE2OWgxLjM2NWwtMS4zNjUsMS44Njl2MTguOTNsMTYuODc0LTIzLjA5IGMxLjI0MS0xLjY5OCwxLjQyMi0zLjk0OSwwLjQ3MS01LjgyM0MyNzEuODE5LDE0MS41ODEsMjY5Ljg5MywxNDAuMzk4LDI2Ny43OSwxNDAuMzk4eiI+PC9wYXRoPiA8L2c+IDxwb2x5Z29uIHN0eWxlPSJmaWxsOiNEMzU5MzM7IiBwb2ludHM9IjY2LjA3OSwzNTUuMTQ3IDk4LjYxOSwzMzIuOTAzIDEzOS4wOTksMzk3LjU3MiAxMDYuNTU2LDQxOS44MTYgIj48L3BvbHlnb24+IDxwb2x5Z29uIHN0eWxlPSJmaWxsOiNCNTQzMjQ7IiBwb2ludHM9IjEzOS4wOTksMzk3LjU3MiAxMTguNTc0LDM2NC43ODQgODYuMTc2LDM4Ny4yNTYgMTA2LjU1Niw0MTkuODE2ICI+PC9wb2x5Z29uPiA8L2c+PC9zdmc+)\n\n\n# Sustainability Dashboard\n\nThis dashboard shows the impact of IBM Turbonomic application resource manager on Energy consumption and Carbon Dioxide equivalents (CO2e) emissions in your private cloud data center environment.\n\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "9.5.2",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 4,
+        "x": 6,
+        "y": 1
+      },
+      "id": 97,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<img width=\"400\" class=\"figure\" src=\"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwcHgiIGhlaWdodD0iMTUwcHgiIHZpZXdCb3g9Ii0xLjA3IDAgMjEuMTI0MzE0IDIxLjEyNDMxNCIgaWQ9InN2ZzgiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIiB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iIHhtbG5zOmlua3NjYXBlPSJodHRwOi8vd3d3Lmlua3NjYXBlLm9yZy9uYW1lc3BhY2VzL2lua3NjYXBlIiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiIHhtbG5zOnNvZGlwb2RpPSJodHRwOi8vc29kaXBvZGkuc291cmNlZm9yZ2UubmV0L0RURC9zb2RpcG9kaS0wLmR0ZCIgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgZmlsbD0iIzAwMDAwMCI+Cgo8ZyBpZD0iU1ZHUmVwb19iZ0NhcnJpZXIiIHN0cm9rZS13aWR0aD0iMCIvPgoKPGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cgo8ZyBpZD0iU1ZHUmVwb19pY29uQ2FycmllciI+IDxkZWZzIGlkPSJkZWZzMiI+IDxjbGlwUGF0aCBjbGlwUGF0aFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgaWQ9ImNsaXBQYXRoMjMiPiA8cmVjdCBoZWlnaHQ9IjE3MC4wMDcxMSIgaWQ9InJlY3QyNSIgc3R5bGU9Im9wYWNpdHk6MTtmaWxsOm5vbmU7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOiMwMDAwMDA7c3Ryb2tlLXdpZHRoOjEuNTtzdHJva2UtbGluZWNhcDpyb3VuZDtzdHJva2UtbGluZWpvaW46cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLWRhc2hvZmZzZXQ6MDtzdHJva2Utb3BhY2l0eTowLjk3NjQxNTEyIiB0cmFuc2Zvcm09InJvdGF0ZSg5MCkiIHdpZHRoPSIyNjMuODQ2MTYiIHg9IjYuNzg0Nzg3NyIgeT0iMTEwLjM2MTk0Ii8+IDwvY2xpcFBhdGg+IDwvZGVmcz4gPGcgaWQ9ImxheWVyMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTYuNjU2NDg0LC0zNDEuMjI5OSkiPiA8cmVjdCBoZWlnaHQ9IjU4LjE4NDI2MSIgaWQ9InJlY3Q4MDExIiByeT0iMS4xNDMzNTcyIiBzdHlsZT0ib3BhY2l0eToxO2ZpbGw6bm9uZTtmaWxsLW9wYWNpdHk6MTtzdHJva2U6bm9uZTtzdHJva2Utd2lkdGg6MS4xMDY5OTk5OTtzdHJva2UtbGluZWNhcDpyb3VuZDtzdHJva2UtbGluZWpvaW46cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLWRhc2hvZmZzZXQ6MDtzdHJva2Utb3BhY2l0eToxIiB3aWR0aD0iMTUwLjExNzYxIiB4PSItMzc3LjIyMDIxIiB5PSItMTk4LjkwNDc3Ii8+IDwvZz4gPGcgaWQ9Imc4NjgxIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1Ni42NTY0ODQsLTM0MS4yMjk5KSI+IDxyZWN0IGhlaWdodD0iNTguMTg0MjYxIiBpZD0icmVjdDg2NzciIHJ5PSIxLjE0MzM1NzIiIHN0eWxlPSJvcGFjaXR5OjE7ZmlsbDpub25lO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lO3N0cm9rZS13aWR0aDoxLjEwNjk5OTk5O3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjpyb3VuZDtzdHJva2UtbWl0ZXJsaW1pdDo0O3N0cm9rZS1kYXNoYXJyYXk6bm9uZTtzdHJva2UtZGFzaG9mZnNldDowO3N0cm9rZS1vcGFjaXR5OjEiIHdpZHRoPSIxNTAuMTE3NjEiIHg9Ii0zNzcuMjIwMjEiIHk9Ii0xOTguOTA0NzciLz4gPC9nPiA8ZyBpZD0iZzkyMzMiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU2LjY1NjQ4NCwtMzQxLjIyOTkpIj4gPHJlY3QgaGVpZ2h0PSI1OC4xODQyNjEiIGlkPSJyZWN0OTIyOSIgcnk9IjEuMTQzMzU3MiIgc3R5bGU9Im9wYWNpdHk6MTtmaWxsOm5vbmU7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOm5vbmU7c3Ryb2tlLXdpZHRoOjEuMTA2OTk5OTk7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjQ7c3Ryb2tlLWRhc2hhcnJheTpub25lO3N0cm9rZS1kYXNob2Zmc2V0OjA7c3Ryb2tlLW9wYWNpdHk6MSIgd2lkdGg9IjE1MC4xMTc2MSIgeD0iLTM3Ny4yMjAyMSIgeT0iLTE5OC45MDQ3NyIvPiA8cmVjdCBoZWlnaHQ9IjM2OC44MzE5NCIgaWQ9InJlY3Q5MzExIiByeT0iMS4xNDMzNTcyIiBzdHlsZT0ib3BhY2l0eToxO2ZpbGw6bm9uZTtmaWxsLW9wYWNpdHk6MTtzdHJva2U6bm9uZTtzdHJva2Utd2lkdGg6MS4xMDY5OTk5OTtzdHJva2UtbGluZWNhcDpyb3VuZDtzdHJva2UtbGluZWpvaW46cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLWRhc2hvZmZzZXQ6MDtzdHJva2Utb3BhY2l0eToxIiB3aWR0aD0iMzEzLjIzOTkiIHg9Ii01OTQuMzg5ODMiIHk9Ii0xNjEuNjM0NDkiLz4gPHBhdGggZD0ibSAtNTAuOTY1MDk2LDM1NC43ODQ1NyBjIDAsMCAtMC4yOTAzMTYsMy42NTE2NCAzLjQyNDQxOCwyLjkzMDQyIiBpZD0icGF0aDk3Mi04LTUiIHN0eWxlPSJvcGFjaXR5OjE7ZmlsbDpub25lO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTojMjQxZjFjO3N0cm9rZS13aWR0aDowLjgwODkwMTk3O3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjpyb3VuZDtzdHJva2UtbWl0ZXJsaW1pdDo0O3N0cm9rZS1kYXNoYXJyYXk6bm9uZTtzdHJva2UtZGFzaG9mZnNldDowO3N0cm9rZS1vcGFjaXR5OjEiLz4gPGVsbGlwc2UgY3g9Ii00Ny42MjI4MTgiIGN5PSIzNjEuOTM0NDgiIGlkPSJwYXRoOTgxLTQtNCIgcng9IjUuMTMzMTQ0OSIgcnk9IjAuNDE5NzM0MzkiIHN0eWxlPSJvcGFjaXR5OjE7ZmlsbDojYjNiM2IzO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lO3N0cm9rZS13aWR0aDoxLjA2NTI3MDM7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjQ7c3Ryb2tlLWRhc2hhcnJheTpub25lO3N0cm9rZS1kYXNob2Zmc2V0OjA7c3Ryb2tlLW9wYWNpdHk6MSIvPiA8cGF0aCBkPSJtIC00OC40OTY4NTYsMzYxLjI2MzUgLTAuMDQzODksLTExLjcyNTY5IDEuNDQwMDc0LC0xLjNlLTQgMC4wODQyNSwxMS43MTU3OSB6IiBpZD0icGF0aDk3OS0xIiBzdHlsZT0ib3BhY2l0eToxO2ZpbGw6Izc4NDQyMTtmaWxsLW9wYWNpdHk6MTtzdHJva2U6IzI0MWYxYztzdHJva2Utd2lkdGg6MC44MDg5MDE5NztzdHJva2UtbGluZWNhcDpyb3VuZDtzdHJva2UtbGluZWpvaW46cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLWRhc2hvZmZzZXQ6MDtzdHJva2Utb3BhY2l0eToxIi8+IDxwYXRoIGQ9Im0gLTQzLjQ1NDcyMiwzNTYuMDcyMjQgYyAwLDAgMC4yOTAzMTUsMy42NTE2NCAtMy40MjQ0MTgsMi45MzA0MyIgaWQ9InBhdGg5NzItOC01LTIiIHN0eWxlPSJvcGFjaXR5OjE7ZmlsbDpub25lO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTojMjQxZjFjO3N0cm9rZS13aWR0aDowLjgwODkwMTk3O3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjpyb3VuZDtzdHJva2UtbWl0ZXJsaW1pdDo0O3N0cm9rZS1kYXNoYXJyYXk6bm9uZTtzdHJva2UtZGFzaG9mZnNldDowO3N0cm9rZS1vcGFjaXR5OjEiLz4gPGVsbGlwc2UgY3g9Ii00Mi4xMjExMDkiIGN5PSIzNTUuMDQzIiBpZD0iZWxsaXBzZTgxNjUiIHJ4PSIzLjk0Mzc1OCIgcnk9IjMuOTQ1MzcwNCIgc3R5bGU9Im9wYWNpdHk6MTtmaWxsOiMyY2EwMmM7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOiMyNDFmMWM7c3Ryb2tlLXdpZHRoOjEuMDE4MjMyODI7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjQ7c3Ryb2tlLWRhc2hhcnJheTpub25lO3N0cm9rZS1kYXNob2Zmc2V0OjA7c3Ryb2tlLW9wYWNpdHk6MC45ODQzMTM3MyIvPiA8cGF0aCBkPSJtIC01MC42NjM0MzksMzYxLjc0NjIzIGggNi4yMjIzMjgiIGlkPSJwYXRoODE2MSIgc3R5bGU9Im9wYWNpdHk6MTtmaWxsOm5vbmU7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOiMyNDFmMWM7c3Ryb2tlLXdpZHRoOjAuNjk0NzEwOTE7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjQ7c3Ryb2tlLWRhc2hhcnJheTpub25lO3N0cm9rZS1kYXNob2Zmc2V0OjA7c3Ryb2tlLW9wYWNpdHk6MSIvPiA8ZWxsaXBzZSBjeD0iLTQ3LjMzODE4OCIgY3k9IjM0OC40MjQwNyIgaWQ9InBhdGg4MzctMS0yIiByeD0iNi45NTUxMDk2IiByeT0iNi42ODUwNTc2IiBzdHlsZT0ib3BhY2l0eToxO2ZpbGw6IzVmZDM1ZjtmaWxsLW9wYWNpdHk6MTtzdHJva2U6IzI0MWYxYztzdHJva2Utd2lkdGg6MS4wMTgyMzI4MjtzdHJva2UtbGluZWNhcDpyb3VuZDtzdHJva2UtbGluZWpvaW46cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLWRhc2hvZmZzZXQ6MDtzdHJva2Utb3BhY2l0eTowLjk4ODIzNTI5Ii8+IDxlbGxpcHNlIGN4PSItNTIuMjAzNjA5IiBjeT0iMzUxLjg0MTM0IiBpZD0iZWxsaXBzZTgxNjkiIHJ4PSIzLjk0Mzc1OCIgcnk9IjMuOTQ1MzcwNCIgc3R5bGU9Im9wYWNpdHk6MTtmaWxsOiMzN2M4Mzc7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOiMyNDFmMWM7c3Ryb2tlLXdpZHRoOjEuMDE4MjMyODI7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjQ7c3Ryb2tlLWRhc2hhcnJheTpub25lO3N0cm9rZS1kYXNob2Zmc2V0OjA7c3Ryb2tlLW9wYWNpdHk6MC45ODQzMTM3MyIvPiA8L2c+IDwvZz4KCjwvc3ZnPg\"></img>\n",
+        "mode": "html"
+      },
+      "pluginVersion": "9.5.2",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "How many acres of forest per year will it take to sequester the total CO2e emissions released by physical machines in the selected scope and over the selected time. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "semi-dark-green",
+            "mode": "fixed"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "acre"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 10,
+        "y": 1
+      },
+      "id": 17,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*count(e.name)/${CORES_CPU}*${CPU_CONSUMPTION}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}/1000/${ACRES_OF_FOREST_SEQUESTRATION_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100 as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "🦌 Total CO2e emissions - Equivalent in acres of forest per year",
+      "transformations": [],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 4,
+        "x": 15,
+        "y": 1
+      },
+      "id": 98,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<img width=\"400\" class=\"figure\" src=\"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwcHgiIGhlaWdodD0iMTUwcHgiIHZpZXdCb3g9IjAgMCAxMDI0IDEwMjQiIGNsYXNzPSJpY29uIiB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgZmlsbD0iIzAwMDAwMCI+PGcgaWQ9IlNWR1JlcG9fYmdDYXJyaWVyIiBzdHJva2Utd2lkdGg9IjAiPjwvZz48ZyBpZD0iU1ZHUmVwb190cmFjZXJDYXJyaWVyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjwvZz48ZyBpZD0iU1ZHUmVwb19pY29uQ2FycmllciI+PHBhdGggZD0iTTI0OC42ODU3MTQgNDM1LjkzMTQyOWg1MzMuOTQyODU3YzkwLjY5NzE0MyAwIDE2My44NCA3My4xNDI4NTcgMTYzLjg0IDE2My44NHYxNjMuODRoLTg2My4wODU3MTRWNjAxLjIzNDI4NmMwLTkwLjY5NzE0MyA3NC42MDU3MTQtMTY1LjMwMjg1NyAxNjUuMzAyODU3LTE2NS4zMDI4NTd6IiBmaWxsPSIjNjRCODI5Ij48L3BhdGg+PHBhdGggZD0iTTk1Ni43MDg1NzEgNzc1LjMxNDI4Nkg3My4xNDI4NTdWNjAxLjIzNDI4NmMwLTk2LjU0ODU3MSA3OC45OTQyODYtMTc0LjA4IDE3NC4wOC0xNzQuMDhoNTMzLjk0Mjg1N2M5Ni41NDg1NzEgMCAxNzQuMDggNzguOTk0Mjg2IDE3NC4wOCAxNzQuMDhWNzc1LjMxNDI4NnogbS04NjMuMDg1NzE0LTIwLjQ4SDkzNi4yMjg1NzFWNjAxLjIzNDI4NmMwLTg0Ljg0NTcxNC02OC43NTQyODYtMTUzLjYtMTUzLjYtMTUzLjZIMjQ4LjY4NTcxNGMtODQuODQ1NzE0IDAtMTUzLjYgNjguNzU0Mjg2LTE1My42IDE1My42djE1My42eiIgZmlsbD0iIzE0MTUxNSI+PC9wYXRoPjxwYXRoIGQ9Ik00MzAuMDggNzY1LjA3NDI4Nkg4My4zODI4NTd2LTEwMC45MzcxNDNjMjMuNDA1NzE0LTc2LjA2ODU3MSA5MC42OTcxNDMtMTMwLjE5NDI4NiAxNjkuNjkxNDI5LTEzMC4xOTQyODYgOTkuNDc0Mjg2IDAgMTc5LjkzMTQyOSA4NC44NDU3MTQgMTc5LjkzMTQyOCAxOTAuMTcxNDI5IDEuNDYyODU3IDE0LjYyODU3MSAwIDI3Ljc5NDI4Ni0yLjkyNTcxNCA0MC45NnoiIGZpbGw9IiNCMkQ1NzciPjwvcGF0aD48cGF0aCBkPSJNNDM4Ljg1NzE0MyA3NzUuMzE0Mjg2SDczLjE0Mjg1N3YtMTE0LjEwMjg1N2MyNi4zMzE0MjktODEuOTIgOTguMDExNDI5LTEzNy41MDg1NzEgMTc5LjkzMTQyOS0xMzcuNTA4NTcyIDEwNS4zMjU3MTQgMCAxOTAuMTcxNDI5IDkwLjY5NzE0MyAxOTAuMTcxNDI4IDIwMS44NzQyODYgMCAxNC42Mjg1NzEtMS40NjI4NTcgMjcuNzk0Mjg2LTQuMzg4NTcxIDQyLjQyMjg1N3Y3LjMxNDI4NnpNOTMuNjIyODU3IDc1NC44MzQyODZoMzI2LjIxNzE0M2MxLjQ2Mjg1Ny0xMC4yNCAyLjkyNTcxNC0yMC40OCAyLjkyNTcxNC0yOS4yNTcxNDMgMC05OS40NzQyODYtNzYuMDY4NTcxLTE3OS45MzE0MjktMTY5LjY5MTQyOC0xNzkuOTMxNDI5LTcxLjY4IDAtMTM2LjA0NTcxNCA0OC4yNzQyODYtMTU5LjQ1MTQyOSAxMjEuNDE3MTQzdjg3Ljc3MTQyOXoiIGZpbGw9IiMxNDE1MTUiPjwvcGF0aD48cGF0aCBkPSJNOTQ2LjQ2ODU3MSA2MjYuMTAyODU3djEzOC45NzE0MjlINTk2Ljg0NTcxNGMtMi45MjU3MTQtMTMuMTY1NzE0LTQuMzg4NTcxLTI2LjMzMTQyOS00LjM4ODU3MS0zOS40OTcxNDNDNTkyLjQ1NzE0MyA2MTQuNCA2NzcuMzAyODU3IDUyNi42Mjg1NzEgNzgxLjE2NTcxNCA1MjYuNjI4NTcxYzcxLjY4IDAgMTMxLjY1NzE0MyAzOS40OTcxNDMgMTY1LjMwMjg1NyA5OS40NzQyODZ6IiBmaWxsPSIjQjJENTc3Ij48L3BhdGg+PHBhdGggZD0iTTk1Ni43MDg1NzEgNzc1LjMxNDI4Nkg1ODguMDY4NTcxbC0xLjQ2Mjg1Ny04Ljc3NzE0M2MtMi45MjU3MTQtMTMuMTY1NzE0LTQuMzg4NTcxLTI3Ljc5NDI4Ni00LjM4ODU3MS00Mi40MjI4NTcgMC0xMTUuNTY1NzE0IDg5LjIzNDI4Ni0yMDkuMTg4NTcxIDE5OC45NDg1NzEtMjA5LjE4ODU3MiA3MS42OCAwIDEzNy41MDg1NzEgNDAuOTYgMTc0LjA4IDEwNS4zMjU3MTVsMS40NjI4NTcgMi45MjU3MTRWNzc1LjMxNDI4NnogbS0zNTEuMDg1NzE0LTIwLjQ4SDkzNi4yMjg1NzFWNjI5LjAyODU3MWMtMzIuMTgyODU3LTU3LjA1MTQyOS05MC42OTcxNDMtOTIuMTYtMTUzLjYtOTIuMTYtOTguMDExNDI5IDAtMTc4LjQ2ODU3MSA4NC44NDU3MTQtMTc4LjQ2ODU3MSAxODguNzA4NTcyLTEuNDYyODU3IDguNzc3MTQzIDAgMTkuMDE3MTQzIDEuNDYyODU3IDI5LjI1NzE0M3oiIGZpbGw9IiMxNDE1MTUiPjwvcGF0aD48cGF0aCBkPSJNODMuMzgyODU3IDY5My4zOTQyODZoODYxLjYyMjg1N3Y3MS42OEg4My4zODI4NTd6IiBmaWxsPSIjOTdDQTFCIj48L3BhdGg+PHBhdGggZD0iTTk1Ni43MDg1NzEgNzc1LjMxNDI4Nkg3My4xNDI4NTd2LTkyLjE2aDg4My41NjU3MTRWNzc1LjMxNDI4NnogbS04NjMuMDg1NzE0LTIwLjQ4SDkzNi4yMjg1NzF2LTUxLjJIOTMuNjIyODU3djUxLjJ6IiBmaWxsPSIjMTQxNTE1Ij48L3BhdGg+PHBhdGggZD0iTTQ5MC4wNTcxNDMgMTk0LjU2YzE1Mi4xMzcxNDMgMCAyODUuMjU3MTQzIDEwNi43ODg1NzEgMzA3LjIgMjQyLjgzNDI4NkgyNDcuMjIyODU3Yy04Ljc3NzE0MyAwLTE3LjU1NDI4NiAwLTI2LjMzMTQyOCAxLjQ2Mjg1NyAwLTEzNi4wNDU3MTQgMTE3LjAyODU3MS0yNDQuMjk3MTQzIDI2OS4xNjU3MTQtMjQ0LjI5NzE0M3oiIGZpbGw9IiM5N0NBMUIiPjwvcGF0aD48cGF0aCBkPSJNMjEwLjY1MTQyOSA0NTAuNTZWNDM4Ljg1NzE0M2MwLTY0LjM2NTcxNCAyNC44Njg1NzEtMTI1LjgwNTcxNCA3MS42OC0xNzIuNjE3MTQzIDUyLjY2Mjg1Ny01Mi42NjI4NTcgMTI3LjI2ODU3MS04MS45MiAyMDcuNzI1NzE0LTgxLjkyIDE1NS4wNjI4NTcgMCAyOTUuNDk3MTQzIDEwOS43MTQyODYgMzE3LjQ0IDI1MS42MTE0MjlsMS40NjI4NTcgMTMuMTY1NzE0LTEzLjE2NTcxNC0xLjQ2Mjg1N0gyNDcuMjIyODU3Yy04Ljc3NzE0MyAwLTE2LjA5MTQyOSAwLTI0Ljg2ODU3MSAxLjQ2Mjg1N2wtMTEuNzAyODU3IDEuNDYyODU3ek00OTAuMDU3MTQzIDIwNC44Yy03Ni4wNjg1NzEgMC0xNDQuODIyODU3IDI2LjMzMTQyOS0xOTMuMDk3MTQzIDc2LjA2ODU3MS0zOS40OTcxNDMgMzkuNDk3MTQzLTYyLjkwMjg1NyA5MC42OTcxNDMtNjQuMzY1NzE0IDE0Ni4yODU3MTVINzg1LjU1NDI4NkM3NTcuNzYgMzAxLjM0ODU3MSA2MzEuOTU0Mjg2IDIwNC44IDQ5MC4wNTcxNDMgMjA0Ljh6IiBmaWxsPSIjMTQxNTE1Ij48L3BhdGg+PHBhdGggZD0iTTc0Ny41MiA0MzcuMzk0Mjg2SDI2My4zMTQyODZjMjQuODY4NTcxLTEwNi43ODg1NzEgMTE1LjU2NTcxNC0xODQuMzIgMjI5LjY2ODU3MS0xODQuMzIgMTE0LjEwMjg1NyAwIDIxNS4wNCA3Ny41MzE0MjkgMjU0LjUzNzE0MyAxODQuMzJ6IiBmaWxsPSIjOTBDRUQ5Ij48L3BhdGg+PHBhdGggZD0iTTc2Mi4xNDg1NzEgNDQ3LjYzNDI4NmgtNTEybDIuOTI1NzE1LTEzLjE2NTcxNWMyNi4zMzE0MjktMTE1LjU2NTcxNCAxMjIuODgtMTkxLjYzNDI4NiAyMzkuOTA4NTcxLTE5MS42MzQyODUgMTE1LjU2NTcxNCAwIDIyMi4zNTQyODYgNzYuMDY4NTcxIDI2NC43NzcxNDMgMTkxLjYzNDI4NWw0LjM4ODU3MSAxMy4xNjU3MTV6IG0tNDg1LjY2ODU3MS0yMC40OEg3MzEuNDI4NTcxQzY5MC40Njg1NzEgMzI3LjY4IDU5NS4zODI4NTcgMjYzLjMxNDI4NiA0OTIuOTgyODU3IDI2My4zMTQyODZzLTE4Ny4yNDU3MTQgNjQuMzY1NzE0LTIxNi41MDI4NTcgMTYzLjg0eiIgZmlsbD0iIzE0MTUxNSI+PC9wYXRoPjxwYXRoIGQ9Ik00NjkuNTc3MTQzIDQzNy4zOTQyODZoLTQzLjg4NTcxNHYtMTc1LjU0Mjg1N2MxMy4xNjU3MTQtNC4zODg1NzEgMjcuNzk0Mjg2LTcuMzE0Mjg2IDQzLjg4NTcxNC04Ljc3NzE0M3YxODQuMzJ6IiBmaWxsPSIjOTdDQTFCIj48L3BhdGg+PHBhdGggZD0iTTQ3OS44MTcxNDMgNDQ3LjYzNDI4NmgtNjQuMzY1NzE0VjI1NC41MzcxNDNsNy4zMTQyODUtMS40NjI4NTdjMTQuNjI4NTcxLTQuMzg4NTcxIDI5LjI1NzE0My03LjMxNDI4NiA0NS4zNDg1NzItOC43NzcxNDNsMTEuNzAyODU3LTEuNDYyODU3djIwNC44eiBtLTQyLjQyMjg1Ny0yMC40OGgyMS45NDI4NTd2LTE2MC45MTQyODZsLTIxLjk0Mjg1NyA0LjM4ODU3MXYxNTYuNTI1NzE1eiIgZmlsbD0iIzE0MTUxNSI+PC9wYXRoPjxwYXRoIGQ9Ik0yNjQuNzc3MTQzIDgyOS40NGM1Ny4wNTE0MjkgMCAxMDMuODYyODU3LTQ2LjgxMTQyOSAxMDMuODYyODU3LTEwMy44NjI4NTdzLTQ2LjgxMTQyOS0xMDMuODYyODU3LTEwMy44NjI4NTctMTAzLjg2Mjg1N2MtNTcuMDUxNDI5IDAtMTAzLjg2Mjg1NyA0Ni44MTE0MjktMTAzLjg2Mjg1NyAxMDMuODYyODU3czQ2LjgxMTQyOSAxMDMuODYyODU3IDEwMy44NjI4NTcgMTAzLjg2Mjg1N3oiIGZpbGw9IiNBMUE2OUMiPjwvcGF0aD48cGF0aCBkPSJNMjY0Ljc3NzE0MyA4MzkuNjhjLTYyLjkwMjg1NyAwLTExNC4xMDI4NTctNTEuMi0xMTQuMTAyODU3LTExNC4xMDI4NTdzNTEuMi0xMTQuMTAyODU3IDExNC4xMDI4NTctMTE0LjEwMjg1NyAxMTQuMTAyODU3IDUxLjIgMTE0LjEwMjg1NyAxMTQuMTAyODU3LTUxLjIgMTE0LjEwMjg1Ny0xMTQuMTAyODU3IDExNC4xMDI4NTd6IG0wLTIwOS4xODg1NzFjLTUxLjIgMC05My42MjI4NTcgNDIuNDIyODU3LTkzLjYyMjg1NyA5My42MjI4NTcgMCA1MS4yIDQyLjQyMjg1NyA5My42MjI4NTcgOTMuNjIyODU3IDkzLjYyMjg1N3M5My42MjI4NTctNDIuNDIyODU3IDkzLjYyMjg1Ny05My42MjI4NTdjMC01MS4yLTQyLjQyMjg1Ny05My42MjI4NTctOTMuNjIyODU3LTkzLjYyMjg1N3oiIGZpbGw9IiMxNDE1MTUiPjwvcGF0aD48cGF0aCBkPSJNMjY0Ljc3NzE0MyA3MjUuNTc3MTQzbS00OS43MzcxNDMgMGE0OS43MzcxNDMgNDkuNzM3MTQzIDAgMSAwIDk5LjQ3NDI4NiAwIDQ5LjczNzE0MyA0OS43MzcxNDMgMCAxIDAtOTkuNDc0Mjg2IDBaIiBmaWxsPSIjREFEOUI0Ij48L3BhdGg+PHBhdGggZD0iTTI2NC43NzcxNDMgNzg0LjA5MTQyOWMtMzIuMTgyODU3IDAtNTkuOTc3MTQzLTI2LjMzMTQyOS01OS45NzcxNDMtNTkuOTc3MTQzIDAtMzIuMTgyODU3IDI2LjMzMTQyOS01OS45NzcxNDMgNTkuOTc3MTQzLTU5Ljk3NzE0MyAzMi4xODI4NTcgMCA1OS45NzcxNDMgMjYuMzMxNDI5IDU5Ljk3NzE0MyA1OS45NzcxNDNzLTI3Ljc5NDI4NiA1OS45NzcxNDMtNTkuOTc3MTQzIDU5Ljk3NzE0M3ogbTAtOTguMDExNDI5Yy0yMS45NDI4NTcgMC0zOS40OTcxNDMgMTcuNTU0Mjg2LTM5LjQ5NzE0MyAzOS40OTcxNDMgMCAyMS45NDI4NTcgMTcuNTU0Mjg2IDM5LjQ5NzE0MyAzOS40OTcxNDMgMzkuNDk3MTQzIDIxLjk0Mjg1NyAwIDM5LjQ5NzE0My0xNy41NTQyODYgMzkuNDk3MTQzLTM5LjQ5NzE0My0xLjQ2Mjg1Ny0yMS45NDI4NTctMTcuNTU0Mjg2LTM5LjQ5NzE0My0zOS40OTcxNDMtMzkuNDk3MTQzeiIgZmlsbD0iIzE0MTUxNSI+PC9wYXRoPjxwYXRoIGQ9Ik03NzMuODUxNDI5IDgyOS40NGM1Ny4wNTE0MjkgMCAxMDMuODYyODU3LTQ2LjgxMTQyOSAxMDMuODYyODU3LTEwMy44NjI4NTdzLTQ2LjgxMTQyOS0xMDMuODYyODU3LTEwMy44NjI4NTctMTAzLjg2Mjg1N2MtNTcuMDUxNDI5IDAtMTAzLjg2Mjg1NyA0Ni44MTE0MjktMTAzLjg2Mjg1OCAxMDMuODYyODU3czQ1LjM0ODU3MSAxMDMuODYyODU3IDEwMy44NjI4NTggMTAzLjg2Mjg1N3oiIGZpbGw9IiNBMUE2OUMiPjwvcGF0aD48cGF0aCBkPSJNNzczLjg1MTQyOSA4MzkuNjhjLTYyLjkwMjg1NyAwLTExNC4xMDI4NTctNTEuMi0xMTQuMTAyODU4LTExNC4xMDI4NTdzNTEuMi0xMTQuMTAyODU3IDExNC4xMDI4NTgtMTE0LjEwMjg1NyAxMTQuMTAyODU3IDUxLjIgMTE0LjEwMjg1NyAxMTQuMTAyODU3LTUxLjIgMTE0LjEwMjg1Ny0xMTQuMTAyODU3IDExNC4xMDI4NTd6IG0wLTIwOS4xODg1NzFjLTUxLjIgMC05My42MjI4NTcgNDIuNDIyODU3LTkzLjYyMjg1OCA5My42MjI4NTcgMCA1MS4yIDQyLjQyMjg1NyA5My42MjI4NTcgOTMuNjIyODU4IDkzLjYyMjg1NyA1MS4yIDAgOTMuNjIyODU3LTQyLjQyMjg1NyA5My42MjI4NTctOTMuNjIyODU3IDAtNTEuMi00Mi40MjI4NTctOTMuNjIyODU3LTkzLjYyMjg1Ny05My42MjI4NTd6IiBmaWxsPSIjMTQxNTE1Ij48L3BhdGg+PHBhdGggZD0iTTc3My44NTE0MjkgNzI1LjU3NzE0M20tNDkuNzM3MTQzIDBhNDkuNzM3MTQzIDQ5LjczNzE0MyAwIDEgMCA5OS40NzQyODUgMCA0OS43MzcxNDMgNDkuNzM3MTQzIDAgMSAwLTk5LjQ3NDI4NSAwWiIgZmlsbD0iI0RBRDlCNCI+PC9wYXRoPjxwYXRoIGQ9Ik03NzMuODUxNDI5IDc4NC4wOTE0MjljLTMyLjE4Mjg1NyAwLTU5Ljk3NzE0My0yNi4zMzE0MjktNTkuOTc3MTQzLTU5Ljk3NzE0MyAwLTMyLjE4Mjg1NyAyNi4zMzE0MjktNTkuOTc3MTQzIDU5Ljk3NzE0My01OS45NzcxNDMgMzIuMTgyODU3IDAgNTkuOTc3MTQzIDI2LjMzMTQyOSA1OS45NzcxNDIgNTkuOTc3MTQzLTEuNDYyODU3IDMzLjY0NTcxNC0yNy43OTQyODYgNTkuOTc3MTQzLTU5Ljk3NzE0MiA1OS45NzcxNDN6IG0wLTk4LjAxMTQyOWMtMjEuOTQyODU3IDAtMzkuNDk3MTQzIDE3LjU1NDI4Ni0zOS40OTcxNDMgMzkuNDk3MTQzIDAgMjEuOTQyODU3IDE3LjU1NDI4NiAzOS40OTcxNDMgMzkuNDk3MTQzIDM5LjQ5NzE0MyAyMS45NDI4NTcgMCAzOS40OTcxNDMtMTcuNTU0Mjg2IDM5LjQ5NzE0Mi0zOS40OTcxNDMtMS40NjI4NTctMjEuOTQyODU3LTE5LjAxNzE0My0zOS40OTcxNDMtMzkuNDk3MTQyLTM5LjQ5NzE0M3oiIGZpbGw9IiMxNDE1MTUiPjwvcGF0aD48cGF0aCBkPSJNNDQ5LjA5NzE0MyA2NDUuMTJjLTUuODUxNDI5IDAtMTAuMjQtNC4zODg1NzEtMTAuMjQtMTAuMjR2LTE0NC44MjI4NTdjMC01Ljg1MTQyOSA0LjM4ODU3MS0xMC4yNCAxMC4yNC0xMC4yNHMxMC4yNCA0LjM4ODU3MSAxMC4yNCAxMC4yNHYxNDQuODIyODU3YzAgNS44NTE0MjktNC4zODg1NzEgMTAuMjQtMTAuMjQgMTAuMjR6IiBmaWxsPSIjMTQxNTE1Ij48L3BhdGg+PHBhdGggZD0iTTY2MS4yMTE0MjkgMzk2LjQzNDI4Nmg3Ni4wNjg1NzFjNy4zMTQyODYgMCAxNC42Mjg1NzEgNS44NTE0MjkgMTQuNjI4NTcxIDE0LjYyODU3MXYzNi41NzE0MjljMCA3LjMxNDI4Ni01Ljg1MTQyOSAxNC42Mjg1NzEtMTQuNjI4NTcxIDE0LjYyODU3MWgtNzYuMDY4NTcxYy03LjMxNDI4NiAwLTE0LjYyODU3MS01Ljg1MTQyOS0xNC42Mjg1NzItMTQuNjI4NTcxVjQwOS42YzAtNy4zMTQyODYgNy4zMTQyODYtMTMuMTY1NzE0IDE0LjYyODU3Mi0xMy4xNjU3MTR6IiBmaWxsPSIjREFFNDgzIj48L3BhdGg+PHBhdGggZD0iTTczNy4yOCA0NzEuMDRoLTc2LjA2ODU3MWMtMTMuMTY1NzE0IDAtMjQuODY4NTcxLTExLjcwMjg1Ny0yNC44Njg1NzItMjQuODY4NTcxVjQwOS42YzAtMTMuMTY1NzE0IDExLjcwMjg1Ny0yNC44Njg1NzEgMjQuODY4NTcyLTI0Ljg2ODU3MWg3Ni4wNjg1NzFjMTMuMTY1NzE0IDAgMjQuODY4NTcxIDExLjcwMjg1NyAyNC44Njg1NzEgMjQuODY4NTcxdjM2LjU3MTQyOWMwIDEzLjE2NTcxNC0xMS43MDI4NTcgMjQuODY4NTcxLTI0Ljg2ODU3MSAyNC44Njg1NzF6IG0tNzYuMDY4NTcxLTY0LjM2NTcxNGMtMi45MjU3MTQgMC00LjM4ODU3MSAxLjQ2Mjg1Ny00LjM4ODU3MiA0LjM4ODU3MXYzNi41NzE0MjljMCAyLjkyNTcxNCAxLjQ2Mjg1NyA0LjM4ODU3MSA0LjM4ODU3MiA0LjM4ODU3MWg3Ni4wNjg1NzFjMi45MjU3MTQgMCA0LjM4ODU3MS0xLjQ2Mjg1NyA0LjM4ODU3MS00LjM4ODU3MVY0MDkuNmMwLTIuOTI1NzE0LTEuNDYyODU3LTQuMzg4NTcxLTQuMzg4NTcxLTQuMzg4NTcxaC03Ni4wNjg1NzF6IiBmaWxsPSIjMTQxNTE1Ij48L3BhdGg+PHBhdGggZD0iTTQzLjg4NTcxNCA2ODkuMDA1NzE0aDcxLjY4djMyLjE4Mjg1N0g0My44ODU3MTR6IiBmaWxsPSIjNkU3Mzc3Ij48L3BhdGg+PHBhdGggZD0iTTExNy4wMjg1NzEgNzMxLjQyODU3MUg0My44ODU3MTRjLTUuODUxNDI5IDAtMTAuMjQtNC4zODg1NzEtMTAuMjQtMTAuMjR2LTMyLjE4Mjg1N2MwLTUuODUxNDI5IDQuMzg4NTcxLTEwLjI0IDEwLjI0LTEwLjI0aDczLjE0Mjg1N2M1Ljg1MTQyOSAwIDEwLjI0IDQuMzg4NTcxIDEwLjI0IDEwLjI0djMyLjE4Mjg1N2MwIDUuODUxNDI5LTUuODUxNDI5IDEwLjI0LTEwLjI0IDEwLjI0eiBtLTYyLjkwMjg1Ny0yMC40OGg1MS4ydi0xMS43MDI4NTdINTQuMTI1NzE0djExLjcwMjg1N3oiIGZpbGw9IiMxNDE1MTUiPjwvcGF0aD48cGF0aCBkPSJNODk2LjczMTQyOSA2MTAuMDExNDI5aDY0LjM2NTcxNGMxMC4yNCAwIDE5LjAxNzE0MyA4Ljc3NzE0MyAxOS4wMTcxNDMgMTkuMDE3MTQydjEwLjI0YzAgMTAuMjQtOC43NzcxNDMgMTkuMDE3MTQzLTE5LjAxNzE0MyAxOS4wMTcxNDNoLTY0LjM2NTcxNGMtMTAuMjQgMC0xOS4wMTcxNDMtOC43NzcxNDMtMTkuMDE3MTQzLTE5LjAxNzE0M1Y2MjkuMDI4NTcxYzAtMTEuNzAyODU3IDguNzc3MTQzLTE5LjAxNzE0MyAxOS4wMTcxNDMtMTkuMDE3MTQyeiIgZmlsbD0iI0ZGRTYzOCI+PC9wYXRoPjxwYXRoIGQ9Ik05NjEuMDk3MTQzIDY2OC41MjU3MTRoLTY0LjM2NTcxNGMtMTYuMDkxNDI5IDAtMjkuMjU3MTQzLTEzLjE2NTcxNC0yOS4yNTcxNDMtMjkuMjU3MTQzVjYyOS4wMjg1NzFjMC0xNi4wOTE0MjkgMTMuMTY1NzE0LTI5LjI1NzE0MyAyOS4yNTcxNDMtMjkuMjU3MTQyaDY0LjM2NTcxNGMxNi4wOTE0MjkgMCAyOS4yNTcxNDMgMTMuMTY1NzE0IDI5LjI1NzE0MyAyOS4yNTcxNDJ2MTAuMjRjMCAxNi4wOTE0MjktMTMuMTY1NzE0IDI5LjI1NzE0My0yOS4yNTcxNDMgMjkuMjU3MTQzeiBtLTY0LjM2NTcxNC00OC4yNzQyODVjLTQuMzg4NTcxIDAtOC43NzcxNDMgNC4zODg1NzEtOC43NzcxNDMgOC43NzcxNDJ2MTAuMjRjMCA0LjM4ODU3MSA0LjM4ODU3MSA4Ljc3NzE0MyA4Ljc3NzE0MyA4Ljc3NzE0M2g2NC4zNjU3MTRjNC4zODg1NzEgMCA4Ljc3NzE0My00LjM4ODU3MSA4Ljc3NzE0My04Ljc3NzE0M1Y2MjkuMDI4NTcxYzAtNC4zODg1NzEtNC4zODg1NzEtOC43NzcxNDMtOC43NzcxNDMtOC43NzcxNDJoLTY0LjM2NTcxNHoiIGZpbGw9IiMxNDE1MTUiPjwvcGF0aD48cGF0aCBkPSJNOTM0Ljc2NTcxNCA1NjAuMjc0Mjg2bS0zMi4xODI4NTcgMGEzMi4xODI4NTcgMzIuMTgyODU3IDAgMSAwIDY0LjM2NTcxNCAwIDMyLjE4Mjg1NyAzMi4xODI4NTcgMCAxIDAtNjQuMzY1NzE0IDBaIiBmaWxsPSIjRkNERDEwIj48L3BhdGg+PHBhdGggZD0iTTkzNC43NjU3MTQgNjAyLjY5NzE0M2MtMjMuNDA1NzE0IDAtNDIuNDIyODU3LTE5LjAxNzE0My00Mi40MjI4NTctNDIuNDIyODU3IDAtMjMuNDA1NzE0IDE5LjAxNzE0My00Mi40MjI4NTcgNDIuNDIyODU3LTQyLjQyMjg1N3M0Mi40MjI4NTcgMTkuMDE3MTQzIDQyLjQyMjg1NyA0Mi40MjI4NTdjMS40NjI4NTcgMjMuNDA1NzE0LTE5LjAxNzE0MyA0Mi40MjI4NTctNDIuNDIyODU3IDQyLjQyMjg1N3ogbTAtNjQuMzY1NzE0Yy0xMS43MDI4NTcgMC0yMS45NDI4NTcgMTAuMjQtMjEuOTQyODU3IDIxLjk0Mjg1N3MxMC4yNCAyMS45NDI4NTcgMjEuOTQyODU3IDIxLjk0Mjg1NyAyMS45NDI4NTctMTAuMjQgMjEuOTQyODU3LTIxLjk0Mjg1Ny04Ljc3NzE0My0yMS45NDI4NTctMjEuOTQyODU3LTIxLjk0Mjg1N3oiIGZpbGw9IiMxNDE1MTUiPjwvcGF0aD48cGF0aCBkPSJNNTA3LjYxMTQyOSAzNjEuMzI1NzE0Yy0yLjkyNTcxNCAwLTUuODUxNDI5LTEuNDYyODU3LTcuMzE0Mjg2LTIuOTI1NzE0LTQuMzg4NTcxLTQuMzg4NTcxLTQuMzg4NTcxLTEwLjI0IDAtMTQuNjI4NTcxbDQ2LjgxMTQyOC00Ni44MTE0MjljNC4zODg1NzEtNC4zODg1NzEgMTAuMjQtNC4zODg1NzEgMTQuNjI4NTcyIDAgNC4zODg1NzEgNC4zODg1NzEgNC4zODg1NzEgMTAuMjQgMCAxNC42Mjg1NzFsLTQ2LjgxMTQyOSA0Ni44MTE0MjljLTEuNDYyODU3IDIuOTI1NzE0LTQuMzg4NTcxIDIuOTI1NzE0LTcuMzE0Mjg1IDIuOTI1NzE0eiIgZmlsbD0iIzE0MTUxNSI+PC9wYXRoPjxwYXRoIGQ9Ik01MTQuOTI1NzE0IDQxNS40NTE0MjljLTIuOTI1NzE0IDAtNS44NTE0MjktMS40NjI4NTctNy4zMTQyODUtMi45MjU3MTUtNC4zODg1NzEtNC4zODg1NzEtNC4zODg1NzEtMTAuMjQgMC0xNC42Mjg1NzFsODQuODQ1NzE0LTg3Ljc3MTQyOWM0LjM4ODU3MS00LjM4ODU3MSAxMC4yNC00LjM4ODU3MSAxNC42Mjg1NzEgMCA0LjM4ODU3MSA0LjM4ODU3MSA0LjM4ODU3MSAxMC4yNCAwIDE0LjYyODU3MmwtODQuODQ1NzE0IDg3Ljc3MTQyOGMtMS40NjI4NTcgMi45MjU3MTQtNC4zODg1NzEgMi45MjU3MTQtNy4zMTQyODYgMi45MjU3MTV6IiBmaWxsPSIjMTQxNTE1Ij48L3BhdGg+PC9nPjwvc3ZnPgo\"></img>\n",
+        "mode": "html"
+      },
+      "pluginVersion": "9.5.2",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "The amount of total CO2e emissions released by physical machines in the selected scope and over the selected time is equivalent to the amount of CO2e emissions released by vehicles driven for 1 year. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "semi-dark-yellow",
+            "mode": "fixed"
+          },
+          "decimals": 3,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 19,
+        "y": 1
+      },
+      "id": 20,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*count(e.name)/${CORES_CPU}*${CPU_CONSUMPTION}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}/1000/${VEHICLE_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100 as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "🚗 Total CO2e emissions - Vehicles per year ",
+      "transformations": [],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "How many trees growing for 10 years will it take to sequester the total CO2e emissions released by physical machines in the selected scope and over the selected time. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "trees"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 10,
+        "y": 6
+      },
+      "id": 16,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*count(e.name)/${CORES_CPU}*${CPU_CONSUMPTION}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}/1000/${TREE_SEQUESTRATION_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100 as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "🌲Total CO2e emissions - Equivalent in trees growing for 10 years",
+      "transformations": [],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "The amount of total CO2e emissions released by physical machines in the selected scope and over the selected time is equivalent to the amount of CO2e emissions released by household electricity consumption for 1 year. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "yellow",
+            "mode": "fixed"
+          },
+          "decimals": 3,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 19,
+        "y": 6
+      },
+      "id": 21,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*count(e.name)/${CORES_CPU}*${CPU_CONSUMPTION}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}/1000/${HOUSEHOLD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100 as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "🏠 Total CO2e emissions - Household per year",
+      "transformations": [],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "collapsed": true,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "id": 2,
+      "panels": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 3,
+            "x": 0,
+            "y": 20
+          },
+          "id": 99,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "![svg image](data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjIwMHB4IiB3aWR0aD0iMjAwcHgiIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgZmlsbD0iIzAwMDAwMCI+PGcgaWQ9IlNWR1JlcG9fYmdDYXJyaWVyIiBzdHJva2Utd2lkdGg9IjAiPjwvZz48ZyBpZD0iU1ZHUmVwb190cmFjZXJDYXJyaWVyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjwvZz48ZyBpZD0iU1ZHUmVwb19pY29uQ2FycmllciI+IDxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+IC5zdDB7ZmlsbDojMjM2ZmQxO30gLnN0MXtvcGFjaXR5OjAuMjtmaWxsOiMyMzFGMjA7fSAuc3Qye2ZpbGw6I2I0YzRkZjt9IC5zdDN7ZmlsbDojRTBFMEQxO30gPC9zdHlsZT4gPGNpcmNsZSBjbGFzcz0ic3QwIiBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiPjwvY2lyY2xlPiA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMTguNCw1MC40Yy0wLjgsMC44LTIsMC44LTIuOCwwbDAsMGMtMC44LTAuOC0wLjgtMiwwLTIuOGw5LjktOS45YzAuOC0wLjgsMi0wLjgsMi44LDBsMCwwIGMwLjgsMC44LDAuOCwyLDAsMi44TDE4LjQsNTAuNHoiPjwvcGF0aD4gPHBhdGggY2xhc3M9InN0MSIgZD0iTTMxLjEsMjYuNGMtMC44LDAuOC0yLDAuOC0yLjgsMGwwLDBjLTAuOC0wLjgtMC44LTIsMC0yLjhsOS45LTkuOWMwLjgtMC44LDItMC44LDIuOCwwbDAsMCBjMC44LDAuOCwwLjgsMiwwLDIuOEwzMS4xLDI2LjR6Ij48L3BhdGg+IDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik00Mi41LDM3LjdjLTAuOCwwLjgtMiwwLjgtMi44LDBsMCwwYy0wLjgtMC44LTAuOC0yLDAtMi44bDkuOS05LjljMC44LTAuOCwyLTAuOCwyLjgsMGwwLDAgYzAuOCwwLjgsMC44LDIsMCwyLjhMNDIuNSwzNy43eiI+PC9wYXRoPiA8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTguNCw0OC40Yy0wLjgsMC44LTIsMC44LTIuOCwwbDAsMGMtMC44LTAuOC0wLjgtMiwwLTIuOGw5LjktOS45YzAuOC0wLjgsMi0wLjgsMi44LDBsMCwwIGMwLjgsMC44LDAuOCwyLDAsMi44TDE4LjQsNDguNHoiPjwvcGF0aD4gPHBhdGggY2xhc3M9InN0MyIgZD0iTTMxLjEsMjQuNGMtMC44LDAuOC0yLDAuOC0yLjgsMGwwLDBjLTAuOC0wLjgtMC44LTIsMC0yLjhsOS45LTkuOWMwLjgtMC44LDItMC44LDIuOCwwbDAsMCBjMC44LDAuOCwwLjgsMiwwLDIuOEwzMS4xLDI0LjR6Ij48L3BhdGg+IDxwYXRoIGNsYXNzPSJzdDMiIGQ9Ik00Mi41LDM1LjdjLTAuOCwwLjgtMiwwLjgtMi44LDBsMCwwYy0wLjgtMC44LTAuOC0yLDAtMi44bDkuOS05LjljMC44LTAuOCwyLTAuOCwyLjgsMGwwLDAgYzAuOCwwLjgsMC44LDIsMCwyLjhMNDIuNSwzNS43eiI+PC9wYXRoPiA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMjcuOSwxOS4zbC04LDhjLTQuMyw0LjMtNC4zLDExLjMsMCwxNS42bDIuOCwyLjhjNC4zLDQuMywxMS4zLDQuMywxNS42LDBsOC04TDI3LjksMTkuM3oiPjwvcGF0aD4gPHBhdGggY2xhc3M9InN0MiIgZD0iTTI3LjksMTcuN2wtOCw4Yy00LjMsNC4zLTQuMywxMS4zLDAsMTUuNmwyLjgsMi44YzQuMyw0LjMsMTEuMyw0LjMsMTUuNiwwbDgtOEwyNy45LDE3Ljd6Ij48L3BhdGg+IDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik00OC4xLDQwLjRjLTAuOCwwLjgtMiwwLjgtMi44LDBMMjUuNSwyMC42Yy0wLjgtMC44LTAuOC0yLDAtMi44bDAsMGMwLjgtMC44LDItMC44LDIuOCwwbDE5LjgsMTkuOCBDNDguOSwzOC40LDQ4LjksMzkuNiw0OC4xLDQwLjRMNDguMSw0MC40eiI+PC9wYXRoPiA8cGF0aCBjbGFzcz0ic3QyIiBkPSJNNDguMSwzOC41Yy0wLjgsMC44LTIsMC44LTIuOCwwTDI1LjUsMTguN2MtMC44LTAuOC0wLjgtMiwwLTIuOGwwLDBjMC44LTAuOCwyLTAuOCwyLjgsMGwxOS44LDE5LjggQzQ4LjksMzYuNSw0OC45LDM3LjcsNDguMSwzOC41TDQ4LjEsMzguNXoiPjwvcGF0aD4gPC9nPjwvc3ZnPg)\n\n\n# Overall consumption\n\nThis dashboard shows the overall consumption for all VMs running in the IT Infrastructure.\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.5.2",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "orange",
+                "mode": "fixed"
+              },
+              "decimals": 0,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "watth"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 4,
+            "x": 3,
+            "y": 20
+          },
+          "id": 90,
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY} as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nGROUP BY m.time\nORDER BY 1",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "⚡ Average Energy -All VMs (Wh)",
+          "transformations": [],
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "How many acres of forest per year will it take to sequester the total CO2e emissions released by physical machines in the selected scope and over the selected time. ",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "orange",
+                "mode": "fixed"
+              },
+              "decimals": 1,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "watth"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 4,
+            "x": 7,
+            "y": 20
+          },
+          "id": 93,
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY}*24*365 as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nGROUP BY m.time\nORDER BY 1",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "⚡ Average Energy -All VMs (Wh/year)",
+          "transformations": [],
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "Total energy consumption in Watt-Hour of all hosts in the selected scope and during the selected time of the dashboard. ",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "watth"
+            },
+            "overrides": [
+              {
+                "__systemRef": "hideSeriesFrom",
+                "matcher": {
+                  "id": "byNames",
+                  "options": {
+                    "mode": "exclude",
+                    "names": [
+                      "value"
+                    ],
+                    "prefix": "All except:",
+                    "readOnly": true
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": true
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "value"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "orange",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 13,
+            "x": 11,
+            "y": 20
+          },
+          "id": 49,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY} as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nGROUP BY m.time\nORDER BY 1",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "⚡ Energy Consumption - All VMs (Wh)",
+          "transformations": [
+            {
+              "id": "reduce",
+              "options": {
+                "includeTimeField": false,
+                "mode": "seriesToRows",
+                "reducers": []
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "How many acres of forest per year will it take to sequester the total CO2e emissions released by physical machines in the selected scope and over the selected time. ",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "purple",
+                "mode": "fixed"
+              },
+              "decimals": 1,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "masskg"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 4,
+            "x": 3,
+            "y": 28
+          },
+          "id": 91,
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY}*${PRIVATE_CLOUD_AVG_PUE}/1000*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100*1000 as \"CO2e (kg)\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nGROUP BY m.time\nORDER BY 1",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "⛽ Average CO2e Emissions - All VMs (g/hour)",
+          "transformations": [],
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "How many acres of forest per year will it take to sequester the total CO2e emissions released by physical machines in the selected scope and over the selected time. ",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "purple",
+                "mode": "fixed"
+              },
+              "decimals": 3,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "masst"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 4,
+            "x": 7,
+            "y": 28
+          },
+          "id": 94,
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY}*${PRIVATE_CLOUD_AVG_PUE}/1000*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100*24*365 as \"CO2e (t)\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nGROUP BY m.time\nORDER BY 1",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "⛽ Average CO2e Emissions - All VMs (t/year)",
+          "transformations": [],
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "CO2e emissions graph shows the CO2e emissions in metric tons (1 metric ton = 1,000Kg) for the hosts in the selected scope and over the selected period of the dashboard. \nCO2e emissions are calculated using Cloud Carbon Footprint open source methodology. See the Help section for more details. ",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "purple",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "masskg"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 13,
+            "x": 11,
+            "y": 28
+          },
+          "id": 87,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "8.5.12",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY}*${PRIVATE_CLOUD_AVG_PUE}/1000*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100*1000 as \"CO2e (kg)\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nGROUP BY m.time\nORDER BY 1",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "⛽ CO2e Emissions - All VMs (g)",
+          "transformations": [],
+          "transparent": true,
+          "type": "timeseries"
+        }
+      ],
+      "title": "🌏 Overview",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 74,
+      "panels": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "gridPos": {
+            "h": 15,
+            "w": 3,
+            "x": 0,
+            "y": 21
+          },
+          "id": 100,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "![svg image](data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgZmlsbD0iIzAwMDAwMCI+PGcgaWQ9IlNWR1JlcG9fYmdDYXJyaWVyIiBzdHJva2Utd2lkdGg9IjAiPjwvZz48ZyBpZD0iU1ZHUmVwb190cmFjZXJDYXJyaWVyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjwvZz48ZyBpZD0iU1ZHUmVwb19pY29uQ2FycmllciI+IDxjaXJjbGUgc3R5bGU9ImZpbGw6IzI2M0E3QTsiIGN4PSIyNTYiIGN5PSIyNTYiIHI9IjI1NiI+PC9jaXJjbGU+IDxnPiA8cGF0aCBzdHlsZT0iZmlsbDojMTIxMTQ5OyIgZD0iTTUwOS4xODUsMjk0LjAyOUwzMjkuOTM4LDExOS44NjFMMzE3LjQ4NywxNzYuN0wxNjQuMDU5LDMyMy4yMzJsLTQzLjY3Miw2Ljg5NmwxNzMuMzcsMTc5LjA5NSBDNDA0LjgyNSw0OTIuODAzLDQ5Mi42NDcsNDA1LjA1OSw1MDkuMTg1LDI5NC4wMjl6Ij48L3BhdGg+IDxwb2x5Z29uIHN0eWxlPSJmaWxsOiMxMjExNDk7IiBwb2ludHM9IjExOS42NTgsMjg0LjIwNyAxNjUuNDk1LDMzMC45OSAxNjEuNzYxLDI4MC43MDkgIj48L3BvbHlnb24+IDxwb2x5Z29uIHN0eWxlPSJmaWxsOiMxMjExNDk7IiBwb2ludHM9IjExOS42NDgsMTkzLjE5NSAxNTkuNzQ5LDIzMy4zMDEgMTYwLjYxMSwxOTEuMDY2ICI+PC9wb2x5Z29uPiA8cG9seWdvbiBzdHlsZT0iZmlsbDojMTIxMTQ5OyIgcG9pbnRzPSIxMTkuOTcyLDIzOC44MzMgMTU4Ljg4NywyNzcuMjYxIDE1Ny43MzcsMjM0LjE2MyAiPjwvcG9seWdvbj4gPHBvbHlnb24gc3R5bGU9ImZpbGw6IzEyMTE0OTsiIHBvaW50cz0iMjg0LjE1OCwxMTkuODExIDMzMC4xMjgsMTY1Ljc4MyAyODMuNTgyLDE2Mi45MDkgIj48L3BvbHlnb24+IDxwb2x5Z29uIHN0eWxlPSJmaWxsOiMxMjExNDk7IiBwb2ludHM9IjIzOC43NjEsMTE5LjgxMSAyODAuNDIzLDE2MS40NzMgMjMxLjg2NSwxNjEuNzU5ICI+PC9wb2x5Z29uPiA8cG9seWdvbiBzdHlsZT0iZmlsbDojMTIxMTQ5OyIgcG9pbnRzPSIxOTMuMjg0LDExOS44OTIgMjM1LjMxMywxNjIuMzM1IDE4NC43NDYsMTU5LjQ2MSAiPjwvcG9seWdvbj4gPC9nPiA8Zz4gPHBhdGggc3R5bGU9ImZpbGw6I0ZFRTE4NzsiIGQ9Ik0xODcuNzMzLDE3OC40MjRjLTQuMjg0LDAtNy43NTgtMy40NzQtNy43NTgtNy43NTh2LTQ1LjUxMWMwLTQuMjg0LDMuNDc0LTcuNzU4LDcuNzU4LTcuNzU4IHM3Ljc1OCwzLjQ3NCw3Ljc1OCw3Ljc1OHY0NS41MTFDMTk1LjQ5MSwxNzQuOTUxLDE5Mi4wMTksMTc4LjQyNCwxODcuNzMzLDE3OC40MjR6Ij48L3BhdGg+IDxwYXRoIHN0eWxlPSJmaWxsOiNGRUUxODc7IiBkPSJNMjMzLjI0NCwxNzguNDI0Yy00LjI4NCwwLTcuNzU4LTMuNDc0LTcuNzU4LTcuNzU4di00NS41MTFjMC00LjI4NCwzLjQ3NC03Ljc1OCw3Ljc1OC03Ljc1OCBzNy43NTgsMy40NzQsNy43NTgsNy43NTh2NDUuNTExQzI0MS4wMDIsMTc0Ljk1MSwyMzcuNTI4LDE3OC40MjQsMjMzLjI0NCwxNzguNDI0eiI+PC9wYXRoPiA8L2c+IDxnPiA8cGF0aCBzdHlsZT0iZmlsbDojRkZDNjFCOyIgZD0iTTMyNC4yNjcsMTc4LjQyNGMtNC4yODQsMC03Ljc1OC0zLjQ3NC03Ljc1OC03Ljc1OHYtNDUuNTExYzAtNC4yODQsMy40NzQtNy43NTgsNy43NTgtNy43NTggczcuNzU4LDMuNDc0LDcuNzU4LDcuNzU4djQ1LjUxMUMzMzIuMDI0LDE3NC45NTEsMzI4LjU1MSwxNzguNDI0LDMyNC4yNjcsMTc4LjQyNHoiPjwvcGF0aD4gPHBhdGggc3R5bGU9ImZpbGw6I0ZGQzYxQjsiIGQ9Ik0yNzguNzU2LDE3OC40MjRjLTQuMjg0LDAtNy43NTgtMy40NzQtNy43NTgtNy43NTh2LTQ1LjUxMWMwLTQuMjg0LDMuNDc0LTcuNzU4LDcuNzU4LTcuNzU4IHM3Ljc1OCwzLjQ3NCw3Ljc1OCw3Ljc1OHY0NS41MTFDMjg2LjUxMywxNzQuOTUxLDI4My4wNDEsMTc4LjQyNCwyNzguNzU2LDE3OC40MjR6Ij48L3BhdGg+IDwvZz4gPGc+IDxwYXRoIHN0eWxlPSJmaWxsOiNGRUUxODc7IiBkPSJNMTg3LjczMywzOTQuNjAyYy00LjI4NCwwLTcuNzU4LTMuNDc0LTcuNzU4LTcuNzU4di00NS41MTFjMC00LjI4NCwzLjQ3NC03Ljc1OCw3Ljc1OC03Ljc1OCBzNy43NTgsMy40NzQsNy43NTgsNy43NTh2NDUuNTExQzE5NS40OTEsMzkxLjEzLDE5Mi4wMTksMzk0LjYwMiwxODcuNzMzLDM5NC42MDJ6Ij48L3BhdGg+IDxwYXRoIHN0eWxlPSJmaWxsOiNGRUUxODc7IiBkPSJNMjMzLjI0NCwzOTQuNjAyYy00LjI4NCwwLTcuNzU4LTMuNDc0LTcuNzU4LTcuNzU4di00NS41MTFjMC00LjI4NCwzLjQ3NC03Ljc1OCw3Ljc1OC03Ljc1OCBzNy43NTgsMy40NzQsNy43NTgsNy43NTh2NDUuNTExQzI0MS4wMDIsMzkxLjEzLDIzNy41MjgsMzk0LjYwMiwyMzMuMjQ0LDM5NC42MDJ6Ij48L3BhdGg+IDwvZz4gPGc+IDxwYXRoIHN0eWxlPSJmaWxsOiNGRkM2MUI7IiBkPSJNMzI0LjI2NywzOTQuNjAyYy00LjI4NCwwLTcuNzU4LTMuNDc0LTcuNzU4LTcuNzU4di00NS41MTFjMC00LjI4NCwzLjQ3NC03Ljc1OCw3Ljc1OC03Ljc1OCBzNy43NTgsMy40NzQsNy43NTgsNy43NTh2NDUuNTExQzMzMi4wMjQsMzkxLjEzLDMyOC41NTEsMzk0LjYwMiwzMjQuMjY3LDM5NC42MDJ6Ij48L3BhdGg+IDxwYXRoIHN0eWxlPSJmaWxsOiNGRkM2MUI7IiBkPSJNMjc4Ljc1NiwzOTQuNjAyYy00LjI4NCwwLTcuNzU4LTMuNDc0LTcuNzU4LTcuNzU4di00NS41MTFjMC00LjI4NCwzLjQ3NC03Ljc1OCw3Ljc1OC03Ljc1OCBzNy43NTgsMy40NzQsNy43NTgsNy43NTh2NDUuNTExQzI4Ni41MTMsMzkxLjEzLDI4My4wNDEsMzk0LjYwMiwyNzguNzU2LDM5NC42MDJ6Ij48L3BhdGg+IDxwYXRoIHN0eWxlPSJmaWxsOiNGRkM2MUI7IiBkPSJNMzg2Ljg0NCwxOTUuNDkxaC00NS41MTFjLTQuMjg0LDAtNy43NTgtMy40NzQtNy43NTgtNy43NThzMy40NzQtNy43NTgsNy43NTgtNy43NThoNDUuNTExIGM0LjI4NCwwLDcuNzU4LDMuNDc0LDcuNzU4LDcuNzU4UzM5MS4xMywxOTUuNDkxLDM4Ni44NDQsMTk1LjQ5MXoiPjwvcGF0aD4gPHBhdGggc3R5bGU9ImZpbGw6I0ZGQzYxQjsiIGQ9Ik0zODYuODQ0LDI0MS4wMDJoLTQ1LjUxMWMtNC4yODQsMC03Ljc1OC0zLjQ3NC03Ljc1OC03Ljc1OHMzLjQ3NC03Ljc1OCw3Ljc1OC03Ljc1OGg0NS41MTEgYzQuMjg0LDAsNy43NTgsMy40NzQsNy43NTgsNy43NThTMzkxLjEzLDI0MS4wMDIsMzg2Ljg0NCwyNDEuMDAyeiI+PC9wYXRoPiA8cGF0aCBzdHlsZT0iZmlsbDojRkZDNjFCOyIgZD0iTTM4Ni44NDQsMzMyLjAyNGgtNDUuNTExYy00LjI4NCwwLTcuNzU4LTMuNDc0LTcuNzU4LTcuNzU4czMuNDc0LTcuNzU4LDcuNzU4LTcuNzU4aDQ1LjUxMSBjNC4yODQsMCw3Ljc1OCwzLjQ3NCw3Ljc1OCw3Ljc1OFMzOTEuMTMsMzMyLjAyNCwzODYuODQ0LDMzMi4wMjR6Ij48L3BhdGg+IDxwYXRoIHN0eWxlPSJmaWxsOiNGRkM2MUI7IiBkPSJNMzg2Ljg0NCwyODYuNTEzaC00NS41MTFjLTQuMjg0LDAtNy43NTgtMy40NzQtNy43NTgtNy43NThzMy40NzQtNy43NTgsNy43NTgtNy43NThoNDUuNTExIGM0LjI4NCwwLDcuNzU4LDMuNDc0LDcuNzU4LDcuNzU4UzM5MS4xMywyODYuNTEzLDM4Ni44NDQsMjg2LjUxM3oiPjwvcGF0aD4gPC9nPiA8Zz4gPHBhdGggc3R5bGU9ImZpbGw6I0ZFRTE4NzsiIGQ9Ik0xNzAuNjY3LDE5NS40OTFoLTQ1LjUxMWMtNC4yODQsMC03Ljc1OC0zLjQ3NC03Ljc1OC03Ljc1OHMzLjQ3NC03Ljc1OCw3Ljc1OC03Ljc1OGg0NS41MTEgYzQuMjg0LDAsNy43NTgsMy40NzQsNy43NTgsNy43NThTMTc0Ljk1MSwxOTUuNDkxLDE3MC42NjcsMTk1LjQ5MXoiPjwvcGF0aD4gPHBhdGggc3R5bGU9ImZpbGw6I0ZFRTE4NzsiIGQ9Ik0xNzAuNjY3LDI0MS4wMDJoLTQ1LjUxMWMtNC4yODQsMC03Ljc1OC0zLjQ3NC03Ljc1OC03Ljc1OHMzLjQ3NC03Ljc1OCw3Ljc1OC03Ljc1OGg0NS41MTEgYzQuMjg0LDAsNy43NTgsMy40NzQsNy43NTgsNy43NThTMTc0Ljk1MSwyNDEuMDAyLDE3MC42NjcsMjQxLjAwMnoiPjwvcGF0aD4gPHBhdGggc3R5bGU9ImZpbGw6I0ZFRTE4NzsiIGQ9Ik0xNzAuNjY3LDMzMi4wMjRoLTQ1LjUxMWMtNC4yODQsMC03Ljc1OC0zLjQ3NC03Ljc1OC03Ljc1OHMzLjQ3NC03Ljc1OCw3Ljc1OC03Ljc1OGg0NS41MTEgYzQuMjg0LDAsNy43NTgsMy40NzQsNy43NTgsNy43NThTMTc0Ljk1MSwzMzIuMDI0LDE3MC42NjcsMzMyLjAyNHoiPjwvcGF0aD4gPHBhdGggc3R5bGU9ImZpbGw6I0ZFRTE4NzsiIGQ9Ik0xNzAuNjY3LDI4Ni41MTNoLTQ1LjUxMWMtNC4yODQsMC03Ljc1OC0zLjQ3NC03Ljc1OC03Ljc1OHMzLjQ3NC03Ljc1OCw3Ljc1OC03Ljc1OGg0NS41MTEgYzQuMjg0LDAsNy43NTgsMy40NzQsNy43NTgsNy43NThTMTc0Ljk1MSwyODYuNTEzLDE3MC42NjcsMjg2LjUxM3oiPjwvcGF0aD4gPC9nPiA8cGF0aCBzdHlsZT0iZmlsbDojN0NCRjM0OyIgZD0iTTE3MC45NTMsMzU4LjU3MmgxNzAuMDkzYzkuNjgsMCwxNy41MjctNy44NDcsMTcuNTI3LTE3LjUyN1YxNzAuOTUzIGMwLTkuNjc4LTcuODQ3LTE3LjUyNS0xNy41MjctMTcuNTI1SDE3MC45NTNjLTkuNjc4LDAtMTcuNTI1LDcuODQ3LTE3LjUyNSwxNy41MjV2MTcwLjA5MyBDMTUzLjQyOCwzNTAuNzI1LDE2MS4yNzUsMzU4LjU3MiwxNzAuOTUzLDM1OC41NzJ6Ij48L3BhdGg+IDxwYXRoIHN0eWxlPSJmaWxsOiM2M0FBMUY7IiBkPSJNMzQxLjA0NSwxNTMuNDI4SDI1NnYyMDUuMTQ1aDg1LjA0NWM5LjY4LDAsMTcuNTI3LTcuODQ3LDE3LjUyNy0xNy41MjdWMTcwLjk1NSBDMzU4LjU3MiwxNjEuMjc1LDM1MC43MjUsMTUzLjQyOCwzNDEuMDQ1LDE1My40Mjh6Ij48L3BhdGg+IDxwYXRoIHN0eWxlPSJmaWxsOiNEREREREQ7IiBkPSJNMTg4LjE5NCwzNDEuMzMzaDEzNS42MTRjOS42OCwwLDE3LjUyNy03Ljg0NywxNy41MjctMTcuNTI3VjE4OC4xOTIgYy0wLjAwMi05LjY3OC03Ljg0OS0xNy41MjUtMTcuNTI3LTE3LjUyNUgxODguMTk0Yy05LjY4LDAtMTcuNTI3LDcuODQ3LTE3LjUyNywxNy41MjV2MTM1LjYxNSBDMTcwLjY2NywzMzMuNDg2LDE3OC41MTQsMzQxLjMzMywxODguMTk0LDM0MS4zMzN6Ij48L3BhdGg+IDxwYXRoIHN0eWxlPSJmaWxsOiNCN0I3Qjc7IiBkPSJNMzIzLjgwNiwxNzAuNjY3SDI1NnYxNzAuNjY3aDY3LjgwNmM5LjY4LDAsMTcuNTI3LTcuODQ3LDE3LjUyNy0xNy41MjdWMTg4LjE5MiBDMzQxLjMzMywxNzguNTE0LDMzMy40ODYsMTcwLjY2NywzMjMuODA2LDE3MC42Njd6Ij48L3BhdGg+IDxyZWN0IHg9IjMxMi44ODkiIHk9IjIyNy41NTYiIHN0eWxlPSJmaWxsOiNGRkM2MUI7IiB3aWR0aD0iMjguNDQ0IiBoZWlnaHQ9IjU2Ljg4OSI+PC9yZWN0PiA8L2c+PC9zdmc+Cg)\n\n\n# Individual VM Consumption\n\nThis dashboard shows the individual consumption per VM.\n\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.5.2",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "This chart shows the number of active VMs in your on-prem environment, and tracks the data over the selected period. \nActive VMs - powered on and discovered by Turbonomic.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "VMs"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 4,
+            "x": 3,
+            "y": 21
+          },
+          "id": 65,
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "/.*/",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  count(e.name) as \"Number of VMs\"\nFROM entity e\nWHERE\n  e.type = 'VIRTUAL_MACHINE' \n",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "💻 Active VMs",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "blue",
+                "mode": "fixed"
+              },
+              "decimals": 0,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "Cores"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 5,
+            "x": 7,
+            "y": 21
+          },
+          "id": 92,
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*count(e.name)/${CORES_CPU} as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY time\nORDER BY 1",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "💻 Active CPU Cores",
+          "transformations": [],
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "This graph shows the ration of number of active VMs per host over the selected period of the dashboard. \nActive VMs - powered on and discovered by Turbonomic.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "dark-blue",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 21
+          },
+          "id": 86,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*count(e.name)/${CORES_CPU} as \"Number of Cores\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\"\njoin scope s on m.entity_oid = s.scoped_oid and s.finish > now() and s.scoped_type = 'VIRTUAL_MACHINE'\nWHERE\n  $__timeFilter(time) and\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.type = 'VCPU' AND\n  s.seed_oid IN (${HOST_LIST})\nGROUP BY m.time\nORDER BY 1",
+              "refId": "Active VMs",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "💻 Active CPU Cores",
+          "transformations": [],
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "Estimated average energy per active VMs in the selected scope.\nActive - powered on and discovered by Turbonomic.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "orange",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "watth"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 9,
+            "x": 3,
+            "y": 28
+          },
+          "id": 68,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "8.5.12",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  SUM(m.current)*${CPU_CONSUMPTION} as \"Total Hosts Energy\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.type = 'VCPU'\nGROUP BY m.time\nORDER BY 1",
+              "refId": "Total Hosts Power",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            },
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  count(m.utilization) as \"Number of Active VMs\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\"\njoin scope s on m.entity_oid = s.scoped_oid and s.finish > now() and s.scoped_type = 'VIRTUAL_MACHINE'\nWHERE\n  $__timeFilter(time) and\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.type = 'VCPU' \nGROUP BY m.time\nORDER BY 1",
+              "refId": "Active VMs",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "Average Energy per VM (Wh)",
+          "transformations": [
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "Average Energy per VM",
+                "binary": {
+                  "left": "Total Hosts Energy",
+                  "operator": "/",
+                  "reducer": "sum",
+                  "right": "Number of Active VMs"
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                },
+                "replaceFields": false
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Average Energy per VM": false,
+                  "Number of Active VMs": true,
+                  "Total Hosts Energy": true,
+                  "Total Hosts Power": true
+                },
+                "indexByName": {},
+                "renameByName": {}
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "Estimated CO2e Emissions per active VMs in the selected scope.\nActive - powered on and discovered by Turbonomic.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "purple",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "masskg"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 28
+          },
+          "id": 102,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "8.5.12",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  SUM(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY}*${PRIVATE_CLOUD_AVG_PUE}/1000*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100 as \"CO2e (kg)\" \nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.type = 'VCPU'\nGROUP BY m.time\nORDER BY 1",
+              "refId": "Total Hosts Power",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            },
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  count(m.utilization) as \"Number of Active VMs\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\"\njoin scope s on m.entity_oid = s.scoped_oid and s.finish > now() and s.scoped_type = 'VIRTUAL_MACHINE'\nWHERE\n  $__timeFilter(time) and\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.type = 'VCPU' \nGROUP BY m.time\nORDER BY 1",
+              "refId": "Active VMs",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "Average CO2e Emissions (t) - Per Vm",
+          "transformations": [
+            {
+              "id": "calculateField",
+              "options": {
+                "alias": "Average Energy per VM",
+                "binary": {
+                  "left": "Total Hosts Energy",
+                  "operator": "/",
+                  "reducer": "sum",
+                  "right": "Number of Active VMs"
+                },
+                "mode": "binary",
+                "reduce": {
+                  "reducer": "sum"
+                },
+                "replaceFields": false
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Average Energy per VM": false,
+                  "Number of Active VMs": true,
+                  "Total Hosts Energy": true,
+                  "Total Hosts Power": true
+                },
+                "indexByName": {},
+                "renameByName": {}
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 3,
+            "x": 0,
+            "y": 36
+          },
+          "id": 104,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "![svg image](data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAyNCAxMDI0IiBjbGFzcz0iaWNvbiIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9IiMwMDAwMDAiPjxnIGlkPSJTVkdSZXBvX2JnQ2FycmllciIgc3Ryb2tlLXdpZHRoPSIwIj48L2c+PGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48L2c+PGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPjxwYXRoIGQ9Ik03MTguOTMzMzMzIDEwNi42NjY2NjdMNDY5LjMzMzMzMyAzNjIuNjY2NjY3bDMyMCAxMDYuNjY2NjY2LTMzNC45MzMzMzMgMzEzLjYgMTA4LjggNTkuNzMzMzM0TDI1NiA5MTcuMzMzMzMzbDU3LjYtMzE1LjczMzMzMyA2MS44NjY2NjcgMTA4LjhMNTc2IDUxMmwtMzIwLTEwNi42NjY2NjdMNTMzLjMzMzMzMyAxMDYuNjY2NjY3aDE4NS42eiIgZmlsbD0iIzAwYjNmZiI+PC9wYXRoPjwvZz48L3N2Zz4)\n\n# Average Power Consumption\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.5.2",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "super-light-yellow",
+                    "value": 50
+                  },
+                  {
+                    "color": "super-light-orange",
+                    "value": 150
+                  },
+                  {
+                    "color": "super-light-red",
+                    "value": 300
+                  }
+                ]
+              },
+              "unit": "watt"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 10,
+            "x": 3,
+            "y": 36
+          },
+          "id": 51,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "datasource",
+                "uid": "-- Dashboard --"
+              },
+              "panelId": 6,
+              "refId": "A"
+            }
+          ],
+          "title": "Average Power Consumption (W) - Individual VM(s)",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 1,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 4,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "always",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "dashed"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "light-yellow",
+                    "value": 50
+                  },
+                  {
+                    "color": "orange",
+                    "value": 150
+                  },
+                  {
+                    "color": "red",
+                    "value": 300
+                  }
+                ]
+              },
+              "unit": "watt"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 11,
+            "x": 13,
+            "y": 36
+          },
+          "id": 6,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Total",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  m.current/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${EFFICIENCY} as value,\n  e.name as metric\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nORDER BY 1, 3",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "Power Consumption (W) - Individual VM(s)",
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 3,
+            "x": 0,
+            "y": 46
+          },
+          "id": 105,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "![svg image](data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNjQgNjQiIGRhdGEtbmFtZT0iTGF5ZXIgMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgZmlsbD0iIzAwMDAwMCI+PGcgaWQ9IlNWR1JlcG9fYmdDYXJyaWVyIiBzdHJva2Utd2lkdGg9IjAiPjwvZz48ZyBpZD0iU1ZHUmVwb190cmFjZXJDYXJyaWVyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjwvZz48ZyBpZD0iU1ZHUmVwb19pY29uQ2FycmllciI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiMwMDc5ZmE7fS5jbHMtMntmaWxsOiNmZmJmMDA7fS5jbHMtM3tmaWxsOiMwMDc5ZmE7fTwvc3R5bGU+PC9kZWZzPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTMyLDU0QTIyLDIyLDAsMCwwLDU0LDMyaDZBMjgsMjgsMCwwLDEsMzIsNjAiPjwvcGF0aD48cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0zMiwxMEEyMiwyMiwwLDAsMCwxMCwzMkg0QTI4LDI4LDAsMCwxLDMyLDQiPjwvcGF0aD48cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iMjMgNTAgMzIgMzMgMTggMzMgMzQgMTggNDYgMTggMzAgMjkgNDIgMjkgMjMgNTAiPjwvcG9seWdvbj48cG9seWdvbiBjbGFzcz0iY2xzLTMiIHBvaW50cz0iMzIgMTIgMzIgMiA0MiA3IDMyIDEyIj48L3BvbHlnb24+PHBvbHlnb24gY2xhc3M9ImNscy0zIiBwb2ludHM9IjMyIDUyIDMyIDYyIDIyIDU3IDMyIDUyIj48L3BvbHlnb24+PC9nPjwvc3ZnPg)\n\n\n# Average Energy Consumption\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.5.2",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 20
+                  },
+                  {
+                    "color": "orange",
+                    "value": 40
+                  },
+                  {
+                    "color": "red",
+                    "value": 60
+                  }
+                ]
+              },
+              "unit": "watth"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 10,
+            "x": 3,
+            "y": 46
+          },
+          "id": 63,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "datasource",
+                "uid": "-- Dashboard --"
+              },
+              "panelId": 48,
+              "refId": "A"
+            }
+          ],
+          "title": "Average Energy Consumption (Wh) - Individual VM(s)",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-BlYlRd",
+                "seriesBy": "max"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 1,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 1,
+                "pointSize": 4,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "always",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "dashed"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 20
+                  },
+                  {
+                    "color": "orange",
+                    "value": 40
+                  },
+                  {
+                    "color": "red",
+                    "value": 60
+                  }
+                ]
+              },
+              "unit": "watth"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 11,
+            "x": 13,
+            "y": 46
+          },
+          "id": 48,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Total",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  m.current/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY} as value,\n  e.name as metric\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nORDER BY 1",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "Energy Consumption (Wh) - Individual VM(s)",
+          "transformations": [],
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 3,
+            "x": 0,
+            "y": 56
+          },
+          "id": 106,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "![svg image](data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjIwMHB4IiB3aWR0aD0iMjAwcHgiIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA1MTIuMDAyIDUxMi4wMDIiIHhtbDpzcGFjZT0icHJlc2VydmUiIGZpbGw9IiMwMDAwMDAiPjxnIGlkPSJTVkdSZXBvX2JnQ2FycmllciIgc3Ryb2tlLXdpZHRoPSIwIj48L2c+PGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48L2c+PGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPiA8cGF0aCBzdHlsZT0iZmlsbDojODI4MjgyOyIgZD0iTTUwOC4zNDQsMTM3LjU0MWMtMS45NTgsMi4xNDUtNC42NTYsMy4yMzQtNy4zNjIsMy4yMzRjLTIuMzY3LDAtNC43NDUtMC44MzMtNi42NDItMi41MjggbC00Mi42MTQtMzguMDYxYy00LjA2NS0zLjYzMS00LjM4Ni05LjgzMS0wLjcxNC0xMy44NTJjMy42NjktNC4wMiw5LjkzOS00LjMzOSwxNC4wMDQtMC43MDdsNDIuNjE2LDM4LjA2MSBDNTExLjY5NCwxMjcuMzE4LDUxMi4wMTUsMTMzLjUyLDUwOC4zNDQsMTM3LjU0MXogTTQyMi41NzksMTMxLjE2OWMtMy45ODktMy43MS0xMC4yNjMtMy41MjMtMTQuMDE2LDAuNDIzIGMtMy43NTMsMy45NDYtMy41NjEsMTAuMTUyLDAuNDI3LDEzLjg2M2w0Mi41ODcsMzkuNjI3YzEuOTE1LDEuNzgxLDQuMzU1LDIuNjY1LDYuNzkzLDIuNjY1YzIuNjM5LDAsNS4yNzEtMS4wMzUsNy4yMjMtMy4wODggYzMuNzUzLTMuOTQ2LDMuNTYyLTEwLjE1Mi0wLjQyNy0xMy44NjNMNDIyLjU3OSwxMzEuMTY5eiI+PC9wYXRoPiA8cGF0aCBzdHlsZT0iZmlsbDojQTVDRDI3OyIgZD0iTTQwOC4wMzMsODIuMzM2Yy0zLjE3Niw0LjQxMy05LjM2Nyw1LjQ0NC0xMy44MjgsMi4zMDRjLTQuMDM0LTIuODM5LTIzLjgxLTE1LjM1Mi0yNy45OTItMTcuOTA2IGMtMzUuMTAxLTIxLjQyNC03NS4yMjMtMzIuNjgtMTE2LjkyMi0zMi42OGMtMTIzLjA0NywwLTIyMy4xNTQsOTkuMDE4LTIyMy4xNTQsMjIwLjcyN2MwLDEwOC43ODMsNzguNjUsMjAwLjQsMTg3LjAxLDIxNy44NDYgYzUuNDA2LDAuODcsOS4wNzMsNS45MSw4LjE5NCwxMS4yNTVjLTAuNzkyLDQuODEzLTQuOTk4LDguMjM0LTkuNzc0LDguMjM0Yy0wLjUyOSwwLTEuMDY1LTAuMDQyLTEuNjA1LTAuMTI4IGMtNTYuMjY5LTkuMDYtMTA3LjgxNS0zNy43NDMtMTQ1LjE0MS04MC43NjZjLTM3LjczMy00My40OTEtNTguNTE0LTk5LjA1LTU4LjUxNC0xNTYuNDRjMC02NC4xOTksMjUuMjc0LTEyNC41NTUsNzEuMTY2LTE2OS45NSBjNDUuODkzLTQ1LjM5MiwxMDYuOTEyLTcwLjM5MywxNzEuODItNzAuMzkzYzQ2LjUzNSwwLDkxLjI3NSwxMi44OCwxMzAuMTc1LDM3LjM2MmMzLjU3NCwyLjI1LDIyLjc2NCwxNC40MTQsMjYuMjM2LDE2Ljg1OCBDNDEwLjE2Niw3MS44LDQxMS4yMDgsNzcuOTI1LDQwOC4wMzMsODIuMzM2eiI+PC9wYXRoPiA8cGF0aCBzdHlsZT0iZmlsbDojNUQ3RDAwOyIgZD0iTTQ3OC44MjksODYuNzU3bC02Ny4xMTEsNzMuOTcybC0yOS43NzEtMjYuNDI0Yy0xNi4zNjgtMTQuNTMtMTcuNzQzLTM5LjY3LTMuMDUxLTU1Ljg2MyBsMTMuNjg3LTE1LjA4NWMxNC42ODktMTYuMTkzLDQwLjEwNS0xNy41NTMsNTYuNDc2LTMuMDJMNDc4LjgyOSw4Ni43NTdMNDc4LjgyOSw4Ni43NTd6Ij48L3BhdGg+IDxwYXRoIHN0eWxlPSJmaWxsOiNDNUUwMkM7IiBkPSJNMjA5LjY0LDQ4Mi4zOWMtMS42NjUtMTYuNzA0LTEuNTA2LTMzLjg1LDAuNjc3LTUxLjIwNSBjMTUuODc3LTEyNi4xMDksMTMyLjA5Ni0yMTUuNjA4LDI1OS41ODktMTk5LjkwOWM4LjMzMSwxLjAyOCwxNi41MTEsMi40ODksMjQuNTA5LDQuMzM5YzEuNjYzLDE2LjcwNCwxLjUwOCwzMy44NS0wLjY3OSw1MS4yMDUgYy0xNS44NjksMTI2LjExLTEzMi4wOTEsMjE1LjYxLTI1OS41ODcsMTk5LjkxQzIyNS44MTYsNDg1LjcwMywyMTcuNjQyLDQ4NC4yNDIsMjA5LjY0LDQ4Mi4zOUwyMDkuNjQsNDgyLjM5eiI+PC9wYXRoPiA8cGF0aCBzdHlsZT0iZmlsbDojQTVDRDI3OyIgZD0iTTIzNC4xNDksNDg2LjczMWMtOC4zMzMtMS4wMjgtMTYuNTA3LTIuNDg5LTI0LjUwOS00LjM0MWwyODQuNzc1LTI0Ni43NzUgYzEuNjYzLDE2LjcwNCwxLjUwOCwzMy44NS0wLjY3OSw1MS4yMDVDNDc3Ljg2Nyw0MTIuOTI5LDM2MS42NDUsNTAyLjQzMSwyMzQuMTQ5LDQ4Ni43MzF6Ij48L3BhdGg+IDxwYXRoIHN0eWxlPSJmaWxsOiM1RDdEMDA7IiBkPSJNMzY2LjkyOCwzNDcuNzQyYzMuNjM5LDQuMTIyLDMuMjExLDEwLjM4LTAuOTU0LDEzLjk4MUwyMTMuODY5LDQ5My4xMzcgYy0zLjk3My0wLjcyMS03LjkxMy0xLjUyMy0xMS44MTEtMi40MjRjLTAuNDI0LTQuMjY3LTAuNzMzLTguNTYxLTAuOTI2LTEyLjg4bDE1MS42NjQtMTMxLjAzMyBDMzU2Ljk2NCwzNDMuMTk5LDM2My4yOTEsMzQzLjYyMiwzNjYuOTI4LDM0Ny43NDJ6Ij48L3BhdGg+IDxwYXRoIGQ9Ik0yNjMuMTg3LDUwNC4zMDljLTEwLjM0OCwwLTIwLjc1OS0wLjY0My0zMS4xOTItMS45NDNjLTguNTYzLTEuMDY2LTE3LjIwMS0yLjYwNS0yNS42ODgtNC41NzEgYy01Ni45NDgtOS4zODUtMTA5LjEwMi0zOC43ODYtMTQ2Ljg5NC04Mi44MjVDMjEuMSwzNzAuMzI3LDAsMzEzLjI5OSwwLDI1NC4zOTFDMCwxMTguMzYyLDExMC42Nyw3LjY5MywyNDYuNjk5LDcuNjkzIGM0OS41MzIsMCw5Ny4wNTgsMTQuNTMsMTM3Ljg1OSw0Mi4wODNjOS4xNjktOC40OTYsMjAuOTQxLTEzLjQ4NywzMy42NDEtMTQuMTc1YzE0LjM3Ny0wLjc4NCwyOC4xOTIsNC4wNjYsMzguODY1LDEzLjY0MyBsMjkuNzM0LDI2LjY4NWM1LjcwOCw1LjEyMyw2LjE4MywxMy45MDMsMS4wNjIsMTkuNjExbC0yLjk2MSwzLjMwMWwyMi40ODksMjAuMTc1YzUuNzEsNS4xMjIsNi4xODYsMTMuOTAzLDEuMDYzLDE5LjYxMSBjLTUuMTIsNS43MDktMTMuOTAyLDYuMTg2LTE5LjYxMSwxLjA2M2wtMjIuNDkyLTIwLjE3OGwtMjQuMDE1LDI2Ljc2bDIyLjQ4OSwyMC4xNzhjNS43MDgsNS4xMjIsNi4xODUsMTMuOTAzLDEuMDYyLDE5LjYxMyBjLTUuMTIyLDUuNzA4LTEzLjkwNSw2LjE4NS0xOS42MTMsMS4wNjJsLTIyLjQ5MS0yMC4xNzlsLTIuOTU3LDMuMjk1Yy01LjEyLDUuNzA5LTEzLjkwMyw2LjE4Ni0xOS42MTEsMS4wNjJsLTI5Ljc0LTI2LjY4MyBjLTIxLjQ0LTE5LjI0Mi0yMy44MDctNTEuOTMtNS44MDgtNzQuMDM4Yy0zNS40MzMtMjMuMDAxLTc2LjM1OS0zNS4xMS0xMTguOTY1LTM1LjExYy0xMjAuNzEyLTAuMDAyLTIxOC45MjIsOTguMjA4LTIxOC45MjIsMjE4LjkyIGMwLDEwMS45OTQsNjguOTQxLDE4OC43NzEsMTY2LjI4MiwyMTIuNTc1Yy0wLjI4NC0xMi4yNCwwLjMzNS0yNC41MjMsMS44NS0zNi43MDFDMjEyLjgzNCwyOTQuMzUxLDMzNy4xNiwxOTcuNTMsNDczLjA4NSwyMTQuNDYgYzguNzIzLDEuMDg2LDE3LjUyLDIuNjYyLDI2LjE1NCw0LjY4YzUuNzksMS4zNTUsMTAuMDc1LDYuMjQ1LDEwLjY1OCwxMi4xNjFjMS44MDUsMTguMzI5LDEuNTYyLDM2LjkyMy0wLjcyNSw1NS4yNjUgYy04LjE5Nyw2NS44MzgtNDEuNTQsMTI0LjU0NS05My44OTMsMTY1LjMwNUMzNzEuMjIzLDQ4Ni4xNzQsMzE4LjE0Miw1MDQuMzA5LDI2My4xODcsNTA0LjMwOXogTTI0MC4xNSw0NzUuMzQzIGM1Ni44Niw1Ljg2OCwxMTIuODE5LTEwLjE2MSwxNTguMDY4LTQ1LjM4N2M0Ni40OTctMzYuMjAxLDc2LjExNC04OC4zNDQsODMuMzk0LTE0Ni44MjJjMS42MTMtMTIuOTQ4LDIuMDgzLTI2LjAzNCwxLjQwMy0zOS4wMjcgYy00LjQ1Mi0wLjgzMy04LjkxOC0xLjUyOS0xMy4zNjItMi4wODVjLTEyMC43MDgtMTUuMDIxLTIzMS4xNDgsNzAuOTU3LTI0Ni4xODIsMTkxLjY3M2MtMC44NTYsNi44ODctMS4zOSwxMy44MDktMS42LDIwLjczNiBsMTI3LjA1NC0xMTEuMzEyYzUuNzcxLTUuMDU1LDE0LjU0NS00LjQ3MywxOS41OTcsMS4yOTVjNS4wNTQsNS43NjgsNC40NzMsMTQuNTQ0LTEuMjk1LDE5LjU5N0wyNDAuMTUsNDc1LjM0M3ogTTQyMS4xNjEsNjMuMzAxIGMtMC40ODUsMC0wLjk3MiwwLjAxNC0xLjQ2LDAuMDM5Yy02Ljk4MywwLjM3OC0xMy4zNzEsMy40MjEtMTcuOTkxLDguNTY5bC0xMy42NzIsMTUuMjM1Yy05LjU5OCwxMC42OTctOC43MDgsMjcuMjA2LDEuOTg4LDM2LjgwNSBsMTkuNCwxNy40MDlsMi43NTktMy4wNzRjMC4wNjUtMC4wNzYsMC4xMy0wLjE1LDAuMTk2LTAuMjI0YzAuMDY2LTAuMDc0LDAuMTMzLTAuMTQ4LDAuMjAxLTAuMjIxbDQyLjE1Ni00Ni45NzQgYzAuMDY4LTAuMDgyLDAuMTM5LTAuMTYsMC4yMS0wLjIzOWMwLjA3MS0wLjA4LDAuMTQzLTAuMTU5LDAuMjE2LTAuMjM1bDIuNzQ4LTMuMDYybC0xOS4zOTgtMTcuNDA5IEM0MzMuNzIzLDY1LjYyMSw0MjcuNjA4LDYzLjMwMSw0MjEuMTYxLDYzLjMwMXoiPjwvcGF0aD4gPC9nPjwvc3ZnPg)\n\n\n# Average CO2 Emission\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.5.2",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 0.25
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.5
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "masskg"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 10,
+            "x": 3,
+            "y": 56
+          },
+          "id": 103,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "datasource",
+                "uid": "-- Dashboard --"
+              },
+              "panelId": 75,
+              "refId": "A"
+            }
+          ],
+          "title": "Average CO2e Emissions (t) - Individual VM(s)",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-BlYlRd"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 2,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "always",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "dashed"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 0.25
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.5
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "masskg"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 11,
+            "x": 13,
+            "y": 56
+          },
+          "id": 75,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Total",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "8.5.12",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  \n  (m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100*24*365/1000 as \"Estimated Yearly CO2e Avg (t)\",\n  e.name as metric\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.type = 'VCPU' AND\n  m.current>0\nORDER BY 1",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "CO2e Emissions (t) - Individual VM(s)",
+          "transformations": [],
+          "transparent": true,
+          "type": "timeseries"
+        }
+      ],
+      "title": "🔎 Individual VM Metrics",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "id": 88,
+      "panels": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 3,
+            "x": 0,
+            "y": 22
+          },
+          "id": 101,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "![svg image](data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjIwMHB4IiB3aWR0aD0iMjAwcHgiIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB4bWw6c3BhY2U9InByZXNlcnZlIiBmaWxsPSIjMDAwMDAwIj48ZyBpZD0iU1ZHUmVwb19iZ0NhcnJpZXIiIHN0cm9rZS13aWR0aD0iMCI+PC9nPjxnIGlkPSJTVkdSZXBvX3RyYWNlckNhcnJpZXIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PC9nPjxnIGlkPSJTVkdSZXBvX2ljb25DYXJyaWVyIj4gPGNpcmNsZSBzdHlsZT0iZmlsbDojMjczQjdBOyIgY3g9IjI1NiIgY3k9IjI1NiIgcj0iMjU2Ij48L2NpcmNsZT4gPGc+IDxwb2x5Z29uIHN0eWxlPSJmaWxsOiMxMjExNDk7IiBwb2ludHM9IjE5NS42NjMsMTE4LjY2MiAyMjguOTkzLDE1MS45OTIgMTc1LjU1MiwxNDUuNjcgIj48L3BvbHlnb24+IDxwYXRoIHN0eWxlPSJmaWxsOiMxMjExNDk7IiBkPSJNMjgyLjUxLDUxMC42NGMxMjguNjUyLTEzLjIzNiwyMjkuMDQ4LTEyMS43NDIsMjI5LjQ3OS0yNTMuNzlMNDAzLjY4MiwxNDguNTQybC0yOTQuMDk3LDE4LjE1MyBsNzQuMTMsNzUuMDU5bC03NC4yNDcsMTAuMjI1bDc4LjY0NSw3OC42NDVsLTc4LjY2Miw2LjY0N0wyODIuNTEsNTEwLjY0eiI+PC9wYXRoPiA8L2c+IDxwYXRoIHN0eWxlPSJmaWxsOiNGRkZGRkY7IiBkPSJNMTE5LjM4LDE3MC42NjdIMzkyLjYyYzcuODU0LDAsMTQuMjIyLTYuMzY4LDE0LjIyMi0xNC4yMjJsMCwwYzAtNy44NTQtNi4zNjgtMTQuMjIyLTE0LjIyMi0xNC4yMjIgSDExOS4zOGMtNy44NTQsMC0xNC4yMjIsNi4zNjgtMTQuMjIyLDE0LjIyMmwwLDBDMTA1LjE1OCwxNjQuMjk5LDExMS41MjYsMTcwLjY2NywxMTkuMzgsMTcwLjY2N3oiPjwvcGF0aD4gPHBhdGggc3R5bGU9ImZpbGw6I0Q4RDhEODsiIGQ9Ik0zOTIuNjIsMTQyLjIyMkgyNTUuNDI2djI4LjQ0NEgzOTIuNjJjNy44NTQsMCwxNC4yMjItNi4zNjgsMTQuMjIyLTE0LjIyMiBTNDAwLjQ3NCwxNDIuMjIyLDM5Mi42MiwxNDIuMjIyeiI+PC9wYXRoPiA8cGF0aCBzdHlsZT0iZmlsbDojRkZGRkZGOyIgZD0iTTExOS4zOCwyNTZIMzkyLjYyYzcuODU0LDAsMTQuMjIyLTYuMzY4LDE0LjIyMi0xNC4yMjJsMCwwYzAtNy44NTQtNi4zNjgtMTQuMjIyLTE0LjIyMi0xNC4yMjIgSDExOS4zOGMtNy44NTQsMC0xNC4yMjIsNi4zNjgtMTQuMjIyLDE0LjIyMmwwLDBDMTA1LjE1OCwyNDkuNjMyLDExMS41MjYsMjU2LDExOS4zOCwyNTZ6Ij48L3BhdGg+IDxwYXRoIHN0eWxlPSJmaWxsOiNEOEQ4RDg7IiBkPSJNMzkyLjYyLDIyNy41NTZIMjU1LjQyNlYyNTZIMzkyLjYyYzcuODU0LDAsMTQuMjIyLTYuMzY4LDE0LjIyMi0xNC4yMjIgUzQwMC40NzQsMjI3LjU1NiwzOTIuNjIsMjI3LjU1NnoiPjwvcGF0aD4gPHBhdGggc3R5bGU9ImZpbGw6I0ZGRkZGRjsiIGQ9Ik0xMTkuMzgsMzQxLjMzM0gzOTIuNjJjNy44NTQsMCwxNC4yMjItNi4zNjgsMTQuMjIyLTE0LjIyMmwwLDBjMC03Ljg1NC02LjM2OC0xNC4yMjItMTQuMjIyLTE0LjIyMiBIMTE5LjM4Yy03Ljg1NCwwLTE0LjIyMiw2LjM2OC0xNC4yMjIsMTQuMjIybDAsMEMxMDUuMTU4LDMzNC45NjUsMTExLjUyNiwzNDEuMzMzLDExOS4zOCwzNDEuMzMzeiI+PC9wYXRoPiA8cGF0aCBzdHlsZT0iZmlsbDojRDhEOEQ4OyIgZD0iTTM5Mi42MiwzMTIuODg5SDI1NS40MjZ2MjguNDQ0SDM5Mi42MmM3Ljg1NCwwLDE0LjIyMi02LjM2OCwxNC4yMjItMTQuMjIyIEM0MDYuODQyLDMxOS4yNTcsNDAwLjQ3NCwzMTIuODg5LDM5Mi42MiwzMTIuODg5eiI+PC9wYXRoPiA8cGF0aCBzdHlsZT0iZmlsbDojRkY2MjYyOyIgZD0iTTE4NS4zOTEsMTk5LjExMWgtMjkuNDQ5Yy03LjU3NywwLTEzLjcyMS02LjE0Mi0xMy43MjEtMTMuNzIxdi01Ny44OTIgYzAtNy41NzcsNi4xNDItMTMuNzIxLDEzLjcyMS0xMy43MjFoMjkuNDQ5YzcuNTc3LDAsMTMuNzE5LDYuMTQyLDEzLjcxOSwxMy43MjF2NTcuODk0IEMxOTkuMTExLDE5Mi45NjksMTkyLjk2OSwxOTkuMTExLDE4NS4zOTEsMTk5LjExMXoiPjwvcGF0aD4gPHBhdGggc3R5bGU9ImZpbGw6IzcxRTJFRjsiIGQ9Ik0zNTYuMDU3LDI4NC40NDRoLTI5LjQ0OWMtNy41NzcsMC0xMy43MTktNi4xNDItMTMuNzE5LTEzLjcxOXYtNTcuODk0IGMwLTcuNTc3LDYuMTQyLTEzLjcyMSwxMy43MTktMTMuNzIxaDI5LjQ0OWM3LjU3NywwLDEzLjcxOSw2LjE0MiwxMy43MTksMTMuNzIxdjU3Ljg5NCBDMzY5Ljc3OCwyNzguMzAyLDM2My42MzUsMjg0LjQ0NCwzNTYuMDU3LDI4NC40NDR6Ij48L3BhdGg+IDxwYXRoIHN0eWxlPSJmaWxsOiNGRkM2MUI7IiBkPSJNMjk5LjE2OCwzNjkuNzc4aC0yOS40NDljLTcuNTc3LDAtMTMuNzE5LTYuMTQyLTEzLjcxOS0xMy43MTl2LTU3Ljg5NCBjMC03LjU3Nyw2LjE0Mi0xMy43MTksMTMuNzE5LTEzLjcxOWgyOS40NDljNy41NzcsMCwxMy43MTksNi4xNDIsMTMuNzE5LDEzLjcxOXY1Ny44OTQgQzMxMi44ODksMzYzLjYzNSwzMDYuNzQ3LDM2OS43NzgsMjk5LjE2OCwzNjkuNzc4eiI+PC9wYXRoPiA8L2c+PC9zdmc+Cg)\n\n\n# Optimization Actions\n\nThis dashboard shows the impact of IBM Turbonomic proposed optimisation actions.\n\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.5.2",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "List of all Host Suspend actions in the selected scope. \nAverage Energy = average energy consumption of the host over the selected period of the report (for example over last 3 hours)\nEstimated Yearly Average = the average energy multiplied by the number of hours in a year to get the average annual energy in W-h. ",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CO2e Avg (kg/h)"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 150
+                  },
+                  {
+                    "id": "unit",
+                    "value": "masskg"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Description"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Host Name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 150
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Date Recommended"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 150
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Host Name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Energy Avg (Wh)"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 150
+                  },
+                  {
+                    "id": "unit",
+                    "value": "watth"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Estimated Yearly CO2e Avg (t)"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 300
+                  },
+                  {
+                    "id": "unit",
+                    "value": "masst"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Energy Yearly(kWh)"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "watth"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 3,
+            "y": 22
+          },
+          "id": 53,
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": true
+            },
+            "frameIndex": 1,
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "table",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  DISTINCT ON (e.\"name\") \n  TO_CHAR(a.recommendation_time, 'dd/mm/yyyy hh:mm:ss') as \"Date Recommended\",\n   e.\"name\" as \"Host Name\",\n  e.\"oid\" as \"Host OID\",\n  a.description as \"Description\",\n  a.target_entity_id as \"ID\"\nFROM pending_action a\nJOIN entity e on e.oid = a.target_entity_id\njoin scope s on s.scoped_oid = e.oid  and s.finish > now()\nwhere\n--  $__timeFilter(a.recommendation_time) AND\n  a.\"type\" = 'DEACTIVATE'  AND\n  e.\"type\" = 'VIRTUAL_MACHINE'  AND\n  a.target_entity_id IN (${HOST_LIST})\nORDER BY \"Host Name\"\n",
+              "refId": "List of actions",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            },
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "table",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  e.oid as \"Host OID\",\n  avg(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY} as \"Energy Avg (Wh)\",\n  (avg(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY}*365*24) as \"Energy Yearly(kWh)\",\n  avg(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100 as \"CO2e Avg (kg/h)\",\n  avg(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100*24*365/1000 as \"Estimated Yearly CO2e (t)\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\"\nJOIN pending_action pa on pa.target_entity_id = e.oid\nWHERE\n--  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY e.oid\nORDER BY 1",
+              "refId": "Average host energy",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "VM Suspend Actions",
+          "transformations": [
+            {
+              "id": "seriesToColumns",
+              "options": {
+                "byField": "Host OID"
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Energy Average": true,
+                  "Energy Average (kWh)": false,
+                  "Estimated Yearly Average Energy": true,
+                  "Estimated Yearly Average Energy (kWh)": false,
+                  "Estimated Yearly Average Energy (kwH": true,
+                  "Estimated Yearly Average Power": true,
+                  "Host OID": true,
+                  "ID": true,
+                  "Power Average": false
+                },
+                "indexByName": {},
+                "renameByName": {}
+              }
+            },
+            {
+              "id": "filterByValue",
+              "options": {
+                "filters": [
+                  {
+                    "config": {
+                      "id": "isNull",
+                      "options": {}
+                    },
+                    "fieldName": "Host Name"
+                  }
+                ],
+                "match": "all",
+                "type": "exclude"
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "description": "Estimated average energy savings from all Turbonomic suspend actions. \nEstimated energy savings are calculated based on the average energy over the selected time period for each one of the hosts that have a suspend action attached to them ",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "light-blue",
+                "mode": "fixed"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "watth"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CO2e Avg (kg/h)"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "masskg"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "light-green",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Estimated Yearly CO2e Avg (t)"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "masst"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "semi-dark-green",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Energy Yearly(kWh)"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "watth"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "semi-dark-orange",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Energy Avg (Wh)"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "light-orange",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 9,
+            "x": 15,
+            "y": 22
+          },
+          "id": 54,
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "vertical",
+            "reduceOptions": {
+              "calcs": [
+                "sum"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "datasource",
+                "uid": "-- Dashboard --"
+              },
+              "panelId": 53,
+              "refId": "A"
+            }
+          ],
+          "title": "VM Suspend Actions - Estimated Missed Energy and CO2e Savings",
+          "transformations": [
+            {
+              "id": "seriesToColumns",
+              "options": {
+                "byField": "Host OID",
+                "mode": "inner"
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "CO2e (t)": false,
+                  "Host Name": false,
+                  "Host OID": true,
+                  "ID": true,
+                  "MTCO2e": true
+                },
+                "indexByName": {},
+                "renameByName": {}
+              }
+            },
+            {
+              "id": "filterByValue",
+              "options": {
+                "filters": [
+                  {
+                    "config": {
+                      "id": "isNull",
+                      "options": {}
+                    },
+                    "fieldName": "Host Name"
+                  }
+                ],
+                "match": "all",
+                "type": "exclude"
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "stat"
+        }
+      ],
+      "title": "🎛️ Optimization Actions",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 70,
+      "panels": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "description": "",
+          "gridPos": {
+            "h": 28,
+            "w": 24,
+            "x": 0,
+            "y": 61
+          },
+          "id": 72,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "# Sustainable IT Dashboard\n***\n## Summary\nThis dashboard shows the impact of IBM Turbonomic application resource manager on Energy consumption and Carbon Dioxide equivalents (CO2e) emissions in your private cloud data center environment. \n\nThis dashboard focuses on data collected for physical machines (hosts) through a vCenter API and includes energy consumption data, number of hosts and VMs, VM-to-Host density ratios as well as the number and the type of generated host suspend and provision actions.\n***\n\n## Data and Methodology\n\n**Energy (Wh)** - data is collected from vCenter API and summed over a period of 10 minutes to get a single number for total Energy (Wh) in 10 minutes. \n\n**CO2e emissions (t)** - carbon emissions calculations are made following an open source methodology outlined in Cloud Carbon Footprint website - [www.cloudcarbonfootprint.org](https://www.cloudcarbonfootprint.org/).    \nSpecifically, in this dashboard carbon emissions are calculated using the following formula:\n\n    Operational Emissions = CO2e (t) = (energy consumption [Wh]) x ((private cloud average PUE) / 1000) x (private cloud emissions factor) x ((100 - percent renewable energy) / 100)\n\nWhere:\n\n- ***Private Cloud Power Usage Effectiveness (PUE)*** = An average PUE of 1.67 is used in our calculations. This [451 report](https://d39w7f4ix9f5s9.cloudfront.net/e3/79/42bf75c94c279c67d777f002051f/carbon-reduction-opportunity-of-moving-to-aws.pdf) notes: \"Adding it all up, the power usage effectiveness (PUE, the ratio of total datacenter power and the IT power) ranged from 1.63 to 1.70 in the survey sample and was consistent across company sizes. This is in line with broader industry data collected by the Uptime Institute but well below the efficiency of AWS operations.\" - 451 Research Report. We use the average of 1.63 and 1.70, which is 1.67.\n\n- ***Private Cloud Emissions Factor*** = `1,562.4 lbs CO2/MWh × (4.536 × 10^(-4) metric tons/lb) × 0.001 MWh/kWh = 7.09 × 10^(-4) metric tons CO2/kWh`. We are using `0.000709` (rounded) in our calculations. ***Note:*** Emission equivalents vary slightly vs. EPA calculation because we are using the rounded numbers of the emissions factor (7.09x10^(-4)).\n\n- ***Percent Renewable Energy*** = User can input the percent renewable energy that is used to generate the energy that is used by the datacenter in which physical hosts that are shown in this dashboard reside. CO2e emissions calculations will be adjusted by this input. \n\n**Density** - this chart shows the number of active VMs per host in your on-prem environment, and tracks the data over the selected dashboard time. \n\n**Estimated carbon sequestration equivalents** - real world examples of sequestration efforts to remove the total CO2e emissions reported in the *\"CO2e Emissions (t) - All Hosts\"* chart. ***Note:*** All sequestration equivalents and carbon emissions equivalents are adjusted for percent renewable energy inserted at the top of the dashboard.    \nSequestration formulas are as follow:\n\n- ***Equivalent Carbon Sequestered by Acres of Forest in 1 year (metric tons CO2 / acre)*** = Total Emissions (metric tons CO2) * Acres of Forest Sequestration Factor.    \nWhere:    \nAcres of Forest Sequestration Factor = -0.23 metric ton C/acre/year* × (44 units CO2/12 units C) = -0.84 metric ton CO2/acre/year sequestered annually by one acre of average U.S. forest.\n\n- ***Equivalent Carbon Sequestered by Tree Seedlings Grown for 10 years (metric ton CO2 / tree)*** = Total Emissions (metric tons CO2) * Tree Sequestration Factor.    \nWhere:    \nTree Sequestration Factor = (-36.4 lbs C/tree × (44 units CO2/12 units C) × 1 metric ton/2,204.6 lbs) = -0.060 metric ton CO2 per urban tree planted.\n\n**Carbon Emissions Equivalents** - To calculate the carbon emission equivalencies we use the formulas provided by United States EPA Greenhouse Gas Equivalencies Calculator [here](https://www.epa.gov/energy/greenhouse-gases-equivalencies-calculator-calculations-and-references). Please note that there will be slight variation between the results you see in the dashboard and what is calculated by the EPA’s site because we are using the numbers they have published, which they have rounded.\n- ***Equivalent Passenger Vehicles*** = Total Emissions (metric tons CO2) * Passenger Vehicles Factor (metric tons CO2e/vehicles/year).    \nWhere:    \nPassenger Vehicles Factor (vehicles/year) = 8.89 × (10^-3) metric tons CO2/gallon gasoline × 11,556 VMT car/truck average × 1/22.5 miles per gallon car/truck average × 1 CO2, CH4, and N2O/0.993 CO2 = 4.60 metric tons CO2e/vehicle/year.\n\n- ***Equivalent Home Electricity Use*** - Total Emissions (metric tons CO2) * Home Electricity Use Factor.   \nWhere:    \nHome Electricity Use Facto r= 11,880 kWh per home × 947.2 lbs CO2 per megawatt-hour generated × 1/(1-0.073) MWh delivered/MWh generated × 1 MWh/1,000 kWh × 1 metric ton/2,204.6 lb = 5.505 metric tons CO2/home.\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.5.2",
+          "title": "Readme",
+          "type": "text"
+        }
+      ],
+      "title": "Help",
+      "type": "row"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_TURBO_TIMESCALE}"
+        },
+        "definition": "select distinct\n    name AS __text,\n    oid AS __value\nfrom entity\nwhere\n    type = 'DATACENTER'\n    and attrs->>'targets' like '%vCenter%'\n    and last_seen > now()\norder by 1",
+        "hide": 2,
+        "includeAll": true,
+        "label": "Data Center",
+        "multi": true,
+        "name": "DATACENTER",
+        "options": [],
+        "query": "select distinct\n    name AS __text,\n    oid AS __value\nfrom entity\nwhere\n    type = 'DATACENTER'\n    and attrs->>'targets' like '%vCenter%'\n    and last_seen > now()\norder by 1",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_TURBO_TIMESCALE}"
+        },
+        "definition": "select distinct\n    e.name AS __text,\n    e.oid AS __value\nfrom \"scope\" s \njoin entity e on s.scoped_oid = e.\"oid\"\nwhere\n    s.scoped_type = 'COMPUTE_CLUSTER'\n    and s.seed_oid IN (${DATACENTER})\n    and e.last_seen > now()\norder by 1",
+        "hide": 2,
+        "includeAll": true,
+        "label": "Cluster",
+        "multi": true,
+        "name": "CLUSTER",
+        "options": [],
+        "query": "select distinct\n    e.name AS __text,\n    e.oid AS __value\nfrom \"scope\" s \njoin entity e on s.scoped_oid = e.\"oid\"\nwhere\n    s.scoped_type = 'COMPUTE_CLUSTER'\n    and s.seed_oid IN (${DATACENTER})\n    and e.last_seen > now()\norder by 1",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_TURBO_TIMESCALE}"
+        },
+        "definition": "select distinct\n    e.name AS __text,\n    e.oid AS __value\nfrom \"scope\" s \njoin entity e on s.scoped_oid = e.\"oid\"\nwhere\n    s.scoped_type = 'VIRTUAL_MACHINE'\n\n    and e.last_seen > now()\n\norder by 1",
+        "hide": 2,
+        "includeAll": true,
+        "label": "Host List",
+        "multi": true,
+        "name": "HOST_LIST",
+        "options": [],
+        "query": "select distinct\n    e.name AS __text,\n    e.oid AS __value\nfrom \"scope\" s \njoin entity e on s.scoped_oid = e.\"oid\"\nwhere\n    s.scoped_type = 'VIRTUAL_MACHINE'\n\n    and e.last_seen > now()\n\norder by 1",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "1.67",
+          "value": "1.67"
+        },
+        "description": "Maximum consumption of your Private Cloud hosts in Watts. You can refer the the \"All Published SPECpower_ssh2008 Results\" link to get the values for your specific host.",
+        "hide": 0,
+        "label": "PUE",
+        "name": "PRIVATE_CLOUD_AVG_PUE",
+        "options": [
+          {
+            "selected": true,
+            "text": "1.67",
+            "value": "1.67"
+          }
+        ],
+        "query": "1.67",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "0.000709",
+          "value": "0.000709"
+        },
+        "description": "Private Cloud Emissions Factor corresponds to 1,562.4 lbs CO2/MWh × (4.536 × 10^(-4) metric tons/lb) × 0.001 MWh/kWh = 7.09 × 10^(-4) metric tons CO2/kWh",
+        "hide": 0,
+        "label": "Emissions Factor",
+        "name": "PRIVATE_CLOUD_EMISSIONS_FACTOR",
+        "options": [
+          {
+            "selected": true,
+            "text": "0.000709",
+            "value": "0.000709"
+          }
+        ],
+        "query": "0.000709",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "0",
+          "value": "0"
+        },
+        "description": "Percent renewable energy used to generate the power that is consumed by your datacenter. ",
+        "hide": 0,
+        "label": "% Renewable Energy",
+        "name": "PERCENT_RENEWABLE_ENERGY",
+        "options": [
+          {
+            "selected": true,
+            "text": "0",
+            "value": "0"
+          }
+        ],
+        "query": "0",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "description": "Each Tree Seedlings Grown for 10 years captures that amount of ton of CO2",
+        "hide": 2,
+        "label": "",
+        "name": "TREE_SEQUESTRATION_FACTOR",
+        "query": "${VAR_TREE_SEQUESTRATION_FACTOR}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_TREE_SEQUESTRATION_FACTOR}",
+          "text": "${VAR_TREE_SEQUESTRATION_FACTOR}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_TREE_SEQUESTRATION_FACTOR}",
+            "text": "${VAR_TREE_SEQUESTRATION_FACTOR}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Each acre of forest captures that amount of ton of CO2 per year",
+        "hide": 2,
+        "label": "",
+        "name": "ACRES_OF_FOREST_SEQUESTRATION_FACTOR",
+        "query": "${VAR_ACRES_OF_FOREST_SEQUESTRATION_FACTOR}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_ACRES_OF_FOREST_SEQUESTRATION_FACTOR}",
+          "text": "${VAR_ACRES_OF_FOREST_SEQUESTRATION_FACTOR}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_ACRES_OF_FOREST_SEQUESTRATION_FACTOR}",
+            "text": "${VAR_ACRES_OF_FOREST_SEQUESTRATION_FACTOR}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Emission of ton of CO2 per passenger vehicles driven for 1 year",
+        "hide": 2,
+        "label": "",
+        "name": "VEHICLE_EMISSIONS_FACTOR",
+        "query": "${VAR_VEHICLE_EMISSIONS_FACTOR}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_VEHICLE_EMISSIONS_FACTOR}",
+          "text": "${VAR_VEHICLE_EMISSIONS_FACTOR}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_VEHICLE_EMISSIONS_FACTOR}",
+            "text": "${VAR_VEHICLE_EMISSIONS_FACTOR}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Emission of ton of CO2 per household electricity consumption for 1 year",
+        "hide": 2,
+        "label": "",
+        "name": "HOUSEHOLD_EMISSIONS_FACTOR",
+        "query": "${VAR_HOUSEHOLD_EMISSIONS_FACTOR}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_HOUSEHOLD_EMISSIONS_FACTOR}",
+          "text": "${VAR_HOUSEHOLD_EMISSIONS_FACTOR}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_HOUSEHOLD_EMISSIONS_FACTOR}",
+            "text": "${VAR_HOUSEHOLD_EMISSIONS_FACTOR}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Average minimum consumption of an AWS instance in Watts. Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours",
+        "hide": 2,
+        "label": "",
+        "name": "AWS_MIN_CONSUMPTION",
+        "query": "${VAR_AWS_MIN_CONSUMPTION}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_AWS_MIN_CONSUMPTION}",
+          "text": "${VAR_AWS_MIN_CONSUMPTION}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_AWS_MIN_CONSUMPTION}",
+            "text": "${VAR_AWS_MIN_CONSUMPTION}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Average maximum consumption of an AWS instance in Watts. Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours",
+        "hide": 2,
+        "label": "",
+        "name": "AWS_MAX_CONSUMPTION",
+        "query": "${VAR_AWS_MAX_CONSUMPTION}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_AWS_MAX_CONSUMPTION}",
+          "text": "${VAR_AWS_MAX_CONSUMPTION}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_AWS_MAX_CONSUMPTION}",
+            "text": "${VAR_AWS_MAX_CONSUMPTION}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Average minimum consumption of an Azure instance in Watts. Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours",
+        "hide": 2,
+        "label": "",
+        "name": "AZURE_MIN_CONSUMPTION",
+        "query": "${VAR_AZURE_MIN_CONSUMPTION}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_AZURE_MIN_CONSUMPTION}",
+          "text": "${VAR_AZURE_MIN_CONSUMPTION}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_AZURE_MIN_CONSUMPTION}",
+            "text": "${VAR_AZURE_MIN_CONSUMPTION}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Average maximum consumption of an Azure instance in Watts. Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours",
+        "hide": 2,
+        "label": "",
+        "name": "AZURE_MAX_CONSUMPTION",
+        "query": "${VAR_AZURE_MAX_CONSUMPTION}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_AZURE_MAX_CONSUMPTION}",
+          "text": "${VAR_AZURE_MAX_CONSUMPTION}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_AZURE_MAX_CONSUMPTION}",
+            "text": "${VAR_AZURE_MAX_CONSUMPTION}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Average minimum consumption of a GCP instance in Watts. Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours",
+        "hide": 2,
+        "label": "",
+        "name": "GCP_MIN_CONSUMPTION",
+        "query": "${VAR_GCP_MIN_CONSUMPTION}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_GCP_MIN_CONSUMPTION}",
+          "text": "${VAR_GCP_MIN_CONSUMPTION}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_GCP_MIN_CONSUMPTION}",
+            "text": "${VAR_GCP_MIN_CONSUMPTION}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Average maximum consumption of a GCP instance in Watts. Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours",
+        "hide": 2,
+        "label": "",
+        "name": "GCP_MAX_CONSUMPTION",
+        "query": "${VAR_GCP_MAX_CONSUMPTION}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_GCP_MAX_CONSUMPTION}",
+          "text": "${VAR_GCP_MAX_CONSUMPTION}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_GCP_MAX_CONSUMPTION}",
+            "text": "${VAR_GCP_MAX_CONSUMPTION}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "300",
+          "value": "300"
+        },
+        "description": "CPU_CONSUMPTION",
+        "hide": 2,
+        "label": "CPU_CONSUMPTION",
+        "name": "CPU_CONSUMPTION",
+        "options": [
+          {
+            "selected": true,
+            "text": "300",
+            "value": "300"
+          }
+        ],
+        "query": "300",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "8",
+          "value": "8"
+        },
+        "description": "CORES_CPU",
+        "hide": 2,
+        "label": "CORES PER CPU",
+        "name": "CORES_CPU",
+        "options": [
+          {
+            "selected": true,
+            "text": "8",
+            "value": "8"
+          }
+        ],
+        "query": "8",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "0.166",
+          "value": "0.166"
+        },
+        "hide": 2,
+        "name": "W_WH_RATIO",
+        "options": [
+          {
+            "selected": true,
+            "text": "0.166",
+            "value": "0.166"
+          }
+        ],
+        "query": "0.166",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "1",
+          "value": "1"
+        },
+        "description": "EFFICIENCY",
+        "hide": 2,
+        "label": "EFFICIENCY",
+        "name": "EFFICIENCY",
+        "options": [
+          {
+            "selected": true,
+            "text": "1",
+            "value": "1"
+          }
+        ],
+        "query": "1",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {
+    "nowDelay": ""
+  },
+  "timezone": "",
+  "title": "SUSTAINABILITY - Sustainable IT Dashboard",
+  "uid": "bR0umS44knlc",
+  "version": 6,
+  "weekStart": ""
+}

@@ -1,0 +1,54 @@
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: beeinstana-scc
+runAsUser:
+  type: MustRunAs
+  uid: 1000
+seLinuxContext:
+  type: RunAsAny
+fsGroup:
+  type: RunAsAny
+allowHostDirVolumePlugin: false
+allowHostNetwork: true
+allowHostPorts: true
+allowPrivilegedContainer: false
+allowHostIPC: true
+allowHostPID: true
+readOnlyRootFilesystem: false
+users:
+  - system:serviceaccount:instana-datastores:beeinstana-aggregator
+  - system:serviceaccount:instana-datastores:beeinstana-beeinstana-operator
+  - system:serviceaccount:instana-datastores:beeinstana-config
+---
+apiVersion: beeinstana.instana.com/v1beta1
+kind: BeeInstana
+metadata:
+  name: instance
+  namespace: instana-datastores
+spec:
+  version: 1.1.3
+  kafkaSettings:
+    brokers:
+      - cluster.kafka.svc:9092
+  config:
+    cpu: 200m
+    memory: 200Mi
+    replicas: 1
+  ingestor:
+    cpu: 8
+    memory: 4Gi
+    limitMemory: true
+    env: on-prem
+    metricsTopic: raw_metrics
+    replicas: 1
+  aggregator:
+    cpu: 4
+    memory: 16Gi
+    limitMemory: true
+    mirrors: {{current_ibmaiops_feature.instana_beeinstana_mirrors  | default("2")}}
+    shards: 1
+    volumes:
+      live:
+        size: 2000Gi
+        storageClass: {{ AIOPS_STORAGE_CLASS_LARGE_BLOCK }}

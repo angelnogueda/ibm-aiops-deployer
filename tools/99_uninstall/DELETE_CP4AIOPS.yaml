@@ -1,0 +1,225 @@
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#         ________  __  ___     ___    ________       
+#        /  _/ __ )/  |/  /    /   |  /  _/ __ \____  _____
+#        / // __  / /|_/ /    / /| |  / // / / / __ \/ ___/
+#      _/ // /_/ / /  / /    / ___ |_/ // /_/ / /_/ (__  ) 
+#     /___/_____/_/  /_/    /_/  |_/___/\____/ .___/____/  
+#                                           /_/
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------------------------"
+#  Delete CP4AIOPS Installation and Backend
+#
+#  IBM AIOps
+#
+#  ©2024 nikh@ch.ibm.com
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+
+
+apiVersion: v1                     
+kind: Namespace
+metadata:
+  name: ibm-aiops-installer
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: ibm-aiops-installer-admin
+  namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: ibm-aiops-installer-admin
+    namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-default-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: ibm-aiops-installer
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ibm-aiops-installer
+  name: ibm-aiops-wipe-aiops-install
+  annotations: {}
+spec:
+  selector:
+    matchLabels:
+      app: ibm-aiops-wipe-aiops-install
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ibm-aiops-wipe-aiops-install
+    spec:
+      containers:
+        - name: tools
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env: []
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ STARTING: DELETE CP4AIOPS"
+              echo "*****************************************************************************************************************************"
+              echo ""
+              echo "  ⏳ INSTALLATION START TIMESTAMP: $(date)"
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+    
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Getting Installation source from GitHub"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   📥 Clone Repo https://github.com/niklaushirt/ibm-aiops-deployer.git -b dev_latest"
+              git clone https://github.com/niklaushirt/ibm-aiops-deployer.git -b dev_latest
+              cd ibm-aiops-deployer/
+
+              echo ""
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🔎 This Repo includes those latestet Commits"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+
+              oc delete ConsoleNotification --all &
+
+              echo "*****************************************************************************************************************************"
+              echo " 💣 WIPE CUSTOM AIOPS NAMESPACES"
+              echo "*****************************************************************************************************************************"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🧻 Delete Namespace sock-shop"
+              oc delete ns sock-shop &
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🧻 Delete Namespace robot-shop"
+              oc delete ns robot-shop &
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🧻 Delete Namespace awx"
+              oc delete ns awx &
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🧻 Delete awx.ansible.com CustomResourceDefinition"
+              oc delete CustomResourceDefinition $(oc get CustomResourceDefinition| grep awx.ansible.com|awk '{print$1}') --ignore-not-found
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🧻 Delete Namespace ibm-aiops-demo-ui"
+              oc delete ns ibm-aiops-demo-ui &
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🧻 Delete Namespace ibm-aiops-tools"
+              oc delete ns ibm-aiops-tools &
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🧻 Delete Namespace openldap"
+              oc delete ns openldap &
+
+
+              echo "*****************************************************************************************************************************"
+              echo " 💣 WIPE CP4AIOPS"
+              echo "*****************************************************************************************************************************"
+              cd ./tools/99_uninstall/ibm-aiops/
+              ./uninstall-cp4waiops.sh -s
+
+
+              echo "*****************************************************************************************************************************"
+              echo " 💣 WIPE REMAINING AIOPS STUFF"
+              echo "*****************************************************************************************************************************"
+              echo ""
+              echo "  ⏳ INSTALLATION START TIMESTAMP: $(date)"
+              echo ""
+
+
+              oc delete serviceaccount -n default demo-admin
+
+              oc delete ClusterRoleBinding admin-demo-user                   
+              oc delete ClusterRoleBinding admin-nik-user                    
+              oc delete ClusterRoleBinding awx-default                       
+              oc delete ClusterRoleBinding default-robotinfo1-admin          
+              oc delete ClusterRoleBinding default-robotinfo2-admin          
+              oc delete ClusterRoleBinding default-sockinfo1-admin           
+              oc delete ClusterRoleBinding default-sockinfo2-admin           
+              oc delete ClusterRoleBinding ibm-aiops-demo-ui-admin-crb       
+              oc delete ClusterRoleBinding ibm-aiops-installer-admin         
+              oc delete ClusterRoleBinding robot-shop                        
+              oc delete ClusterRoleBinding test-admin    
+
+
+
+              oc delete ConsoleLink ibm-aiops-aimanager
+              oc delete ConsoleLink ibm-aiops-aimanager-demo
+              oc delete ConsoleLink ibm-aiops-awx
+              oc delete ConsoleLink ibm-aiops-flink-connectors
+              oc delete ConsoleLink ibm-aiops-flink-policy
+              oc delete ConsoleLink ibm-aiops-ldap
+              oc delete ConsoleLink ibm-aiops-robotshop
+              oc delete ConsoleLink ibm-aiops-sockshop
+              oc delete ConsoleLink ibm-aiops-spark
+
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🧻 Delete Namespace ibm-aiops"
+              oc delete ns ibm-aiops
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🧻 Restart OLM Pod"
+              oc -n openshift-operator-lifecycle-manager delete $(oc get pods  -l app=catalog-operator -o NAME -n openshift-operator-lifecycle-manager)
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🧻 Delete Namespace ibm-aiops-installer"
+              oc delete ns ibm-aiops-installer &
+              oc delete ClusterRoleBinding ibm-aiops-installer-default-admin &
+              oc delete deployment ibm-aiops-wipe-aiops-install &
+
+              echo ""
+              echo ""
+              echo "  ⏳ INSTALLATION END TIMESTAMP: $(date)"
+              echo ""
+              echo "*****************************************************************************************************************************"
+              echo " ✅ INITIALIZATION - WAITING FOREVER"
+              echo "*****************************************************************************************************************************"
+
+
+              while true
+              do
+                sleep 1000
+              done
+
+      imagePullSecrets: []
+  paused: false
+
+

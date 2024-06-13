@@ -1,0 +1,470 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: aiops
+    app.kubernetes.io/managed-by: ibm-aiops-orchestrator
+    app.kubernetes.io/name: custom-sized-profiles
+    app.kubernetes.io/part-of: ibm-aiops
+    aiops-custom-size-profile-version: 4.3.0-2023-December-21
+  name: aiops-custom-size-profile
+data:
+  # WARNING: Modifications to this ConfigMap may cause your AIOPs installation to become unstable.
+  profiles: |
+    generatedfor: NonHA
+    automationbase:
+      kafka:
+        replicas: 1
+        resources:
+          requests:
+            cpu: 265m
+            memory: 1000Mi
+          limits:
+            cpu: 2000m
+            memory: 2000Mi
+        config:
+          default.replication.factor: 1
+          min.insync.replicas: 1
+      elasticsearch:
+        replicas: 1
+        resources:
+          requests:
+            cpu: 794m
+            memory: 2292Mi
+          limits:
+            cpu: 2000m
+            memory: 2292Mi
+        env:
+          - name: ES_JAVA_OPTS
+            value: -Xms1146M -Xmx1146M 
+        tlsproxy:
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+    cloud-native-postgresql:
+      cluster:
+        spec:
+          instances : 1
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1200Mi
+            limits:
+              cpu: 2000m
+              memory: 1200Mi
+          postgresql:
+            parameters:
+              shared_buffers: 300MB
+              effective_cache_size: 900MB
+    cp4waiops-eventprocessor:
+      flink:
+        jobmanager:
+          replicas: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 700Mi
+            limits:
+              cpu: 1000m
+              memory: 700Mi
+          tlsproxy:
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                cpu: 1000m
+                memory: 512Mi
+        taskmanager:
+          replicas: 1
+          resources:
+            requests:
+              cpu: 1500m
+              memory: 3548Mi
+            limits:
+              cpu: 3000m
+              memory: 3548Mi
+        properties:
+          jobmanager.memory.heap.size: 300mb
+          jobmanager.memory.jvm-metaspace.size: 100mb
+          taskmanager.memory.heap.size: 840mb
+          taskmanager.memory.managed.size: 120mb
+          taskmanager.numberOfTaskSlots: 8
+    configmaps:
+    - name: ibm-zen-config
+      data:
+        zen: |-
+          scale_data:
+            ZenCoreMetaDb:
+              name: zen-metastoredb
+              kind: StatefulSet
+              container: zen-metastoredb
+              replicas: 3
+              resources:
+                requests:
+                  cpu: 111m
+                  memory: 1024Mi
+                limits:
+                  cpu: 2000m
+                  memory: 2048Mi
+            ZenCore:
+              name: zen-core
+              kind: Deployment
+              container: zen-core-container
+              replicas: 2
+              resources:
+                requests:
+                  cpu: 117m
+                  memory: 256Mi
+                limits:
+                  cpu: 2000m
+                  memory: 512Mi
+            ZenCoreApi:
+              name: zen-core-api
+              kind: Deployment
+              container: zen-core-api-container
+              replicas: 2
+              resources:
+                requests:
+                  cpu: 109m
+                  memory: 512Mi
+                limits:
+                  cpu: 2000m
+                  memory: 1024Mi
+    - name: aiops-topology-sizing
+      data:
+        asm: |
+          file-observer:
+            specs:
+              replicas: 1
+            containers:
+              file-observer:
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 256Mi
+                  limits:
+                    cpu: 1000m
+                    memory: 366Mi
+                env:
+                  - name: JVM_ARGS
+                    value: -Xms37M -Xmx219M 
+          kubernetes-observer:
+            specs:
+              replicas: 1
+            containers:
+              kubernetes-observer:
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 256Mi
+                  limits:
+                    cpu: 1000m
+                    memory: 366Mi
+                env:
+                  - name: JVM_ARGS
+                    value: -Xms37M -Xmx219M 
+          status:
+            specs:
+              replicas: 1
+            containers:
+              status:
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 600Mi
+                  limits:
+                    cpu: 1000m
+                    memory: 857Mi
+                env:
+                  - name: JVM_ARGS
+                    value: -Xms429M -Xmx514M 
+          cassandra:
+            specs:
+              replicas: 1
+            containers:
+              cassandra:
+                resources:
+                  requests:
+                    cpu: 305m
+                    memory: 5120Mi
+                  limits:
+                    cpu: 2000m
+                    memory: 5120Mi
+                env:
+                  - name: CASSANDRA_HEAP_NEWSIZE
+                    value: 768M 
+                  - name: CASSANDRA_HEAP_SIZE
+                    value: 3584M 
+    operandconfigs:
+    - name: ibm-watson-aiops-ui-operator
+      spec:
+        insightsui:
+          container:
+            datarouter:
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 1400Mi
+                limits:
+                  cpu: 1000m
+                  memory: 1400Mi
+                env:
+                  - name: BATCH_SIZE
+                    value: 5000 
+                  - name: BATCH_TIMEOUT
+                    value: 250 
+                  - name: KAFKA_MAX_BYTES
+                    value: 5242880 
+                  - name: KAFKA_MAX_BYTES_PARTITION
+                    value: 1048576 
+        aiopsui:
+          container:
+            applicationUiApi:
+              container:
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 256Mi
+                  limits:
+                    cpu: 1000m
+                    memory: 256Mi
+            uiApi:
+              container:
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 256Mi
+                  limits:
+                    cpu: 2000m
+                    memory: 256Mi
+                env:
+                  - name: NODE_OPTS
+                    value: --max-old-space-size=192 --max-http-header-size=32768 
+    - name: aimanager-operator
+      spec:
+        aimanager:
+          minio:
+            customSizing:
+              requests:
+                cpu: 253m
+                memory: 540Mi
+              limits:
+                cpu: 2000m
+                memory: 540Mi
+    - name: ir-ai-operator
+      spec:
+        aiopsanalyticsorchestrator:
+          overrides:
+            metricAction:
+              cosDownloadThreads: 20
+              modelCacheSize: 2000000
+              kafkaStreamsThreads: 12
+              xms: 614M 
+              xmx: 653M 
+            metricSpark:
+              xms: 1127M 
+              xmx: 1352M 
+          customSizing:
+            deployments:
+            - name: metric-action
+              replicas: 1
+              containers:
+              - name: metric-action
+                requests:
+                  cpu: 103m
+                  memory: 768Mi
+                limits:
+                  cpu: 2000m
+                  memory: 853Mi
+            - name: metric-api
+              replicas: 1
+              containers:
+              - name: metric-api
+                requests:
+                  cpu: 100m
+                  memory: 1500Mi
+                limits:
+                  cpu: 1000m
+                  memory: 1875Mi
+            - name: metric-spark
+              replicas: 1
+              containers:
+              - name: metric-spark
+                requests:
+                  cpu: 300m
+                  memory: 1502Mi
+                limits:
+                  cpu: 2000m
+                  memory: 1582Mi
+    - name: ir-core-operator
+      spec:
+        issueresolutioncore:
+          overrides:
+            datarouting:
+              batchsize: 5000
+              batchtimeout: 250
+              loglevel: info
+              kafkamaxbytes: 0
+              kafkamaxbytespartition: 0
+            metricSpark:
+              sparkCoresMax: 3
+          customSizing:
+            deployments:
+            - name: datarouting
+              replicas: 1
+              containers:
+              - name: datarouting
+                requests:
+                  cpu: 100m
+                  memory: 1400Mi
+                limits:
+                  cpu: 1000m
+                  memory: 1556Mi
+            - name: esarchiving
+              replicas: 1
+              containers:
+              - name: esarchiving
+                requests:
+                  cpu: 50m
+                  memory: 50Mi
+                limits:
+                  cpu: 1000m
+                  memory: 1000Mi
+            - name: ncodl-api
+              replicas: 1
+              containers:
+              - name: api
+                requests:
+                  cpu: 100m
+                  memory: 1024Mi
+                limits:
+                  cpu: 1000m
+                  memory: 1138Mi
+                clops: --max-old-space-size=853  
+            - name: ncodl-jobmgr
+              replicas: 1
+              containers:
+              - name: jobmgr
+                requests:
+                  cpu: 100m
+                  memory: 1024Mi
+                limits:
+                  cpu: 1000m
+                  memory: 2048Mi
+                clops: --max-old-space-size=1536  
+            - name: ncodl-std
+              replicas: 2
+              containers:
+              - name: standard
+                requests:
+                  cpu: 100m
+                  memory: 1024Mi
+                limits:
+                  cpu: 1000m
+                  memory: 2048Mi
+                clops: --max-old-space-size=1536  
+            - name: rba-as
+              replicas: 1
+              containers:
+              - name: rba-as
+                requests:
+                  cpu: 131m
+                  memory: 200Mi
+                limits:
+                  cpu: 2000m
+                  memory: 1000Mi
+            - name: rba-rbs
+              replicas: 1
+              containers:
+              - name: rba-rbs
+                requests:
+                  cpu: 152m
+                  memory: 200Mi
+                limits:
+                  cpu: 1000m
+                  memory: 1538Mi
+            statefulSets:
+            - name: spark-worker
+              replicas: 2
+              containers:
+              - name: spark-worker
+                requests:
+                  cpu: 1003m
+                  memory: 3000Mi
+                limits:
+                  cpu: 3000m
+                  memory: 3750Mi
+            - name: couchdb
+              replicas: 1
+              containers:
+              - name: db
+                requests:
+                  cpu: 1285m
+                  memory: 1000Mi
+                limits:
+                  cpu: 2000m
+                  memory: 1000Mi
+              - name: mgmt
+                requests:
+                  cpu: 250m
+                  memory: 64Mi
+                limits:
+                  cpu: 1000m
+                  memory: 128Mi
+    - name: ir-lifecycle-operator
+      spec:
+        lifecycleservice:
+          overrides:
+            datarouting:
+              batchsize: 5000
+              batchtimeout: 50
+              loglevel: info
+              kafkamaxbytes: 0
+              kafkamaxbytespartition: 0
+            eventprocessor:
+              flink:
+                properties:
+                  taskmanager.memory.process.size: 4096M 
+                  taskmanager.numberOfTaskSlots: 2
+          customSizing:
+            deployments:
+            - name: policy-registry-svc
+              replicas: 1
+              containers:
+              - name: policy-registry-svc
+                requests:
+                  cpu: 50m
+                  memory: 250Mi
+                limits:
+                  cpu: 1000m
+                  memory: 500Mi
+            - name: datarouting
+              replicas: 1
+              containers:
+              - name: datarouting
+                requests:
+                  cpu: 500m
+                  memory: 2400Mi
+                limits:
+                  cpu: 2000m
+                  memory: 4800Mi
+            statefulSets:
+            - name: eventprocessor-ep-taskmanager
+              replicas: 1
+              containers:
+              - name: taskmanager
+                requests:
+                  cpu: 629m
+                  memory: 4096Mi
+                limits:
+                  cpu: 3000m
+                  memory: 4096Mi
+        lifecycletrigger:
+          customJobConfiguration:
+            executionEnvironment:
+              parallelism: 6

@@ -1,0 +1,258 @@
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ibm-aiops-load-lags-normal
+  namespace: ibm-aiops-installer
+spec:
+  template:
+    spec:
+      serviceAccountName: ibm-aiops-installer-admin
+      serviceAccount: ibm-aiops-installer-admin
+
+      containers:
+        - name: load
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ STARTING: Stream normal Logs for LAGS"
+              echo "*****************************************************************************************************************************"
+
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              echo "    📥 Downloading log files"
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              export TRAINING_REPO=https://github.com/niklaushirt/ibm-aiops-trainingdata.git
+              git clone $TRAINING_REPO
+              cd ibm-aiops-trainingdata
+
+              echo ""
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🔎 This Repo includes those latestet Commits"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              echo "    🚀 Starting Data Load"
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "This Repo includes those latestet Commits"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+              while true
+              do
+                echo "   ------------------------------------------------------------------------------------------------------------------------------"
+                echo "    📶 Stream Data "
+                echo "   ------------------------------------------------------------------------------------------------------------------------------"
+                ./training/load-gs-logs-kafka_date.sh
+                echo "   ------------------------------------------------------------------------------------------------------------------------------"
+                echo "    ⏳ Wait 5 minutes"
+                echo "   ------------------------------------------------------------------------------------------------------------------------------"
+                sleep 300
+              done
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ DONE"
+              echo "*****************************************************************************************************************************"
+              while true
+              do
+                sleep 600
+              done
+          env:
+            - name: INDEX_OVERWRITE
+              value : "true"
+            - name: VERSION
+              value : "latest"
+      restartPolicy: Never
+
+  backoffLimit: 500
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibm-aiops-stream-lags-normal
+  namespace: ibm-aiops-demo-ui
+  labels:
+      app: ibm-aiops-inject-lags-anomaly
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: ibm-aiops-inject-lags-anomaly
+  template:
+    metadata:
+      labels:
+        app: ibm-aiops-inject-lags-anomaly
+    spec:
+      serviceAccountName: ibm-aiops-demo-ui-admin
+      serviceAccount: ibm-aiops-demo-ui-admin 
+
+      containers:
+      - image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+        imagePullPolicy: IfNotPresent
+        name: ibm-aiops-inject-lags-anomaly
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "150m"
+          limits:
+            memory: "2024Mi"
+            cpu: "1200m"
+        command:
+          - /bin/sh
+          - -c
+          - |
+              #!/bin/bash
+              #set -x
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ STARTING: Stream normal Logs for LAGS"
+              echo "*****************************************************************************************************************************"
+
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              echo "    📥 Downloading log files"
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              export TRAINING_REPO=https://github.com/niklaushirt/ibm-aiops-trainingdata.git
+              git clone $TRAINING_REPO
+              cd ibm-aiops-trainingdata
+
+              echo ""
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🔎 This Repo includes those latestet Commits"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              echo "    🚀 Starting Data Load"
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "This Repo includes those latestet Commits"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+              while true
+              do
+                echo "   ------------------------------------------------------------------------------------------------------------------------------"
+                echo "    📶 Stream Data "
+                echo "   ------------------------------------------------------------------------------------------------------------------------------"
+                ./training/stream-gs-logs-kafka-normal.sh
+                echo "   ------------------------------------------------------------------------------------------------------------------------------"
+                echo "    ⏳ Wait 5 minutes"
+                echo "   ------------------------------------------------------------------------------------------------------------------------------"
+                sleep 300
+              done
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ DONE"
+              echo "*****************************************************************************************************************************"
+              while true
+              do
+                sleep 600
+              done
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibm-aiops-inject-lags-anomaly
+  namespace: ibm-aiops-demo-ui
+  labels:
+      app: ibm-aiops-inject-lags-anomaly
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: ibm-aiops-inject-lags-anomaly
+  template:
+    metadata:
+      labels:
+        app: ibm-aiops-inject-lags-anomaly
+    spec:
+      serviceAccountName: ibm-aiops-demo-ui-admin
+      serviceAccount: ibm-aiops-demo-ui-admin 
+
+      containers:
+      - image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+        imagePullPolicy: IfNotPresent
+        name: ibm-aiops-inject-lags-anomaly
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "150m"
+          limits:
+            memory: "2024Mi"
+            cpu: "1200m"
+        command:
+          - /bin/sh
+          - -c
+          - |
+              #!/bin/bash
+              #set -x
+              echo "*****************************************************************************************************************************"
+              echo " 🚀 Inject LAGS Anomaly                                                                                                                                                  "
+              echo "*****************************************************************************************************************************"
+
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              echo "    📥 Downloading log files"
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              export TRAINING_REPO=https://github.com/niklaushirt/ibm-aiops-trainingdata.git
+              git clone $TRAINING_REPO
+              cd ibm-aiops-trainingdata
+
+              echo ""
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🔎 This Repo includes those latestet Commits"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              echo "    🚀 Starting Data Load"
+              echo "   ------------------------------------------------------------------------------------------------------------------------------"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "This Repo includes those latestet Commits"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+              while true
+              do
+                echo "   ------------------------------------------------------------------------------------------------------------------------------"
+                echo "    📶 Stream Data "
+                echo "   ------------------------------------------------------------------------------------------------------------------------------"
+                ./training/stream-gs-logs-kafka-anomaly.sh
+              done
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ DONE"
+              echo "*****************************************************************************************************************************"
+              while true
+              do
+                sleep 600
+              done
+

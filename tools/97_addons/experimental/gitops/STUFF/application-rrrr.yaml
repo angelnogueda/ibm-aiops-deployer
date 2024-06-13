@@ -1,0 +1,98 @@
+﻿apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rrrr
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: ibm-aiops-installer
+    server: 'https://kubernetes.default.svc'
+  project: default
+  source:
+    helm:
+      parameters:
+        - name: cp4aiops.content.create_account
+          value: false
+        - name: cp4aiops.content.create_external_routes
+          value: false
+        - name: cp4aiops.content.create_incident_policy
+          value: false
+        - name: cp4aiops.content.create_log_connection
+          value: false
+        - name: cp4aiops.content.create_runbook_policy
+          value: false
+        - name: cp4aiops.content.create_topology_apps
+          value: false
+        - name: cp4aiops.content.create_topology_templates
+          value: false
+        - name: cp4aiops.content.create_valid_ingress_certificate
+          value: false
+        - name: cp4aiops.content.demoui_admin_mode
+          value: false
+        - name: cp4aiops.content.demoui_simulation_mode
+          value: false
+        - name: cp4aiops.content.demoui_slack_pwd
+          value: CHANGEME
+        - name: cp4aiops.content.demoui_slack_url
+          value: 'https://aiopsdemohq.slack.com/sign_in_with_password'
+        - name: cp4aiops.content.demoui_slack_user
+          value: ibm-aiopsdemo@gmail.com
+        - name: cp4aiops.content.demoui_user
+          value: demo
+        - name: cp4aiops.content.install_awx
+          value: false
+        - name: cp4aiops.content.install_custom_topology
+          value: false
+        - name: cp4aiops.content.install_demo_ui
+          value: false
+        - name: cp4aiops.content.install_demoapps
+          value: false
+        - name: cp4aiops.content.install_demoapps_observer
+          value: false
+        - name: cp4aiops.content.install_ldap
+          value: false
+        - name: cp4aiops.content.integrate_awx
+          value: false
+        - name: cp4aiops.content.ldap_base
+          value: 'dc=ibm,dc=com'
+        - name: cp4aiops.content.ldap_domain
+          value: ibm.com
+        - name: cp4aiops.content.ldap_namespace
+          value: openldap
+        - name: cp4aiops.content.ldap_register
+          value: false
+        - name: cp4aiops.content.load_awx_playbooks
+          value: false
+        - name: cp4aiops.content.load_runbooks
+          value: false
+        - name: cp4aiops.content.robotshop_color
+          value: white
+        - name: cp4aiops.content.subscription_channel
+          value: v4.x
+        - name: cp4aiops.content.training_create_season_xiny
+          value: false
+        - name: cp4aiops.content.training_create_training_metrics
+          value: false
+        - name: cp4aiops.content.training_create_training_snow
+          value: false
+        - name: cp4aiops.content.training_create_training_temporal
+          value: false
+        - name: cp4aiops.content.training_data_repo
+          value: ibm-aiops-additionaldata
+        - name: cp4aiops.content.training_data_url
+          value: 'https://github.com/niklaushirt/'
+        - name: cp4aiops.content.training_load_data_metrics
+          value: false
+        - name: cp4aiops.content.training_load_data_snow
+          value: false
+        - name: cp4aiops.content.training_run_training_metrics
+          value: false
+        - name: cp4aiops.content.training_run_training_snow
+          value: false
+        - name: cp4aiops.globalPassword
+          value: CHANGEME
+        - name: cp4aiops.instanceName
+          value: Demo
+    path: tools/97_addons/experimental/gitops/content/cp4aiops-demo-content-aio
+    repoURL: 'https://github.com/niklaushirt/ibm-aiops-deployer'
+    targetRevision: dev_latest

@@ -1,0 +1,3920 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_TURBO_TIMESCALE",
+      "label": "Turbo Timescale",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "postgres",
+      "pluginName": "PostgreSQL"
+    },
+    {
+      "name": "VAR_TREE_SEQUESTRATION_FACTOR",
+      "type": "constant",
+      "label": "TREE_SEQUESTRATION_FACTOR",
+      "value": "0.060",
+      "description": ""
+    },
+    {
+      "name": "VAR_ACRES_OF_FOREST_SEQUESTRATION_FACTOR",
+      "type": "constant",
+      "label": "ACRES_OF_FOREST_SEQUESTRATION_FACTOR",
+      "value": "0.84",
+      "description": ""
+    },
+    {
+      "name": "VAR_VEHICLE_EMISSIONS_FACTOR",
+      "type": "constant",
+      "label": "VEHICLE_EMISSIONS_FACTOR",
+      "value": "4.60",
+      "description": ""
+    },
+    {
+      "name": "VAR_HOUSEHOLD_EMISSIONS_FACTOR",
+      "type": "constant",
+      "label": "HOUSEHOLD_EMISSIONS_FACTOR",
+      "value": "5.505",
+      "description": ""
+    },
+    {
+      "name": "VAR_AWS_MIN_CONSUMPTION",
+      "type": "constant",
+      "label": "AWS_MIN_CONSUMPTION",
+      "value": "0.74",
+      "description": ""
+    },
+    {
+      "name": "VAR_AWS_MAX_CONSUMPTION",
+      "type": "constant",
+      "label": "AWS_MAX_CONSUMPTION",
+      "value": "3.5",
+      "description": ""
+    },
+    {
+      "name": "VAR_AZURE_MIN_CONSUMPTION",
+      "type": "constant",
+      "label": "AZURE_MIN_CONSUMPTION",
+      "value": "0.78",
+      "description": ""
+    },
+    {
+      "name": "VAR_AZURE_MAX_CONSUMPTION",
+      "type": "constant",
+      "label": "AZURE_MAX_CONSUMPTION",
+      "value": "3.76",
+      "description": ""
+    },
+    {
+      "name": "VAR_GCP_MIN_CONSUMPTION",
+      "type": "constant",
+      "label": "GCP_MIN_CONSUMPTION",
+      "value": "0.71",
+      "description": ""
+    },
+    {
+      "name": "VAR_GCP_MAX_CONSUMPTION",
+      "type": "constant",
+      "label": "GCP_MAX_CONSUMPTION",
+      "value": "4.26",
+      "description": ""
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "9.5.2"
+    },
+    {
+      "type": "datasource",
+      "id": "postgres",
+      "name": "PostgreSQL",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Sustainable IT Dashboard - Private Cloud including suspend actions",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "info",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": true,
+      "title": "All Published SPECpower_ssj2008 Results",
+      "tooltip": "",
+      "type": "link",
+      "url": "https://www.spec.org/power_ssj2008/results/power_ssj2008.html"
+    }
+  ],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 70,
+      "panels": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "description": "",
+          "gridPos": {
+            "h": 28,
+            "w": 24,
+            "x": 0,
+            "y": 1
+          },
+          "id": 72,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "# Sustainable IT Dashboard - Private Cloud\n***\n## Summary\nThis dashboard shows the impact of IBM Turbonomic application resource manager on Energy consumption and Carbon Dioxide equivalents (CO2e) emissions in your private cloud data center environment. \n\nThis dashboard focuses on data collected for physical machines (hosts) through a vCenter API and includes energy consumption data, number of hosts and VMs, VM-to-Host density ratios as well as the number and the type of generated host suspend and provision actions.\n***\n\n## Data and Methodology\n\n**Energy (Wh)** - data is collected from vCenter API and summed over a period of 10 minutes to get a single number for total Energy (Wh) in 10 minutes. \n\n**CO2e emissions (t)** - carbon emissions calculations are made following an open source methodology outlined in Cloud Carbon Footprint website - [www.cloudcarbonfootprint.org](https://www.cloudcarbonfootprint.org/).    \nSpecifically, in this dashboard carbon emissions are calculated using the following formula:\n\n    Operational Emissions = CO2e (t) = (energy consumption [Wh]) x ((private cloud average PUE) / 1000) x (private cloud emissions factor) x ((100 - percent renewable energy) / 100)\n\nWhere:\n\n- ***Private Cloud Power Usage Effectiveness (PUE)*** = An average PUE of 1.67 is used in our calculations. This [451 report](https://d39w7f4ix9f5s9.cloudfront.net/e3/79/42bf75c94c279c67d777f002051f/carbon-reduction-opportunity-of-moving-to-aws.pdf) notes: \"Adding it all up, the power usage effectiveness (PUE, the ratio of total datacenter power and the IT power) ranged from 1.63 to 1.70 in the survey sample and was consistent across company sizes. This is in line with broader industry data collected by the Uptime Institute but well below the efficiency of AWS operations.\" - 451 Research Report. We use the average of 1.63 and 1.70, which is 1.67.\n\n- ***Private Cloud Emissions Factor*** = `1,562.4 lbs CO2/MWh × (4.536 × 10^(-4) metric tons/lb) × 0.001 MWh/kWh = 7.09 × 10^(-4) metric tons CO2/kWh`. We are using `0.000709` (rounded) in our calculations. ***Note:*** Emission equivalents vary slightly vs. EPA calculation because we are using the rounded numbers of the emissions factor (7.09x10^(-4)).\n\n- ***Percent Renewable Energy*** = User can input the percent renewable energy that is used to generate the energy that is used by the datacenter in which physical hosts that are shown in this dashboard reside. CO2e emissions calculations will be adjusted by this input. \n\n**Density** - this chart shows the number of active VMs per host in your on-prem environment, and tracks the data over the selected dashboard time. \n\n**Estimated carbon sequestration equivalents** - real world examples of sequestration efforts to remove the total CO2e emissions reported in the *\"CO2e Emissions (t) - All Hosts\"* chart. ***Note:*** All sequestration equivalents and carbon emissions equivalents are adjusted for percent renewable energy inserted at the top of the dashboard.    \nSequestration formulas are as follow:\n\n- ***Equivalent Carbon Sequestered by Acres of Forest in 1 year (metric tons CO2 / acre)*** = Total Emissions (metric tons CO2) * Acres of Forest Sequestration Factor.    \nWhere:    \nAcres of Forest Sequestration Factor = -0.23 metric ton C/acre/year* × (44 units CO2/12 units C) = -0.84 metric ton CO2/acre/year sequestered annually by one acre of average U.S. forest.\n\n- ***Equivalent Carbon Sequestered by Tree Seedlings Grown for 10 years (metric ton CO2 / tree)*** = Total Emissions (metric tons CO2) * Tree Sequestration Factor.    \nWhere:    \nTree Sequestration Factor = (-36.4 lbs C/tree × (44 units CO2/12 units C) × 1 metric ton/2,204.6 lbs) = -0.060 metric ton CO2 per urban tree planted.\n\n**Carbon Emissions Equivalents** - To calculate the carbon emission equivalencies we use the formulas provided by United States EPA Greenhouse Gas Equivalencies Calculator [here](https://www.epa.gov/energy/greenhouse-gases-equivalencies-calculator-calculations-and-references). Please note that there will be slight variation between the results you see in the dashboard and what is calculated by the EPA’s site because we are using the numbers they have published, which they have rounded.\n- ***Equivalent Passenger Vehicles*** = Total Emissions (metric tons CO2) * Passenger Vehicles Factor (metric tons CO2e/vehicles/year).    \nWhere:    \nPassenger Vehicles Factor (vehicles/year) = 8.89 × (10^-3) metric tons CO2/gallon gasoline × 11,556 VMT car/truck average × 1/22.5 miles per gallon car/truck average × 1 CO2, CH4, and N2O/0.993 CO2 = 4.60 metric tons CO2e/vehicle/year.\n\n- ***Equivalent Home Electricity Use*** - Total Emissions (metric tons CO2) * Home Electricity Use Factor.   \nWhere:    \nHome Electricity Use Facto r= 11,880 kWh per home × 947.2 lbs CO2 per megawatt-hour generated × 1/(1-0.073) MWh delivered/MWh generated × 1 MWh/1,000 kWh × 1 metric ton/2,204.6 lb = 5.505 metric tons CO2/home.\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.5.2",
+          "title": "Readme",
+          "type": "text"
+        }
+      ],
+      "title": "Help",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 2,
+      "panels": [],
+      "title": "Private Cloud - Overview",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "How many acres of forest per year will it take to sequester the total CO2e emissions released by physical machines in the selected scope and over the selected time. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "watth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 0,
+        "y": 2
+      },
+      "id": 93,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY}*24*365 as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nGROUP BY m.time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Average Energy Consumption (Wh) - All VMs",
+      "transformations": [],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "How many acres of forest per year will it take to sequester the total CO2e emissions released by physical machines in the selected scope and over the selected time. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "acre"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 12,
+        "y": 2
+      },
+      "id": 17,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*count(e.name)/${CORES_CPU}*${CPU_CONSUMPTION}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}/1000/${ACRES_OF_FOREST_SEQUESTRATION_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100 as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "🦌 Total CO2e emissions - Equivalent in acres of forest per year",
+      "transformations": [],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "The amount of total CO2e emissions released by physical machines in the selected scope and over the selected time is equivalent to the amount of CO2e emissions released by vehicles driven for 1 year. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "decimals": 3,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 18,
+        "y": 2
+      },
+      "id": 20,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*count(e.name)/${CORES_CPU}*${CPU_CONSUMPTION}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}/1000/${VEHICLE_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100 as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "🚗 Total CO2e emissions - Vehicles per year ",
+      "transformations": [],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "How many acres of forest per year will it take to sequester the total CO2e emissions released by physical machines in the selected scope and over the selected time. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "decimals": 3,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "masst"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 11
+      },
+      "id": 94,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY}*${PRIVATE_CLOUD_AVG_PUE}/1000*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100*24*365 as \"CO2e (t)\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nGROUP BY m.time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Average CO2e Emissions (t/year) - All VMs",
+      "transformations": [],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "How many trees growing for 10 years will it take to sequester the total CO2e emissions released by physical machines in the selected scope and over the selected time. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "trees"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 11
+      },
+      "id": 16,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*count(e.name)/${CORES_CPU}*${CPU_CONSUMPTION}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}/1000/${TREE_SEQUESTRATION_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100 as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "🌲Total CO2e emissions - Equivalent in trees growing for 10 years",
+      "transformations": [],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "The amount of total CO2e emissions released by physical machines in the selected scope and over the selected time is equivalent to the amount of CO2e emissions released by household electricity consumption for 1 year. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "decimals": 3,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 11
+      },
+      "id": 21,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*count(e.name)/${CORES_CPU}*${CPU_CONSUMPTION}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}/1000/${HOUSEHOLD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100 as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "🏠 Total CO2e emissions - Household per year",
+      "transformations": [],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "How many acres of forest per year will it take to sequester the total CO2e emissions released by physical machines in the selected scope and over the selected time. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "CPU"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "id": 92,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*count(e.name)/${CORES_CPU} as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total CO2e emissions - Equivalent in acres of forest/year",
+      "transformations": [],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "How many acres of forest per year will it take to sequester the total CO2e emissions released by physical machines in the selected scope and over the selected time. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "watth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 22
+      },
+      "id": 90,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY} as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nGROUP BY m.time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Average Energy Consumption (Wh) - All VMs",
+      "transformations": [],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "How many acres of forest per year will it take to sequester the total CO2e emissions released by physical machines in the selected scope and over the selected time. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "masskg"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 22
+      },
+      "id": 91,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY}*${PRIVATE_CLOUD_AVG_PUE}/1000*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100*1000 as \"CO2e (kg)\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nGROUP BY m.time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Average CO2e Emissions per hour - All VMs",
+      "transformations": [],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Total energy consumption in Watt-Hour of all hosts in the selected scope and during the selected time of the dashboard. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "watth"
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "value"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 26
+      },
+      "id": 49,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "max",
+            "mean",
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY} as value\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nGROUP BY m.time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Energy Consumption (Wh) - All VMs",
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "seriesToRows",
+            "reducers": []
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "CO2e emissions graph shows the CO2e emissions in metric tons (1 metric ton = 1,000Kg) for the hosts in the selected scope and over the selected period of the dashboard. \nCO2e emissions are calculated using Cloud Carbon Footprint open source methodology. See the Help section for more details. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "masskg"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 26
+      },
+      "id": 87,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "max",
+            "mean",
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "8.5.12",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  sum(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY}*${PRIVATE_CLOUD_AVG_PUE}/1000*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100*1000 as \"CO2e (kg)\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nGROUP BY m.time\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "CO2e Emissions (t) - All VMs",
+      "transformations": [],
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "This chart shows the number of hosts in your on-prem environment, and tracks the data over the selected period. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "light-blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 37
+      },
+      "id": 84,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "count"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  e.oid as \"Host OID\",\n  e.\"name\" as \"Host Name\",\n\tattrs->>'model' as \"Host Model\",\n\tinitcap(replace(attrs->>'state', '_', ' ')) as \"Power State\",\n\tattrs->>'num_cpus' as \"Number of CPU\",\n\tattrs->>'cpu_model' as \"CPU Model\"\nFROM entity e\nWHERE\n  (e.first_seen, e.last_seen) overlaps ($__timeFrom(), $__timeTo()) AND\n  e.\"type\" = 'PHYSICAL_MACHINE' \nORDER BY 1",
+          "refId": "Host List",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select\n  e.oid as \"Host OID\",\n  --e.name as \"Host Name\",\n  count(s.seed_oid) as \"Current Number of VMs\"\nfrom entity e\njoin scope s on s.seed_oid = e.oid and s.scoped_type = 'VIRTUAL_MACHINE' and s.finish > now()\nwhere\n  e.type = 'PHYSICAL_MACHINE' and\n  \n  e.last_seen > now()\ngroup by e.oid\norder by e.name",
+          "refId": "VMs per Host",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Number of Physical Host(s)",
+      "transformations": [
+        {
+          "id": "seriesToColumns",
+          "options": {
+            "byField": "Host OID"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Host OID": true
+            },
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "This graph shows the ration of number of active VMs per host over the selected period of the dashboard. \nActive VMs - powered on and discovered by Turbonomic.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 9,
+        "x": 6,
+        "y": 37
+      },
+      "id": 86,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "max",
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  count(m.utilization) as \"Number of Active Hosts\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(time) and\n  e.environment = 'ON_PREM' AND\n  m.type = 'CPU' \nGROUP BY m.time\nORDER BY 1",
+          "refId": "Active Hosts",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  count(m.utilization) as \"Number of Active VMs\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\"\njoin scope s on m.entity_oid = s.scoped_oid and s.finish > now() and s.scoped_type = 'VIRTUAL_MACHINE'\nWHERE\n  $__timeFilter(time) and\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  e.environment = 'ON_PREM' AND\n  m.type = 'VCPU' AND\n  s.seed_oid IN (${HOST_LIST})\nGROUP BY m.time\nORDER BY 1",
+          "refId": "Active VMs",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "VM:Host Density",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Density",
+            "binary": {
+              "left": "Number of Active VMs",
+              "operator": "/",
+              "reducer": "sum",
+              "right": "Number of Active Hosts"
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Density": false,
+              "Number of Active Hosts": true,
+              "Number of Active VMs": true
+            },
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "Estimated average energy per active VMs in the selected scope.\nActive - powered on and discovered by Turbonomic.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 6,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "watth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 9,
+        "x": 15,
+        "y": 37
+      },
+      "id": 68,
+      "options": {
+        "legend": {
+          "calcs": [
+            "min",
+            "max",
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "8.5.12",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  SUM(m.current)*${CPU_CONSUMPTION} as \"Total Hosts Energy\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'PHYSICAL_MACHINE' AND\n  m.type = 'CPU'\nGROUP BY m.time\nORDER BY 1",
+          "refId": "Total Hosts Power",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  count(m.utilization) as \"Number of Active VMs\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\"\njoin scope s on m.entity_oid = s.scoped_oid and s.finish > now() and s.scoped_type = 'VIRTUAL_MACHINE'\nWHERE\n  $__timeFilter(time) and\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  e.environment = 'ON_PREM' AND\n  m.type = 'VCPU' \nGROUP BY m.time\nORDER BY 1",
+          "refId": "Active VMs",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Average Energy per VM (Wh)",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Average Energy per VM",
+            "binary": {
+              "left": "Total Hosts Energy",
+              "operator": "/",
+              "reducer": "sum",
+              "right": "Number of Active VMs"
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Average Energy per VM": false,
+              "Number of Active VMs": true,
+              "Total Hosts Energy": true,
+              "Total Hosts Power": true
+            },
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "description": "This chart shows the number of active VMs in your on-prem environment, and tracks the data over the selected period. \nActive VMs - powered on and discovered by Turbonomic.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "light-purple",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 42
+      },
+      "id": 65,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  count(e.name) as \"Number of VMs\"\nFROM entity e\nWHERE\n  e.type = 'VIRTUAL_MACHINE' \n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Number of Active VM(s)",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 47
+      },
+      "id": 74,
+      "panels": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 50
+                  },
+                  {
+                    "color": "orange",
+                    "value": 150
+                  },
+                  {
+                    "color": "red",
+                    "value": 300
+                  }
+                ]
+              },
+              "unit": "watt"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 28
+          },
+          "id": 51,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "datasource",
+                "uid": "-- Dashboard --"
+              },
+              "panelId": 6,
+              "refId": "A"
+            }
+          ],
+          "title": "Average Power Consumption (W) - Individual VM(s)",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 20
+                  },
+                  {
+                    "color": "orange",
+                    "value": 40
+                  },
+                  {
+                    "color": "red",
+                    "value": 60
+                  }
+                ]
+              },
+              "unit": "watth"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 28
+          },
+          "id": 63,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "datasource",
+                "uid": "-- Dashboard --"
+              },
+              "panelId": 48,
+              "refId": "A"
+            }
+          ],
+          "title": "Average Energy Consumption (Wh) - Individual VM(s)",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 1,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 4,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "always",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "line+area"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "light-yellow",
+                    "value": 50
+                  },
+                  {
+                    "color": "orange",
+                    "value": 150
+                  },
+                  {
+                    "color": "red",
+                    "value": 300
+                  }
+                ]
+              },
+              "unit": "watt"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 36
+          },
+          "id": 6,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "sum"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Total",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  m.current/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${EFFICIENCY} as value,\n  e.name as metric\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nORDER BY 1, 3",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "Power Consumption (W) - Individual VM(s)",
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-BlYlRd",
+                "seriesBy": "max"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 1,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 1,
+                "pointSize": 4,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "always",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "line+area"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 20
+                  },
+                  {
+                    "color": "orange",
+                    "value": 40
+                  },
+                  {
+                    "color": "red",
+                    "value": 60
+                  }
+                ]
+              },
+              "unit": "watth"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 36
+          },
+          "id": 48,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "max",
+                "mean",
+                "sum"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Total",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  m.current/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${W_WH_RATIO}*${EFFICIENCY} as value,\n  e.name as metric\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.provider_oid is null AND\n  m.type = 'VCPU' AND\n  m.current>0\nORDER BY 1",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "Energy Consumption (Wh) - Individual VM(s)",
+          "transformations": [],
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-BlYlRd"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 2,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "always",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "masst"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 44
+          },
+          "id": 75,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "mean",
+                "max",
+                "sum"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Total",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "8.5.12",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "time_series",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  m.\"time\" as \"time\",\n  (m.current)/1000*${CPU_CONSUMPTION}*${PRIVATE_CLOUD_AVG_PUE}/1000*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100 as \"MTCO2e\",\n  e.name as metric\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\" \nWHERE\n  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.type = 'VCPU' AND\n  m.current>0\nORDER BY 1",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "CO2e Emissions (t) - Individual VM(s)",
+          "transformations": [],
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "filterable": true,
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Number of CPU"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 134
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CPU Model"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 313
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Host Name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 273
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Host Model"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 160
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Power State"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 118
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 15,
+            "w": 24,
+            "x": 0,
+            "y": 53
+          },
+          "id": 44,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": true
+            },
+            "frameIndex": 1,
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "Host Name"
+              }
+            ]
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  e.oid as \"Host OID\",\n  e.\"name\" as \"Host Name\",\n\tattrs->>'model' as \"Host Model\",\n\tinitcap(replace(attrs->>'state', '_', ' ')) as \"Power State\",\n\tattrs->>'num_cpus' as \"Number of CPU\",\n\tattrs->>'cpu_model' as \"CPU Model\"\nFROM entity e\nWHERE\n  (e.first_seen, e.last_seen) overlaps ($__timeFrom(), $__timeTo()) AND\n  e.\"type\" = 'VIRTUAL_MACHINE' AND\n  e.oid IN (${HOST_LIST})\nORDER BY 1",
+              "refId": "Host List",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            },
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "format": "table",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "select\n  e.oid as \"Host OID\",\n  --e.name as \"Host Name\",\n  count(s.seed_oid) as \"Current Number of VMs\"\nfrom entity e\njoin scope s on s.seed_oid = e.oid and s.scoped_type = 'VIRTUAL_MACHINE' and s.finish > now()\nwhere\n  e.type = 'PHYSICAL_MACHINE' and\n  e.oid IN (${HOST_LIST}) and\n  e.last_seen > now()\ngroup by e.oid\norder by e.name",
+              "refId": "VMs per Host",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "Physical Host(s) List",
+          "transformations": [
+            {
+              "id": "seriesToColumns",
+              "options": {
+                "byField": "Host OID"
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Host OID": true
+                },
+                "indexByName": {},
+                "renameByName": {}
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        }
+      ],
+      "title": "Private Cloud - Individual Host Metrics",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 48
+      },
+      "id": 88,
+      "panels": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "description": "Estimated average energy savings from all Turbonomic suspend actions. \nEstimated energy savings are calculated based on the average energy over the selected time period for each one of the hosts that have a suspend action attached to them ",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "light-blue",
+                "mode": "fixed"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "watth"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CO2e Avg (kg)"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "masskg"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "light-green",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Estimated Yearly CO2e Avg (t)"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "masst"
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "semi-dark-green",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 43
+          },
+          "id": 54,
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "vertical",
+            "reduceOptions": {
+              "calcs": [
+                "sum"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "datasource",
+                "uid": "-- Dashboard --"
+              },
+              "panelId": 53,
+              "refId": "A"
+            }
+          ],
+          "title": "VM Suspend Actions - Estimated Missed Energy and CO2e Savings",
+          "transformations": [
+            {
+              "id": "seriesToColumns",
+              "options": {
+                "byField": "Host OID",
+                "mode": "inner"
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "CO2e (t)": false,
+                  "Host Name": false,
+                  "Host OID": true,
+                  "ID": true,
+                  "MTCO2e": true
+                },
+                "indexByName": {},
+                "renameByName": {}
+              }
+            },
+            {
+              "id": "filterByValue",
+              "options": {
+                "filters": [
+                  {
+                    "config": {
+                      "id": "isNull",
+                      "options": {}
+                    },
+                    "fieldName": "Host Name"
+                  }
+                ],
+                "match": "all",
+                "type": "exclude"
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "description": "List of all Host Suspend actions in the selected scope. \nAverage Energy = average energy consumption of the host over the selected period of the report (for example over last 3 hours)\nEstimated Yearly Average = the average energy multiplied by the number of hours in a year to get the average annual energy in W-h. ",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CO2e Avg (kg)"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 150
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Description"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Host Name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 150
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Date Recommended"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 200
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Cluster Name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Energy Avg (Wh)"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 150
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Estimated Yearly CO2e Avg (t)"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 300
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 43
+          },
+          "id": 53,
+          "options": {
+            "cellHeight": "md",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": true
+            },
+            "frameIndex": 1,
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "table",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  DISTINCT ON (e.\"name\") \n  TO_CHAR(a.recommendation_time, 'dd/mm/yyyy hh:mm:ss') as \"Date Recommended\",\n   e.\"name\" as \"Host Name\",\n  e.\"oid\" as \"Host OID\",\n  a.description as \"Description\",\n  a.target_entity_id as \"ID\"\nFROM pending_action a\nJOIN entity e on e.oid = a.target_entity_id\njoin scope s on s.scoped_oid = e.oid  and s.finish > now()\nwhere\n--  $__timeFilter(a.recommendation_time) AND\n  a.\"type\" = 'DEACTIVATE'  AND\n  e.\"type\" = 'VIRTUAL_MACHINE'  AND\n  a.target_entity_id IN (${HOST_LIST})\nORDER BY \"Host Name\"\n",
+              "refId": "List of actions",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            },
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "table",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "SELECT\n  e.oid as \"Host OID\",\n  avg(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${EFFICIENCY} as \"Energy Avg (Wh)\",\n  (avg(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${EFFICIENCY}*365*24) as \"Estimated Yearly Energy Avg (Wh)\",\n  avg(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${EFFICIENCY}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100 as \"CO2e Avg (kg)\",\n  avg(m.current)/1000*${CPU_CONSUMPTION}/${CORES_CPU}*${EFFICIENCY}*${PRIVATE_CLOUD_AVG_PUE}*${PRIVATE_CLOUD_EMISSIONS_FACTOR}*(100-${PERCENT_RENEWABLE_ENERGY})/100*24*365/1000 as \"Estimated Yearly CO2e Avg (t)\"\nFROM metric m\nJOIN entity e on m.entity_oid = e.\"oid\"\nJOIN pending_action pa on pa.target_entity_id = e.oid\nWHERE\n--  $__timeFilter(m.\"time\") AND\n  m.entity_type = 'VIRTUAL_MACHINE' AND\n  m.entity_oid IN (${HOST_LIST}) AND\n  m.type = 'VCPU'\nGROUP BY e.oid\nORDER BY 1",
+              "refId": "Average host energy",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "VM Suspend Actions",
+          "transformations": [
+            {
+              "id": "seriesToColumns",
+              "options": {
+                "byField": "Host OID"
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Energy Average": true,
+                  "Energy Average (kWh)": false,
+                  "Estimated Yearly Average Energy": true,
+                  "Estimated Yearly Average Energy (kWh)": false,
+                  "Estimated Yearly Average Energy (kwH": true,
+                  "Estimated Yearly Average Power": true,
+                  "Host OID": true,
+                  "ID": true,
+                  "Power Average": false
+                },
+                "indexByName": {},
+                "renameByName": {}
+              }
+            },
+            {
+              "id": "filterByValue",
+              "options": {
+                "filters": [
+                  {
+                    "config": {
+                      "id": "isNull",
+                      "options": {}
+                    },
+                    "fieldName": "Host Name"
+                  }
+                ],
+                "match": "all",
+                "type": "exclude"
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "table"
+        }
+      ],
+      "title": "Optimization Actions",
+      "type": "row"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_TURBO_TIMESCALE}"
+        },
+        "definition": "select distinct\n    name AS __text,\n    oid AS __value\nfrom entity\nwhere\n    type = 'DATACENTER'\n    and attrs->>'targets' like '%vCenter%'\n    and last_seen > now()\norder by 1",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Data Center",
+        "multi": true,
+        "name": "DATACENTER",
+        "options": [],
+        "query": "select distinct\n    name AS __text,\n    oid AS __value\nfrom entity\nwhere\n    type = 'DATACENTER'\n    and attrs->>'targets' like '%vCenter%'\n    and last_seen > now()\norder by 1",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_TURBO_TIMESCALE}"
+        },
+        "definition": "select distinct\n    e.name AS __text,\n    e.oid AS __value\nfrom \"scope\" s \njoin entity e on s.scoped_oid = e.\"oid\"\nwhere\n    s.scoped_type = 'COMPUTE_CLUSTER'\n    and s.seed_oid IN (${DATACENTER})\n    and e.last_seen > now()\norder by 1",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Cluster",
+        "multi": true,
+        "name": "CLUSTER",
+        "options": [],
+        "query": "select distinct\n    e.name AS __text,\n    e.oid AS __value\nfrom \"scope\" s \njoin entity e on s.scoped_oid = e.\"oid\"\nwhere\n    s.scoped_type = 'COMPUTE_CLUSTER'\n    and s.seed_oid IN (${DATACENTER})\n    and e.last_seen > now()\norder by 1",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_TURBO_TIMESCALE}"
+        },
+        "definition": "select distinct\n    e.name AS __text,\n    e.oid AS __value\nfrom \"scope\" s \njoin entity e on s.scoped_oid = e.\"oid\"\nwhere\n    s.scoped_type = 'VIRTUAL_MACHINE'\n\n    and e.last_seen > now()\n\norder by 1",
+        "hide": 2,
+        "includeAll": true,
+        "label": "Host List",
+        "multi": true,
+        "name": "HOST_LIST",
+        "options": [],
+        "query": "select distinct\n    e.name AS __text,\n    e.oid AS __value\nfrom \"scope\" s \njoin entity e on s.scoped_oid = e.\"oid\"\nwhere\n    s.scoped_type = 'VIRTUAL_MACHINE'\n\n    and e.last_seen > now()\n\norder by 1",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "1.67",
+          "value": "1.67"
+        },
+        "description": "Maximum consumption of your Private Cloud hosts in Watts. You can refer the the \"All Published SPECpower_ssh2008 Results\" link to get the values for your specific host.",
+        "hide": 0,
+        "label": "PUE",
+        "name": "PRIVATE_CLOUD_AVG_PUE",
+        "options": [
+          {
+            "selected": true,
+            "text": "1.67",
+            "value": "1.67"
+          }
+        ],
+        "query": "1.67",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "0.000709",
+          "value": "0.000709"
+        },
+        "description": "Private Cloud Emissions Factor corresponds to 1,562.4 lbs CO2/MWh × (4.536 × 10^(-4) metric tons/lb) × 0.001 MWh/kWh = 7.09 × 10^(-4) metric tons CO2/kWh",
+        "hide": 0,
+        "label": "Emissions Factor",
+        "name": "PRIVATE_CLOUD_EMISSIONS_FACTOR",
+        "options": [
+          {
+            "selected": true,
+            "text": "0.000709",
+            "value": "0.000709"
+          }
+        ],
+        "query": "0.000709",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "0",
+          "value": "0"
+        },
+        "description": "Percent renewable energy used to generate the power that is consumed by your datacenter. ",
+        "hide": 0,
+        "label": "% Renewable Energy",
+        "name": "PERCENT_RENEWABLE_ENERGY",
+        "options": [
+          {
+            "selected": true,
+            "text": "0",
+            "value": "0"
+          }
+        ],
+        "query": "0",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "description": "Each Tree Seedlings Grown for 10 years captures that amount of ton of CO2",
+        "hide": 2,
+        "label": "",
+        "name": "TREE_SEQUESTRATION_FACTOR",
+        "query": "${VAR_TREE_SEQUESTRATION_FACTOR}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_TREE_SEQUESTRATION_FACTOR}",
+          "text": "${VAR_TREE_SEQUESTRATION_FACTOR}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_TREE_SEQUESTRATION_FACTOR}",
+            "text": "${VAR_TREE_SEQUESTRATION_FACTOR}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Each acre of forest captures that amount of ton of CO2 per year",
+        "hide": 2,
+        "label": "",
+        "name": "ACRES_OF_FOREST_SEQUESTRATION_FACTOR",
+        "query": "${VAR_ACRES_OF_FOREST_SEQUESTRATION_FACTOR}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_ACRES_OF_FOREST_SEQUESTRATION_FACTOR}",
+          "text": "${VAR_ACRES_OF_FOREST_SEQUESTRATION_FACTOR}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_ACRES_OF_FOREST_SEQUESTRATION_FACTOR}",
+            "text": "${VAR_ACRES_OF_FOREST_SEQUESTRATION_FACTOR}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Emission of ton of CO2 per passenger vehicles driven for 1 year",
+        "hide": 2,
+        "label": "",
+        "name": "VEHICLE_EMISSIONS_FACTOR",
+        "query": "${VAR_VEHICLE_EMISSIONS_FACTOR}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_VEHICLE_EMISSIONS_FACTOR}",
+          "text": "${VAR_VEHICLE_EMISSIONS_FACTOR}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_VEHICLE_EMISSIONS_FACTOR}",
+            "text": "${VAR_VEHICLE_EMISSIONS_FACTOR}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Emission of ton of CO2 per household electricity consumption for 1 year",
+        "hide": 2,
+        "label": "",
+        "name": "HOUSEHOLD_EMISSIONS_FACTOR",
+        "query": "${VAR_HOUSEHOLD_EMISSIONS_FACTOR}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_HOUSEHOLD_EMISSIONS_FACTOR}",
+          "text": "${VAR_HOUSEHOLD_EMISSIONS_FACTOR}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_HOUSEHOLD_EMISSIONS_FACTOR}",
+            "text": "${VAR_HOUSEHOLD_EMISSIONS_FACTOR}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Average minimum consumption of an AWS instance in Watts. Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours",
+        "hide": 2,
+        "label": "",
+        "name": "AWS_MIN_CONSUMPTION",
+        "query": "${VAR_AWS_MIN_CONSUMPTION}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_AWS_MIN_CONSUMPTION}",
+          "text": "${VAR_AWS_MIN_CONSUMPTION}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_AWS_MIN_CONSUMPTION}",
+            "text": "${VAR_AWS_MIN_CONSUMPTION}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Average maximum consumption of an AWS instance in Watts. Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours",
+        "hide": 2,
+        "label": "",
+        "name": "AWS_MAX_CONSUMPTION",
+        "query": "${VAR_AWS_MAX_CONSUMPTION}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_AWS_MAX_CONSUMPTION}",
+          "text": "${VAR_AWS_MAX_CONSUMPTION}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_AWS_MAX_CONSUMPTION}",
+            "text": "${VAR_AWS_MAX_CONSUMPTION}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Average minimum consumption of an Azure instance in Watts. Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours",
+        "hide": 2,
+        "label": "",
+        "name": "AZURE_MIN_CONSUMPTION",
+        "query": "${VAR_AZURE_MIN_CONSUMPTION}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_AZURE_MIN_CONSUMPTION}",
+          "text": "${VAR_AZURE_MIN_CONSUMPTION}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_AZURE_MIN_CONSUMPTION}",
+            "text": "${VAR_AZURE_MIN_CONSUMPTION}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Average maximum consumption of an Azure instance in Watts. Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours",
+        "hide": 2,
+        "label": "",
+        "name": "AZURE_MAX_CONSUMPTION",
+        "query": "${VAR_AZURE_MAX_CONSUMPTION}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_AZURE_MAX_CONSUMPTION}",
+          "text": "${VAR_AZURE_MAX_CONSUMPTION}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_AZURE_MAX_CONSUMPTION}",
+            "text": "${VAR_AZURE_MAX_CONSUMPTION}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Average minimum consumption of a GCP instance in Watts. Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours",
+        "hide": 2,
+        "label": "",
+        "name": "GCP_MIN_CONSUMPTION",
+        "query": "${VAR_GCP_MIN_CONSUMPTION}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_GCP_MIN_CONSUMPTION}",
+          "text": "${VAR_GCP_MIN_CONSUMPTION}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_GCP_MIN_CONSUMPTION}",
+            "text": "${VAR_GCP_MIN_CONSUMPTION}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "description": "Average maximum consumption of a GCP instance in Watts. Reference: https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours",
+        "hide": 2,
+        "label": "",
+        "name": "GCP_MAX_CONSUMPTION",
+        "query": "${VAR_GCP_MAX_CONSUMPTION}",
+        "skipUrlSync": false,
+        "type": "constant",
+        "current": {
+          "value": "${VAR_GCP_MAX_CONSUMPTION}",
+          "text": "${VAR_GCP_MAX_CONSUMPTION}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_GCP_MAX_CONSUMPTION}",
+            "text": "${VAR_GCP_MAX_CONSUMPTION}",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "300",
+          "value": "300"
+        },
+        "description": "CPU_CONSUMPTION",
+        "hide": 0,
+        "label": "CPU_CONSUMPTION",
+        "name": "CPU_CONSUMPTION",
+        "options": [
+          {
+            "selected": true,
+            "text": "300",
+            "value": "300"
+          }
+        ],
+        "query": "300",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "8",
+          "value": "8"
+        },
+        "description": "CORES_CPU",
+        "hide": 0,
+        "label": "CORES PER CPU",
+        "name": "CORES_CPU",
+        "options": [
+          {
+            "selected": true,
+            "text": "8",
+            "value": "8"
+          }
+        ],
+        "query": "8",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "0.166",
+          "value": "0.166"
+        },
+        "hide": 0,
+        "name": "W_WH_RATIO",
+        "options": [
+          {
+            "selected": true,
+            "text": "0.166",
+            "value": "0.166"
+          }
+        ],
+        "query": "0.166",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "1",
+          "value": "1"
+        },
+        "description": "EFFICIENCY",
+        "hide": 0,
+        "label": "EFFICIENCY",
+        "name": "EFFICIENCY",
+        "options": [
+          {
+            "selected": true,
+            "text": "1",
+            "value": "1"
+          }
+        ],
+        "query": "1",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {
+    "nowDelay": ""
+  },
+  "timezone": "",
+  "title": "Sustainable IT Dashboard - Private Cloud",
+  "uid": "bR0umS44knlc",
+  "version": 22,
+  "weekStart": ""
+}

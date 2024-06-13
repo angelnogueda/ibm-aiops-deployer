@@ -1,0 +1,55 @@
+{
+    "query": {
+      "match": {
+        "kubernetes.namespace_name": {
+          "query": "robot-shop",
+          "type": "phrase"
+        }
+      }
+    }
+  }
+
+  {
+    "message_field": "message",
+    "log_entity_types": "kubernetes.container_image_id, kubernetes.host, kubernetes.pod_name, kubernetes.namespace_name",
+    "resource_id": "kubernetes.container_name",
+    "instance_id_field": "kubernetes.namespace_name",
+    "rolling_time": 10,
+    "timestamp_field": "@timestamp"
+  }
+
+
+  {
+    "message_field": "message",
+    "log_entity_types": "kubernetes.container_image_id, kubernetes.host, kubernetes.pod_name, kubernetes.namespace_name",
+    "resource_id": "kubernetes.container_name",
+    "instance_id_field": "kubernetes.namespace_name",
+    "rolling_time": 10,
+    "timestamp_field": "@timestamp"
+  }
+
+
+
+  {
+    "rolling_time": 10,
+    "instance_id_field": "application_name",
+    "log_entity_types": "clusterName, kubernetes.container_image_id, kubernetes.host, kubernetes.container_name, kubernetes.pod_name",
+    "message_field": "message",
+    "timestamp_field": "@timestamp",
+    "resource_id": "kubernetes.pod_name"
+  }
+
+
+
+
+  2023-11-08T07:03:03.885545594+00:00
+  2023-11-08T10:06:59.407379639+00:00
+
+  Moutwash
+  Cream
+  Perfume
+  Gel
+  Denti
+  Handcream
+  Deo ?
+

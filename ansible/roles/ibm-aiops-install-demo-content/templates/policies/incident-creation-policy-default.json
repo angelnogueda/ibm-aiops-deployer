@@ -1,0 +1,120 @@
+{
+  "metadata": {
+    "name": "DEMO Incident creation policy for all alerts",
+    "description": "Created by Nicks scripts",
+    "createdBy": {
+      "id": "demo",
+      "type": "user"
+    },
+    "lastUpdatedBy": {
+      "changeDetails": "Created",
+      "id": "demo",
+      "type": "user"
+    },
+    "labels": {
+      "ibm.com/aiops/uitemplate": "alert:createstory",
+      "ibm.com/is-default": "false"
+    }
+  },
+  "state": "disabled",
+  "executionPriority": 25,
+  "spec": {
+    "triggers": [{
+      "entityId": "alert",
+      "triggerId": "aiops.ibm.com/trigger/alert-created",
+      "arguments": {
+        "condition": {
+          "$variable": "constants.baseTriggerCondition"
+        }
+      }
+    }, {
+      "entityId": "alert",
+      "triggerId": "aiops.ibm.com/trigger/alert-updated",
+      "arguments": {
+        "condition": {
+          "actionId": "lang/condition/and",
+          "arguments": {
+            "conditions": [{
+              "$variable": "constants.baseTriggerCondition"
+            }, {
+              "actionId": "lang/condition/template",
+              "arguments": {
+                "template": "{{prevAlert.suppressed}} != {{alert.suppressed}} or {{prevAlert.eventCount}} != {{alert.eventCount}}"
+              }
+            }]
+          }
+        }
+      }
+    }],
+    "constants": {
+      "baseTriggerCondition": {
+        "actionId": "lang/condition/template",
+        "arguments": {
+          "template": "{{alert.state}} != \"clear\" and {{alert.state}} != \"closed\" and {{alert.suppressed}} == false"
+        }
+      }
+    },
+    "actions": [{
+      "actionId": "lang/if",
+      "arguments": {
+        "name": "Condition set 1",
+        "conditions": {
+          "actionId": "lang/condition/and",
+          "arguments": {
+            "conditions": [{
+                "actionId": "lang/condition/template",
+                "arguments": {
+                  "template": "({{alert.severity}} >= 2)"
+                }
+              }
+            ]
+          }
+        },
+        "then": [{
+          "actionId": "aiops/stories/deriveFromAlert",
+          "arguments": {
+            "entity": {
+              "$variable": "alert"
+            },
+            "priority": 1,
+            "retentionDays": 30,
+            "title": {
+              "$template": "{{ alert.summary }}"
+            },
+            "description": {
+              "$template": "{{ alert.summary }}"
+            },
+            "holdoffSec": 0,
+            "notification": [{
+              "type": "snow",
+              "name": "AIOPSSystemDefault",
+              "details": {}
+            }, {
+              "type": "chatops",
+              "name": "AIOPSSystemDefault",
+              "details": {}
+            }, {
+              "type": "connector",
+              "details": {
+                "name": "email",
+                "displayName": "email",
+                "connectorUID": "d4faee54-efec-4d74-af54-07ffcecb1e82",
+                "connectionType": "email-notifications",
+                "status": "Running"
+              }
+            }],
+            "assignment": {
+              "owner": "demo",
+              "team": "All users"
+            },
+            "addRelatedAlerts": {
+              "update": false
+            }
+          },
+          "output": "global.proposedStories.[]"
+        }]
+      }
+    }]
+  },
+  "hotfields": []
+}

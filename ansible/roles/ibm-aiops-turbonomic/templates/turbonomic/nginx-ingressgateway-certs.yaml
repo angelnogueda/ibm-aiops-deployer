@@ -1,0 +1,17 @@
+
+  global:
+    ingress:
+      secrets:   
+        - certificate: |
+            -----BEGIN CERTIFICATE-----
+            xxx
+            -----END CERTIFICATE-----
+          key: |
+            -----BEGIN RSA PRIVATE KEY-----
+            xxx
+            -----END RSA PRIVATE KEY-----
+          name: nginx-ingressgateway-certs
+                      
+
+
+

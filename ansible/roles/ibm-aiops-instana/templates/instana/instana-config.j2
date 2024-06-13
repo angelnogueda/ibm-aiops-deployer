@@ -1,0 +1,55 @@
+adminPassword: {{current_admin_pass}}
+storageConfigs:
+  rawSpans:
+    pvcConfig:
+      accessModes:
+        - ReadWriteMany
+      resources:
+        requests:
+          storage: 300Gi
+      storageClassName: {{ AIOPS_STORAGE_CLASS_FILE }}
+  synthetics:
+    pvcConfig:
+      accessModes:
+        - ReadWriteMany
+      resources:
+        requests:
+          storage: 300Gi
+      storageClassName: {{ AIOPS_STORAGE_CLASS_FILE }}
+  syntheticsKeystore:
+    pvcConfig:
+      accessModes:
+        - ReadWriteMany
+      resources:
+        requests:
+          storage: 300Gi
+      storageClassName: {{ AIOPS_STORAGE_CLASS_FILE }}
+datastoreConfigs:
+  postgresConfigs:
+    - databases:
+        - butlerdb
+        - tenantdb
+        - sales
+      user: postgres
+      password: {{ POSTGRES_PWD }} 
+      adminUser: postgres
+      adminPassword: {{ POSTGRES_PWD }} 
+  clickhouseConfigs:
+    - databases:
+        - application
+        - logs
+      user: clickhouse-user
+      password: clickhouse-pass
+      adminUser: clickhouse-user
+      adminPassword: clickhouse-pass
+  cassandraConfigs:
+    - user: instana-superuser
+      password: mysupersecretpassword
+      adminUser: instana-superuser
+      adminPassword: mysupersecretpassword
+imagePullSecrets:
+  - name: instana-registry
+downloadKey: {{current_agent_key}}
+salesKey: {{current_sales_key}}
+tokenSecret: uQOkH+Y4wU_0
+# SAML/OIDC configuration

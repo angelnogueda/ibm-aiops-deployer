@@ -1,0 +1,469 @@
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#         ________  __  ___     ___    ________       
+#        /  _/ __ )/  |/  /    /   |  /  _/ __ \____  _____
+#        / // __  / /|_/ /    / /| |  / // / / / __ \/ ___/
+#      _/ // /_/ / /  / /    / ___ |_/ // /_/ / /_/ (__  ) 
+#     /___/_____/_/  /_/    /_/  |_/___/\____/ .___/____/  
+#                                           /_/
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------------------------"
+#  Installing IBM AIOps
+#
+#  CloudPak for AIOps
+#
+#  ©2024 nikh@ch.ibm.com
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Get a Cluster from TechZone: https://techzone.ibm.com/collection/tech-zone-certified-base-images
+#   Type:               VMWare on IBM Cloud / UPI Public
+#   Worker node count:  5
+#   Flavour:            b3c.32x128 ❗ 
+#   OpenShift Version:  4.12
+#   ODF:                5TB
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Installs:
+#
+#     - Create Policies
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+---
+apiVersion: v1                     
+kind: Namespace
+metadata:
+  name: ibm-aiops-installer
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ibm-aiops-install-configuration-missing-policies
+  namespace: ibm-aiops-installer
+immutable: false
+data:
+  # Get your key from here https://myibm.ibm.com/products-services/containerlibrary
+  ENTITLED_REGISTRY_KEY: >-
+    <REGISTRY_TOKEN>
+  INSTALLATION_CONFIG.yaml: >+
+    #*************************************************************************************************************************************************
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    # Global Configuration
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    #*************************************************************************************************************************************************
+
+    global_config:
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Passwords and Licenses
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Use this Password for all Instances
+      global_password: notneeded
+
+
+      # Available Names: Test, Demo, AIOPS, CP4AIOPS, Arya,Bear,Cersei,Cersei1,Daenerys,Groot,Hodor,Hofstadter,Howard,Jimmy,John,King,Lemmy,Nightking,Penny,Raj,Robot1,Robot2,Robot3,Robot4,Robot5,Sansa,Sheldon,Sherlock,Slash,Tormund,Tyrion,Walker,Watson
+      environment_name: Bear
+      cloud_platform: existing-ocp
+      # Set this value to True to accept all licenses
+      accept_all_licenses: False
+      # Key to decrypt Licenses
+      #license_token: NONE
+
+
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Pull Registires
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      entitled_registry: cp.icr.io
+      entitled_registry_user: cp
+      catalog_image: icr.io/cpopen/ibm-operator-catalog:latest
+
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Notifications and Cards
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Create Welcome Cards in ibm-aiops
+      create_cards: true
+      # Create App Menu Items in OCP
+      create_ocp_items: true
+      # Create Notifications in OCP
+      create_ocp_notifications: true
+      position_ocp_notifications: BannerBottom
+      position_final_ocp_notification: BannerTop
+
+
+
+
+
+    # *************************************************************************************************************************************************
+    # -------------------------------------------------------------------------------------------------------------------------------------
+    # OpenShift Configuration
+    # --------------------------------------------------------------------------------------------------------------------------------------
+    # *************************************************************************************************************************************************
+
+    openshift:
+
+    - name: "mycluster"
+      ocp_version: "4.15"
+      cluster_name: "mycluster"
+      domain_name: example.com
+      openshift_storage:
+      - storage_name: auto-storage
+        storage_type: auto
+        # Alternatively use
+        #storage_name: ibm-roks-storage
+        #storage_type: custom
+        #ocp_storage_class_file: ibmc-file-gold-gid
+        #ocp_storage_class_block: ibmc-block-gold
+
+
+
+
+    #*************************************************************************************************************************************************
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    # IBM AIOPS Configuration
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    #*************************************************************************************************************************************************
+
+    ibmaiops:
+
+
+    #--------------------------------------------------------------------------------------------------------------------------------------
+
+    # CloudPak for AIOps Base Install
+
+    #--------------------------------------------------------------------------------------------------------------------------------------
+
+    - project: ibm-aiops
+      instances:
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    # CloudPak for AIOps Demo Content Install
+    #--------------------------------------------------------------------------------------------------------------------------------------
+      - name: ibm-aiops-demo-content
+        kind: IBMAIOpsDemoContent
+        install: true
+
+
+         # ---------------------------------------------------------------------
+        # TRAINING
+        # Train the Models based on pre-canned content
+
+        training_load_data_events: false
+        training_create_training_temporal: false
+        training_run_training_temporal: false
+
+        # Enable Log Anomaly Golden Signals (Disables LAD-NLP Training - ❗ HIGHLY EXPERIMENTAL)
+        training_enable_log_golden_signals: false
+
+        # LAD-NLP Training (disabled if training_enable_log_golden_signals is false)
+
+
+        training_load_data_snow: false
+        training_create_training_snow: false
+        training_run_training_snow: false
+
+        training_load_data_metrics: false
+        training_create_training_metrics: false
+        training_run_training_metrics: false
+
+        # Create feature flag Training (Seasonality and XinY)
+        training_create_season_xiny: false
+
+        training_data_url: https://github.com/niklaushirt/
+        training_data_repo: ibm-aiops-trainingdata
+
+
+        # ---------------------------------------------------------------------
+        # TOPOLOGY
+        # Install DemoApps Application
+        install_demoapps: false
+        # RobotShop interface color (classic/white)
+        robotshop_color: white
+        # Install DemoApps K8s Observer
+        install_demoapps_observer: false
+        # Create Topology
+        create_topology_templates: false
+        create_topology_apps: false
+        # Create Custom overlay topology
+        install_custom_topology: false
+
+
+        # ---------------------------------------------------------------------
+        # RUNBOOKS
+        # Install AWX and create Runbooks
+        install_awx: false
+        load_awx_playbooks: false
+        integrate_awx: false
+        load_runbooks: false
+        create_runbook_policy: false
+
+
+        # ---------------------------------------------------------------------
+        # Demo UI
+        install_demo_ui: false
+        demoui_slack_url: https://aiopsdemohq.slack.com/sign_in_with_password
+        # demoui_slack_url: https://aiops-fry2953.slack.com/x-p1624757694871-3716524482480-3705437209041/messages/C01JZLFJFMJ
+        demoui_slack_user: ibm-aiopsdemo@gmail.com
+        demoui_slack_pwd: CHANGEME
+        demoui_admin_mode: "false"
+        demoui_simulation_mode: "false"
+
+        # Create incident links to static Slack and Snow pages
+        demoui_create_slack_snow: false
+        
+        demoui_user: demo
+        # Password for the Demo UI (OVERRIDES GLOBAL PASSWORD)
+        #demoui_pwd: CHANGEME
+
+
+        # ---------------------------------------------------------------------
+        # LDAP
+        install_ldap: false
+        # ldap domain
+        ldap_domain: ibm.com
+        # ldap base
+        ldap_base: dc=ibm,dc=com
+        # LDAP Admin Password (OVERRIDES GLOBAL PASSWORD)
+        #ldap_admin_password: CHANGEME
+        # LDAP Password for all Users (OVERRIDES GLOBAL PASSWORD)
+        #ldap_user_password: CHANGEME
+        # ldap namespace
+        ldap_namespace: openldap
+        # Integrate AIOps Login with OpenLDAP 
+        ldap_register: false
+        # Integrate OpenShift Login with OpenLDAP
+        integrate_ocp_openldap: false
+
+        # ---------------------------------------------------------------------
+        # MISC PARAMETERS (you should not modify those)
+        # Create external routes (needed to create demo content)
+        create_external_routes: false
+
+        # Create a valid ingress certificate when on ITZ
+        create_valid_ingress_itz: false
+
+        # Create Policy for Story Creation
+        create_incident_policy: true
+
+        # Create Kafka connection for Log inception (needed to create log anomalies in the demo environment)
+        create_log_connection: false
+
+        # Create Service Account
+        create_account: false
+
+
+
+
+    - project: ibm-aiops-addons
+      instances:
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # CP4WAIOPS ELK
+      # --------------------------------------------------------------------------------------------------------------------------------------
+
+      - name: ibm-aiops-elk
+        kind: ELK
+        install: false
+
+
+
+
+  INSTALL_REPO: 'https://github.com/niklaushirt/ibm-aiops-deployer.git -b main'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# DO NOT MODIFY BELOW
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: ibm-aiops-installer-admin
+  namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: ibm-aiops-installer-admin
+    namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-default-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: ibm-aiops-installer
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ibm-aiops-aiops-create-missing-policies
+  namespace: ibm-aiops-installer
+spec:
+  serviceAccountname: ibm-aiops-installer-admin
+  template:
+    metadata:
+      labels:
+        app: ibm-aiops-installer
+    spec:
+      serviceAccountName: ibm-aiops-installer-admin
+      containers:
+        - name: install
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+              echo "***************************************************************************************************************************************************"
+              echo "***************************************************************************************************************************************************"
+              echo "                                                                                                                                                   "
+              echo " 🚀 Install IBM AIOps                                                                                                                                                  "
+              echo "                                                                                                                                                   "
+              echo "***************************************************************************************************************************************************"
+              echo "***************************************************************************************************************************************************"
+              echo "  "
+              echo "  "
+              echo "  ⏳ INSTALLATION START TIMESTAMP: $(date)"
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 📥 Housekeeping"
+              oc delete ConsoleNotification --all>/dev/null 2>/dev/null 
+              oc delete job  -n ibm-aiops-installer --ignore-not-found $(oc get job -n ibm-aiops-installer|grep load-|awk '{print$1}'):-notfound  --ignore-not-found>/dev/null 2>/dev/null 
+              oc delete pod  -n ibm-aiops-installer $(oc get po -n ibm-aiops-installer|grep load-|awk '{print$1}'):-notfound  --ignore-not-found>/dev/null 2>/dev/null 
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Getting Installation source from GitHub"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   📥 Clone Repo $INSTALL_REPO"
+              git clone $INSTALL_REPO
+              cd ibm-aiops-deployer
+
+              echo ""
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🔎 This Repo includes those latestet Commits"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 📝 Config File"         
+              cat /tmp/config-file/INSTALLATION_CONFIG.yaml
+
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Starting Installation"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Prepare Ansible"
+              pip -q install openshift pyyaml kubernetes
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Launching Ansible Playbook"
+              export ANSIBLE_LOG_PATH=/tmp/ansible.log
+              ansible-playbook ./ansible/00_ibm-aiops-install.yaml -e "config_file_path=/tmp/config-file/INSTALLATION_CONFIG.yaml" -e cp_entitlement_key=$ENTITLED_REGISTRY_KEY
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "  ⏳ INSTALLATION END TIMESTAMP: $(date)"
+              echo ""
+
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Finalize Installation"
+              ./tools/90_finalizeInstallation.sh
+              echo ""
+
+              while true
+              do
+                sleep 1000
+              done
+
+
+          env:
+          - name: INSTALL_REPO
+            valueFrom:
+              configMapKeyRef:
+                name: ibm-aiops-install-configuration-missing-policies
+                key: INSTALL_REPO
+          - name: TURBO_LICENSE
+            valueFrom:
+              configMapKeyRef:
+                name: ibm-aiops-install-configuration-missing-policies
+                key: TURBO_LICENSE
+                optional: true
+          - name: INSTANA_SALES_KEY
+            valueFrom:
+              configMapKeyRef:
+                name: ibm-aiops-install-configuration-missing-policies
+                key: INSTANA_SALES_KEY
+                optional: true
+          - name: INSTANA_AGENT_KEY
+            valueFrom:
+              configMapKeyRef:
+                name: ibm-aiops-install-configuration-missing-policies
+                key: INSTANA_AGENT_KEY
+                optional: true
+          - name: ENTITLED_REGISTRY_KEY
+            valueFrom:
+              configMapKeyRef:
+                name: ibm-aiops-install-configuration-missing-policies
+                key: ENTITLED_REGISTRY_KEY
+                optional: true
+          volumeMounts:
+            - name: config-file
+              mountPath: /tmp/config-file
+      volumes:
+        - name: config-file
+          configMap:
+            name: ibm-aiops-install-configuration-missing-policies
+            items:
+            - key: INSTALLATION_CONFIG.yaml
+              path: INSTALLATION_CONFIG.yaml
+      restartPolicy: Never
+  backoffLimit: 500
+

@@ -1,0 +1,48 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-gitops-operator
+  namespace: openshift-operators
+spec:
+  channel: latest
+  installPlanApproval: Automatic
+  name: openshift-gitops-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  # startingCSV: openshift-gitops-operator.v1.9.0
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: argocd-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: openshift-gitops-argocd-application-controller
+    namespace: openshift-gitops
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: install-cp4aiops
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: ibm-aiops
+    server: 'https://kubernetes.default.svc'
+  project: default
+  source:
+    helm:
+      parameters:
+        - name: spec.aiManager.namespace
+          value: ibm-aiops
+        - name: spec.storageClass
+          value: ocs-storagecluster-cephfs
+        - name: spec.storageClassLargeBlock
+          value: ' ocs-storagecluster-ceph-rbd'
+    path: config/cp4waiops/install-aimgr
+    repoURL: 'https://github.com/IBM/cp4waiops-gitops'
+    targetRevision: release-4.1

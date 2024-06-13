@@ -1,0 +1,281 @@
+---
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Get Storage Classes
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+
+- name: 🛰️  START - STORAGE CLASS
+  debug: 
+    msg="{{ lookup('pipe','date +%d.%m.%Y---%H:%M:%S') }}"
+
+- name: 🛰️  START - PREREQUISITES
+  debug: 
+    msg="{{ lookup('pipe','date +%d.%m.%Y---%H:%M:%S') }}"
+
+- name: Log
+  shell: |
+    export MESSAGE="Installing Prerequisites"
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "$MESSAGE  >> ../install_{{current_ibmaiops_feature.kind}}.log
+  ignore_errors: true
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ffd500'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - Prerequisites'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+
+
+
+
+
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Determine Storage Classes
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+- name: 🌏 STORAGECLASS - Get Cluster FQDN
+  shell: |
+    CLUSTER_ROUTE=$(oc get routes console -n openshift-console | tail -n 1 2>&1 ) 
+    CLUSTER_FQDN=$( echo $CLUSTER_ROUTE | awk '{print $2}')
+    echo ${CLUSTER_FQDN##*console.}
+  register: CLUSTER_NAME
+
+- name: 🌏 STORAGECLASS - Check Cluster Connectivity
+  fail: msg="You must be logged in to the server!"
+  when: CLUSTER_NAME.stdout==""
+
+- name: 🛠️  Show Config File
+  debug:
+    var: current_ibmaiops_feature.storage_class_block
+
+
+
+- name: 🛠️  GLOBAL STRING_STORAGE_CLASS_FILE
+  set_fact: STRING_STORAGE_CLASS_FILE={{ ocp_storage_class_file }}
+  when: ocp_storage_class_file is defined
+
+- name: 🛠️  GLOBAL STRING_STORAGE_CLASS_BLOCK
+  set_fact: STRING_STORAGE_CLASS_BLOCK={{ ocp_storage_class_block }}
+  when: ocp_storage_class_block is defined
+
+- name: 🛠️  Show GLOBAL STRING_STORAGE_CLASS_FILE
+  debug:
+    var: STRING_STORAGE_CLASS_FILE
+    
+- name: 🛠️  Show GLOBAL STRING_STORAGE_CLASS_BLOCK
+  debug:
+    var: STRING_STORAGE_CLASS_BLOCK
+
+
+- name: 🛠️  INSTANCE STRING_STORAGE_CLASS_FILE
+  set_fact: STRING_STORAGE_CLASS_FILE={{ current_ibmaiops_feature.storage_class_file }}
+  when: current_ibmaiops_feature.storage_class_file is defined
+
+- name: 🛠️  INSTANCE STRING_STORAGE_CLASS_BLOCK
+  set_fact: STRING_STORAGE_CLASS_BLOCK={{ current_ibmaiops_feature.storage_class_block }}
+  when: current_ibmaiops_feature.storage_class_block is defined
+
+- name: 🛠️  Show FINAL STRING_STORAGE_CLASS_FILE
+  debug:
+    var: STRING_STORAGE_CLASS_FILE
+    
+- name: 🛠️  Show FINAL STRING_STORAGE_CLASS_BLOCK
+  debug:
+    var: STRING_STORAGE_CLASS_BLOCK
+
+- name: ✅  Fail if STRING_STORAGE_CLASS_FILE not defined
+  fail: msg="STRING_STORAGE_CLASS_FILE not defined"
+  when: STRING_STORAGE_CLASS_FILE is not defined
+
+- name: ✅  Fail if STRING_STORAGE_CLASS_BLOCK not defined
+  fail: msg="STRING_STORAGE_CLASS_BLOCK not defined"
+  when: STRING_STORAGE_CLASS_BLOCK is not defined
+
+  
+
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# If Storage Classes are overridden
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: 🌏 STORAGECLASS - Determine Storage Class File Override
+  set_fact: AIOPS_STORAGE_CLASS_LARGE_BLOCK={{ STRING_STORAGE_CLASS_BLOCK }}
+  when: STRING_STORAGE_CLASS_BLOCK!="automatic"
+
+
+- name: 🌏 STORAGECLASS - Determine Storage Class Block Override
+  set_fact: AIOPS_STORAGE_CLASS_FILE={{ STRING_STORAGE_CLASS_FILE }}
+  when: STRING_STORAGE_CLASS_FILE!="automatic"
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Otherwise determine Storage Class
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: 🌏 STORAGECLASS - Determine File Storage Class - Detection
+  shell: |
+      export STORAGE_CLASSES=$(oc get storageclasses)
+      if [ -z "${STORAGE_CLASSES##*ocs-storagecluster-cephfs*}" ];
+      then
+          echo "ocs-storagecluster-cephfs"
+      else
+
+        if [ -z "${STORAGE_CLASSES##*ibmc-file-gold-gid*}" ];
+        then
+            echo "ibmc-file-gold-gid"
+        else
+          if [ -z "${STORAGE_CLASSES##*rook-cephfs*}" ];
+          then
+              echo "rook-cephfs"
+          else
+            if [ -z "${STORAGE_CLASSES##*managed-nfs-storage*}" ];
+              then
+                  echo "managed-nfs-storage"
+              else
+                SC_DEFAULT_STRING=$(oc get sc | grep "(default)")
+                if [ -z "${SC_DEFAULT_STRING##*(default)*}" ];
+                then
+                  echo ${SC_DEFAULT_STRING//\(*} 
+                else
+                  echo "No default StorageClass defined. Unable to determine what SC to use." 
+                  echo "Please define one using storageclass.kubernetes.io/is-default-class:true"
+                  echo "or set the STORAGECLASS_XXX_OVERRIDE in the configuration file."
+                  exit 1
+                fi
+              fi
+          fi
+        fi
+      fi
+  register: INSTALL_DETECTED_STORAGECLASS
+  when: STRING_STORAGE_CLASS_FILE=="automatic"
+  #args:
+  #  executable: /bin/bash
+
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Otherwise determine Storage Class
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: 🌏 STORAGECLASS - Determine Block Storage Class - Detection
+  shell: |
+      export STORAGE_CLASSES=$(oc get storageclasses)
+      if [ -z "${STORAGE_CLASSES##*ocs-storagecluster-ceph-rbd*}" ];
+      then
+          echo "ocs-storagecluster-ceph-rbd"
+      else
+
+        if [ -z "${STORAGE_CLASSES##*ibmc-block-gold*}" ];
+        then
+            echo "ibmc-block-gold"
+        else
+          if [ -z "${STORAGE_CLASSES##*rook-ceph-block*}" ];
+          then
+              echo "rook-ceph-block"
+          else
+            if [ -z "${STORAGE_CLASSES##*managed-nfs-storage*}" ];
+              then
+                  echo "managed-nfs-storage"
+              else
+                SC_DEFAULT_STRING=$(oc get sc | grep "(default)")
+                if [ -z "${SC_DEFAULT_STRING##*(default)*}" ];
+                then
+                  echo ${SC_DEFAULT_STRING//\(*} 
+                else
+                  echo "No default StorageClass defined. Unable to determine what SC to use." 
+                  echo "Please define one using storageclass.kubernetes.io/is-default-class:true"
+                  echo "or set the STORAGECLASS_XXX_OVERRIDE in the configuration file."
+                  exit 1
+                fi
+              fi
+          fi
+        fi
+      fi
+  register: INSTALL_DETECTED_BLOCK_STORAGECLASS
+  when: STRING_STORAGE_CLASS_BLOCK=="automatic"
+  #args:
+  #  executable: /bin/bash
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Set File Storage Class
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: 🌏 STORAGECLASS - Set AIOPS_STORAGE_CLASS_FILE={{ INSTALL_DETECTED_STORAGECLASS.stdout_lines[0] }}
+  set_fact: AIOPS_STORAGE_CLASS_FILE={{ INSTALL_DETECTED_STORAGECLASS.stdout_lines[0] }} 
+  when: STRING_STORAGE_CLASS_FILE=="automatic"
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Set Large Block Storage Class to same value
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: 🌏 STORAGECLASS - Set AIOPS_STORAGE_CLASS_LARGE_BLOCK={{ INSTALL_DETECTED_BLOCK_STORAGECLASS.stdout_lines[0] }} 
+  set_fact: AIOPS_STORAGE_CLASS_LARGE_BLOCK={{ INSTALL_DETECTED_BLOCK_STORAGECLASS.stdout_lines[0] }} 
+  when: STRING_STORAGE_CLASS_BLOCK=="automatic" 
+
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Check File Storage Class exists
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: 🔎 STORAGECLASS - Check File Storage Class exists {{ AIOPS_STORAGE_CLASS_FILE }}
+  shell: |
+          SC_EXISTS=$(oc get sc {{ AIOPS_STORAGE_CLASS_FILE }} --ignore-not-found --no-headers| wc -l|tr -d ' ')
+          if [ $SC_EXISTS -gt 0 ];
+          then
+            echo "OK"
+          else
+            echo "Storage Class does not exist!"
+            echo "Please review your block storage class or set the STORAGECLASS_XXX_OVERRIDE in the configuration file."
+            exit 1
+          fi     
+  register: INSTALL_DETECTED_BLOCK_STORAGECLASS
+  args:
+    executable: /bin/bash
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Check Large Block Storage Class exists
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: 🔎 STORAGECLASS - Check Large Block Storage Class exists {{ AIOPS_STORAGE_CLASS_LARGE_BLOCK }}
+  shell: |
+          SC_EXISTS=$(oc get sc {{ AIOPS_STORAGE_CLASS_LARGE_BLOCK }} --ignore-not-found --no-headers| wc -l|tr -d ' ')
+          if [ $SC_EXISTS -gt 0 ];
+          then
+            echo "OK"
+          else
+            echo "Storage Class does not exist!"
+            echo "Please review your block storage class or set the STORAGECLASS_XXX_OVERRIDE in the configuration file."
+            exit 1
+          fi     
+  register: INSTALL_DETECTED_BLOCK_STORAGECLASS
+  args:
+    executable: /bin/bash
+
+
+- name: 🟢🟢🟢🟢🟢🟢🟢 STORAGECLASS - FINAL Storage Classes 🟢🟢🟢🟢🟢🟢🟢
+  debug: 
+    msg: 
+    - "** Global Storage Classes for IBMAIOPS installation *************************************************************************"
+    - " IBMAIOPS Storage Class File:          {{AIOPS_STORAGE_CLASS_FILE}}"
+    - " IBMAIOPS Storage Class Large Block:   {{AIOPS_STORAGE_CLASS_LARGE_BLOCK}}"
+
+- name: Log
+  shell: |
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - ""Global Storage Classes for IBMAIOPS installation:"  >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "" IBMAIOPS Storage Class File:          {{AIOPS_STORAGE_CLASS_FILE}}"  >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "" IBMAIOPS Storage Class Large Block:   {{AIOPS_STORAGE_CLASS_LARGE_BLOCK}}"  >> ../install_{{current_ibmaiops_feature.kind}}.log
+
+  ignore_errors: true

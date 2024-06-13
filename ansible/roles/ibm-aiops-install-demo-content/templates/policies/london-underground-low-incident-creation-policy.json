@@ -1,0 +1,87 @@
+{
+  "metadata": {
+    "labels": {
+      "ibm.com/aiops/uitemplate": "alert:createstory",
+      "ibm.com/is-default": "false"
+    },
+    "name": "DEMO London-Underground - Catch All",
+    "description": "Created by Nicks scripts",
+    "createdBy": {
+      "id": "demo",
+      "type": "user"
+    }
+  },
+  "executionPriority": 90,
+  "state": "enabled",
+  "spec": {
+    "triggers": [{
+      "entityId": "alert",
+      "triggerId": "aiops.ibm.com/trigger/alert-created",
+      "arguments": {
+        "condition": {
+          "$variable": "constants.baseTriggerCondition"
+        }
+      }
+    }],
+    "constants": {
+      "baseTriggerCondition": {
+        "actionId": "lang/condition/template",
+        "arguments": {
+          "template": "{{alert.state}} != \"clear\" and {{alert.state}} != \"closed\" and {{alert.suppressed}} == false"
+        }
+      }
+    },
+    "actions": [{
+      "actionId": "lang/if",
+      "arguments": {
+        "name": "Condition set 1",
+        "conditions": {
+          "actionId": "lang/condition/and",
+          "arguments": {
+            "conditions": [{
+              "actionId": "lang/condition/template",
+              "arguments": {
+                "template": "({{alert.sender.service}} == \"DemoTube\") and ({{alert.severity}} <= 3)"
+              }
+            }]
+          }
+        },
+        "then": [{
+          "actionId": "aiops/stories/deriveFromAlert",
+          "arguments": {
+            "entity": {
+              "$variable": "alert"
+            },
+            "priority": 3,
+            "retentionDays": 30,
+            "title": {
+              "$template": "{{ alert.summary }}"
+            },
+            "description": {
+              "$template": "{{ alert.summary }}"
+            },
+            "holdoffSec": 0,
+            "notification": [{
+              "type": "chatops",
+              "name": "AIOPSSystemDefault",
+              "details": {}
+            }, {
+              "type": "snow",
+              "name": "AIOPSSystemDefault",
+              "details": {}
+            }],
+            "assignment": {
+              "owner": "demo",
+              "team": "All users"
+            },
+            "addRelatedAlerts": {
+              "update": false
+            }
+          },
+          "output": "global.proposedStories.[]"
+        }]
+      }
+    }]
+  }
+
+}

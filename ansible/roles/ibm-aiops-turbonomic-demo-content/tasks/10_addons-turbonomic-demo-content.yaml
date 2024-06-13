@@ -1,0 +1,1048 @@
+
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Install Turbonomic
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Install Turbonomic Demo Content
+# --------------------------------------------------------------------------------------------------------------------------------------
+
+- name: 🛰️  START - INSTALL TURBONOMIC
+  debug: 
+    msg="{{ lookup('pipe','date +%d.%m.%Y---%H:%M:%S') }}"
+
+
+- name: Log
+  shell: |
+    export MESSAGE="Installing TURBONOMIC Demo Content"
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "$MESSAGE  >> ../install_{{current_ibmaiops_feature.kind}}.log
+  ignore_errors: true
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ffd500'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - Demo Content'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+
+
+- name: 🚀 TURBONOMIC - Set ADMIN Password 
+  set_fact: current_admin_pass={{current_ibmaiops_feature.turbo_admin_password  | default( global_config.global_password )}}
+
+
+- name: 🟣  TURBONOMIC -  ADMIN Password {{current_admin_pass}}
+  debug:
+    var: current_admin_pass
+    verbosity: 1
+
+
+- name: 🚀 TURBONOMIC - Set DEMO Password 
+  set_fact: current_demo_pass={{current_ibmaiops_feature.turbo_admin_password  | default( global_config.global_password )}}
+
+
+- name: 🟣  TURBONOMIC -  DEMO Password {{current_demo_pass}}
+  debug:
+    var: current_demo_pass
+    verbosity: 1
+
+
+
+
+- name: 🚀 TURBONOMIC - Get ROUTE
+  shell: |
+    export TURBO_URL=$(oc get route -n turbonomic nginx -o jsonpath={.spec.host})
+    echo $TURBO_URL
+  ignore_errors: true
+  register: output
+        
+- name: 🚀 TURBONOMIC - Set ROUTE - {{ output.stdout_lines }} 
+  set_fact: TURBO_URL={{ output.stdout_lines[0] }} 
+
+
+- name: 🚀 TURBONOMIC - Init Admin
+  shell: |
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 📥 Initialization"
+    export TURBO_PASSWORD={{current_admin_pass}}
+    export TURBO_URL={{TURBO_URL}}
+
+    result=$(curl -XPOST -s -k -c /tmp/cookies -H 'accept: application/json' "https://{{TURBO_URL}}/api/v3/initAdmin" -d "username=administrator&password=$TURBO_PASSWORD")
+    echo $result
+    result=$(curl -XPOST -s -k -c /tmp/cookies -H 'accept: application/json' "https://{{TURBO_URL}}/api/v3/login?disable_hateoas=true" -d "username=administrator&password=$TURBO_PASSWORD")
+    echo $result
+
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+        
+
+
+
+
+- name: 🚀 TURBONOMIC - Login
+  shell: |
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 📥 Initialization"
+    export TURBO_PASSWORD={{current_admin_pass}}
+    export TURBO_URL={{TURBO_URL}}
+
+    while [[ `curl -XPOST -s -k -c /tmp/cookies -H 'accept: application/json' "https://{{TURBO_URL}}/api/v3/login?hateoas=true" -d "username=administrator&password=$TURBO_PASSWORD"` =~ "InvalidCredentialsException" ]]
+    do
+      echo "Waiting for Turbo Init"
+      sleep 15
+    done
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+        
+
+
+
+
+# --------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
+# LOAD LICENSE IF PROVIDED
+# --------------------------------------------------------------------------------------------------------
+- name: 🚀 TURBONOMIC - Add License if provided
+  shell: |
+    export TURBO_URL={{TURBO_URL}}
+
+    echo "{{current_turbo_license | default("NONE") }}" > /tmp/license.lic
+    #cat /tmp/license.lic
+    
+    result=$(curl -XPOST -k -b /tmp/cookies -H 'Content-Type: multipart/form-data'  -H 'accept: application/json' "https://$TURBO_URL/api/v3/licenses?dryRun=false" -F 'file=@/tmp/license.lic')
+ 
+    echo $result
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_turbo_license | default("NONE") != "NONE"
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 2
+  when: current_turbo_license | default("NONE") != "NONE"
+
+
+
+
+
+# --------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
+# CREATE DEMO USER
+# --------------------------------------------------------------------------------------------------------
+
+
+- name: 🚀 TURBONOMIC - Create demo User
+  shell: |
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 📥 Create demo User"
+    result=$(curl -XPOST -s -k "https://{{TURBO_URL}}/api/v3/users" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json' -d '  {
+      "displayName": "Demo User",
+        "username": "{{current_ibmaiops_feature.demo_user}}",
+        "password": "{{current_demo_pass}}",
+        "roles": [
+          {
+            "name": "ADMINISTRATOR"
+          }
+        ],
+        "loginProvider": "Local",
+        "type": "DedicatedCustomer",
+        "showSharedUserSC": false
+      }
+      ')
+    echo $result
+    echo ""
+    echo ""
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.create_user == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.create_user == true
+
+
+
+# --------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
+# CREATE GROUPS
+# --------------------------------------------------------------------------------------------------------
+- name: 🚀 TURBONOMIC - Create Group vSphere VMs
+  shell: |
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 📥 Create demo User"
+    result=$(curl -XPOST -s -k "https://{{TURBO_URL}}/api/v3/groups" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json' -d '  
+      {
+        "displayName": "vSphere VMs",
+        "className": "Group",
+        "groupType": "VirtualMachine",
+        "environmentType": "ONPREM",
+        "isStatic": false,
+        "logicalOperator": "AND",
+        "criteriaList": [
+          {
+            "expVal": "vCenter",
+            "expType": "EQ",
+            "filterType": "vmByTargetType",
+            "caseSensitive": false,
+            "entityType": null,
+            "singleLine": false
+          }
+        ],
+        "temporary": false,
+        "memberTypes": [
+          "VirtualMachine"
+        ],
+        "entityTypes": [
+          "VirtualMachine"
+        ],
+        "groupOrigin": "USER",
+        "groupClassName": "GroupApiDTO"
+      }
+    
+      ')
+    echo $result
+    echo ""
+    echo ""
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.group_vcenter_vms == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.group_vcenter_vms == true
+
+
+
+- name: 🚀 TURBONOMIC - Create Group Azure VMs
+  shell: |
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 📥 Create demo User"
+    result=$(curl -XPOST -s -k "https://{{TURBO_URL}}/api/v3/groups" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json' -d '  
+      {
+        "displayName": "Azure VMs",
+        "className": "Group",
+        "groupType": "VirtualMachine",
+        "environmentType": "ONPREM",
+        "isStatic": false,
+        "logicalOperator": "AND",
+        "criteriaList": [{
+            "expVal": "AZURE",
+            "expType": "EQ",
+            "filterType": "vmsByCloudProvider",
+            "caseSensitive": false,
+            "entityType": null,
+            "singleLine": false
+        }],
+        "temporary": false,
+        "memberTypes": [
+          "VirtualMachine"
+        ],
+        "entityTypes": [
+          "VirtualMachine"
+        ],
+        "groupOrigin": "USER",
+        "groupClassName": "GroupApiDTO"
+      }
+    
+      ')
+    echo $result
+    echo ""
+    echo ""
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.group_vcenter_vms == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.group_vcenter_vms == true
+
+
+
+- name: 🚀 TURBONOMIC - Create Group AWS VMs
+  shell: |
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 📥 Create demo User"
+    result=$(curl -XPOST -s -k "https://{{TURBO_URL}}/api/v3/groups" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json' -d '  
+      {
+        "displayName": "AWS VMs",
+        "className": "Group",
+        "groupType": "VirtualMachine",
+        "environmentType": "ONPREM",
+        "isStatic": false,
+        "logicalOperator": "AND",
+        "criteriaList": [{
+            "expVal": "AWS",
+            "expType": "EQ",
+            "filterType": "vmsByCloudProvider",
+            "caseSensitive": false,
+            "entityType": null,
+            "singleLine": false
+        }],
+        "temporary": false,
+        "memberTypes": [
+          "VirtualMachine"
+        ],
+        "entityTypes": [
+          "VirtualMachine"
+        ],
+        "groupOrigin": "USER",
+        "groupClassName": "GroupApiDTO"
+      }
+    
+      ')
+    echo $result
+    echo ""
+    echo ""
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.group_vcenter_vms == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.group_vcenter_vms == true
+
+
+- name: 🚀 TURBONOMIC - Create Group Google VMs
+  shell: |
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 📥 Create demo User"
+    result=$(curl -XPOST -s -k "https://{{TURBO_URL}}/api/v3/groups" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json' -d '  
+      {
+        "displayName": "Google VMs",
+        "className": "Group",
+        "groupType": "VirtualMachine",
+        "environmentType": "ONPREM",
+        "isStatic": false,
+        "logicalOperator": "AND",
+        "criteriaList": [{
+            "expVal": "GCP",
+            "expType": "EQ",
+            "filterType": "vmsByCloudProvider",
+            "caseSensitive": false,
+            "entityType": null,
+            "singleLine": false
+        }],
+        "temporary": false,
+        "memberTypes": [
+          "VirtualMachine"
+        ],
+        "entityTypes": [
+          "VirtualMachine"
+        ],
+        "groupOrigin": "USER",
+        "groupClassName": "GroupApiDTO"
+      }
+    
+      ')
+    echo $result
+    echo ""
+    echo ""
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.group_vcenter_vms == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.group_vcenter_vms == true
+
+
+- name: 🚀 TURBONOMIC - Create Group Kubernetes VMs
+  shell: |
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 📥 Create demo User"
+    result=$(curl -XPOST -s -k "https://{{TURBO_URL}}/api/v3/groups" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json' -d '  
+      {
+        "displayName": "Kubernetes VMs",
+        "className": "Group",
+        "groupType": "VirtualMachine",
+        "environmentType": "ONPREM",
+        "isStatic": false,
+        "logicalOperator": "AND",
+        "criteriaList": [
+          {
+            "expVal": "Kubernetes",
+            "expType": "EQ",
+            "filterType": "vmByTargetType",
+            "caseSensitive": false,
+            "entityType": null,
+            "singleLine": false
+          }
+        ],
+        "temporary": false,
+        "memberTypes": [
+          "VirtualMachine"
+        ],
+        "entityTypes": [
+          "VirtualMachine"
+        ],
+        "groupOrigin": "USER",
+        "groupClassName": "GroupApiDTO"
+      }
+    
+      ')
+    echo $result
+    echo ""
+    echo ""
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.group_vcenter_vms == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.group_vcenter_vms == true
+
+
+
+- name: 🚀 TURBONOMIC - Create Group RobotShop AppComponents
+  shell: |
+    result=$(curl -s -k -X 'POST' \
+      "https://{{TURBO_URL}}/api/v3/groups" -b /tmp/cookies\
+      -H 'accept: application/json' \
+      -H 'Content-Type: application/json' \
+      -d '  
+      {
+        "displayName": "RobotShopSynthetic AppComponents",
+        "className": "Group",
+        "groupType": "ApplicationComponent",
+        "severity": "NORMAL",
+        "environmentType": "HYBRID",
+        "isStatic": false,
+        "logicalOperator": "AND",
+        "criteriaList": [
+          {
+            "expVal": ".*robot.*",
+            "expType": "RXEQ",
+            "filterType": "appCompsByName",
+            "caseSensitive": false,
+            "entityType": null,
+            "singleLine": false
+          }
+        ],
+        "temporary": false,
+        "cloudType": "UNKNOWN",
+        "memberTypes": [
+          "ApplicationComponent"
+        ],
+        "entityTypes": [
+          "ApplicationComponent"
+        ],
+        "groupOrigin": "USER",
+        "groupClassName": "GroupApiDTO"
+      }
+      ')
+
+    echo $result
+    echo ""
+    echo ""
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.group_robotshop == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.group_robotshop == true
+
+
+
+
+
+- name: 🚀 TURBONOMIC - Create Licensing Groups
+  shell: |
+    result=$(curl -s -k -X 'POST' \
+      "https://{{TURBO_URL}}/api/v3/groups" -b /tmp/cookies\
+      -H 'accept: application/json' \
+      -H 'Content-Type: application/json' \
+      -d ' {
+        "displayName": "_DB_LICENSED_HOST",
+        "className": "Group",
+        "groupType": "PhysicalMachine",
+        "severity": "CRITICAL",
+        "environmentType": "ONPREM",
+        "isStatic": false,
+        "logicalOperator": "AND",
+        "criteriaList": [
+          {
+            "expVal": "192.168.10.87",
+            "expType": "RXEQ",
+            "filterType": "pmsByName",
+            "caseSensitive": false,
+            "entityType": null,
+            "singleLine": false
+          }
+        ],
+        "temporary": false,
+        "cloudType": "UNKNOWN",
+        "memberTypes": [
+          "PhysicalMachine"
+        ],
+        "entityTypes": [
+          "PhysicalMachine"
+        ],
+        "groupOrigin": "USER",
+        "groupClassName": "GroupApiDTO"
+      }
+      
+      ')
+
+    echo $result|jq -r ".displayName"| sed 's/^/     /'
+    export sellerUuid=$(echo $result|jq -r ".uuid")
+    echo "sellerUuid: $sellerUuid"
+    echo ""
+
+
+
+    result=$(curl -s -k -X 'POST' \
+      "https://{{TURBO_URL}}/api/v3/groups" -b /tmp/cookies\
+      -H 'accept: application/json' \
+      -H 'Content-Type: application/json' \
+      -d '   {
+        "displayName": "_DB_VMs",
+        "className": "Group",
+        "groupType": "VirtualMachine",
+        "severity": "NORMAL",
+        "environmentType": "HYBRID",
+        "isStatic": false,
+        "logicalOperator": "AND",
+        "criteriaList": [
+          {
+            "expVal": ".*mysql.*|.*demo.*|.*backend.*",
+            "expType": "RXEQ",
+            "filterType": "vmsByName",
+            "caseSensitive": false,
+            "entityType": null,
+            "singleLine": false
+          }
+        ],
+        "temporary": false,
+        "cloudType": "HYBRID",
+        "memberTypes": [
+          "VirtualMachine"
+        ],
+        "entityTypes": [
+          "VirtualMachine"
+        ],
+        "groupOrigin": "USER",
+        "groupClassName": "GroupApiDTO"
+      }
+      ')
+
+    echo $result|jq -r ".displayName"| sed 's/^/     /'
+    export buyerUuid=$(echo $result|jq -r ".uuid")
+    echo "buyerUuid: $buyerUuid"
+    echo ""
+
+
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 🚀 Creating License Policy"
+    echo "      sellerUuid: $sellerUuid"
+    echo "      buyerUuid: $buyerUuid"
+
+
+
+    result=$(curl -XPOST -s -k "https://{{TURBO_URL}}/api/v3/markets/777777/policies" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json' -d '
+    {
+      "policyName": "_DB_LICENSE",
+      "type": "BIND_TO_GROUP_AND_LICENSE",
+      "sellerUuid": "'$sellerUuid'",
+      "buyerUuid": "'$buyerUuid'",
+      "mergeUuids": [
+      
+      ],
+      "mergeType": "Cluster",
+      "capacity": 4,
+      "enabled": true,
+      "providerEntityType": "Application"
+    }')
+
+    echo $result|jq -r ".displayName"| sed 's/^/     /'
+    echo ""
+
+
+
+
+    result=$(curl -XPOST -s -k "https://{{TURBO_URL}}/api/v3/markets/777777/policies" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json' -d '
+    {
+      "policyName": "_DB_PLACE",
+      "type": "AT_MOST_N_BOUND",
+      "capacity": 4,
+      "sellerUuid": "'$sellerUuid'",
+      "buyerUuid": "'$buyerUuid'",
+      "mergeUuids": [
+      
+      ],
+      "mergeType": "Cluster",
+      "capacity": 4,
+      "enabled": true,
+      "providerEntityType": "Application"
+    }')
+
+    echo $result|jq -r ".displayName"| sed 's/^/     /'
+    echo ""
+
+
+
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.group_licensing == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.group_licensing == true
+
+
+
+
+
+
+- name: 🚀 TURBONOMIC - Create Schedule and Maintenance Policy
+  shell: |
+    result=$(curl -s -k -X 'POST' \
+      "https://{{TURBO_URL}}/api/v3/schedules" -b /tmp/cookies \
+      -H 'accept: application/json' \
+      -H 'Content-Type: application/json' \
+      -d '  
+        {
+          "displayName": "MaintenanceFirstSaturdayOfMonth",
+          "startTime": "2023-03-29T01:30",
+          "endTime": "2023-03-29T02:30",
+          "recurrence": {
+            "type": "MONTHLY",
+            "daysOfWeek": [
+              "Sat"
+            ],
+            "weekOfTheMonth": [
+              1
+            ],
+            "interval": 1
+          },
+          "timeZone": "Europe/Paris"
+        }
+      ')
+
+    echo $result
+    echo ""
+    echo ""
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.group_robotshop == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.group_robotshop == true
+
+
+
+
+
+# --------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
+# CREATE TARGETS
+# --------------------------------------------------------------------------------------------------------
+
+
+# - name: 🚀 TURBONOMIC - Create Instana Target
+#   shell: |
+#     echo "------------------------------------------------------------------------------------------------------------------------------"
+#     echo " 📥 Create Instana Target"
+#     INSTANA_IP=$(oc get route -n instana-core dev-aiops -o jsonpath={.spec.host})
+#     result=$(curl -XPOST -s -k "https://{{TURBO_URL}}/api/v3/targets" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json' -d '{
+#         "uuid": "74709474070544",
+#         "displayName": "159.122.143.166",
+#         "category": "Applications and Databases",
+#         "inputFields": [
+#           {
+#             "name": "apiToken",
+#             "value": "ChangeMe"
+#           },
+#           {
+#             "name": "address",
+#             "value": "'$INSTANA_IP'"
+#           },
+#           {
+#             "name": "collectVmMetrics",
+#             "value": "false"
+#           }
+#         ],
+#         "type": "Instana",
+#         "readonly": false
+#       }')
+
+#     echo $result
+#     echo ""
+#     echo ""
+#   ignore_errors: true
+#   register: output
+#   args:
+#     executable: /bin/bash
+#   when: current_ibmaiops_feature.target_instana == true
+# - name: 🟣  OUTPUT
+#   debug:
+#     var: output.stdout_lines
+#     verbosity: 1
+#   when: current_ibmaiops_feature.target_instana == true
+
+
+
+
+
+# --------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
+# DEPLOY DIF METRICS ROBOTSHOP
+# --------------------------------------------------------------------------------------------------------
+
+
+- name: 🚀 TURBONOMIC - Create RobotShop BusinessApp
+  shell: |
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 📥 Create demo User"
+    result=$(curl -XPOST -s -k "https://{{TURBO_URL}}/api/v3/topologydefinitions" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json' -d '  
+    {
+      "uuid": "285815442727328",
+      "displayName": "RobotShopSynthetic",
+      "contextBased": true,
+      "entityType": "BusinessApplication",
+      "entityDefinitionData": {
+        "manualConnectionData": {
+          "Service": {
+            "dynamicConnectionCriteria": [{
+              "expVal": ".*robot.*",
+              "expType": "RXEQ",
+              "filterType": "servicesByName",
+              "caseSensitive": false,
+              "entityType": null,
+              "singleLine": false
+            }]
+          },
+          "Container": {
+            "dynamicConnectionCriteria": [{
+              "expVal": "robot-shop",
+              "expType": "EQ",
+              "filterType": "containersByNamespace",
+              "caseSensitive": false,
+              "entityType": null,
+              "singleLine": false
+            }]
+          },
+          "VirtualMachine": {
+            "dynamicConnectionCriteria": [{
+              "expVal": ".*demo.*|.*robot.*",
+              "expType": "RXEQ",
+              "filterType": "vmsByName",
+              "caseSensitive": false,
+              "entityType": null,
+              "singleLine": false
+            }]
+          },
+          "ContainerPod": {
+            "dynamicConnectionCriteria": [{
+              "expVal": "robot-shop",
+              "expType": "EQ",
+              "filterType": "containerPodsByNamespace",
+              "caseSensitive": false,
+              "entityType": null,
+              "singleLine": false
+            }]
+          },
+          "ApplicationComponent": {
+            "dynamicConnectionCriteria": [{
+              "expVal": "*.robot.*",
+              "expType": "RXEQ",
+              "filterType": "appCompsByName",
+              "caseSensitive": false,
+              "entityType": null,
+              "singleLine": false
+            }]
+          }
+        }
+      }
+    }
+
+      ')
+    echo $result
+    echo ""
+    echo ""
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.metrics_dif == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.metrics_dif == true
+
+
+
+- name: 🚀 TURBONOMIC - Deploy Synthetic Metrics Server for DIF
+  shell: |
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 🚀 Deploy Synthetic Metrics Server for DIF"
+    oc apply -f ./roles/ibm-aiops-turbonomic-demo-content/templates/create-data-ingestion.yaml
+    echo ""
+    echo ""
+    export robotshopUUID=$(curl -XGET -s -k "https://{{TURBO_URL}}/api/v3/topologydefinitions" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json'|jq -r '.[]|select(.displayName=="RobotShopSynthetic").uuid')
+    echo "  🌏 Synthetic Metric URL: http://turbo-dif-service.default:3000/businessApplication/RobotShopSynthetic/$robotshopUUID"
+    echo ""
+    echo ""
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.metrics_dif == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.metrics_dif == true
+
+
+
+
+- name: 🚀 TURBONOMIC - Create SyntheticMetricsHelloWorld
+  shell: |
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 📥 Create Hello Metrics"
+    result=$(curl -XPOST -s -k "https://{{TURBO_URL}}/api/v3/targets" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json' -d '{
+        "uuid": "74709421524256",
+        "displayName": "SyntheticMetricsHelloWorld",
+        "category": "Custom",
+        "inputFields": [
+          {
+            "name": "Name",
+            "value": "Hello"
+          },
+          {
+            "name": "targetIdentifier",
+            "value": "http://turbo-metrics-dif-service.turbonomic:3000/helloworld"
+          }
+        ],
+        "type": "DataIngestionFramework-Turbonomic",
+        "readonly": false
+      }')
+
+    echo $result
+    echo ""
+    echo ""
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.metrics_dif == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.metrics_dif == true
+
+
+
+
+- name: 🚀 TURBONOMIC - Create SyntheticMetricsRobotShop
+  shell: |
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 📥 Create RobotShop Metrics"
+    export robotshopUUID=$(curl -XGET -s -k "https://{{TURBO_URL}}/api/v3/topologydefinitions" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json'|jq -r '.[]|select(.displayName=="RobotShopSynthetic").uuid')
+
+    result=$(curl -XPOST -s -k "https://{{TURBO_URL}}/api/v3/targets" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json' -d '{
+        "uuid": "74709422922224",
+        "displayName": "SyntheticMetricsRobotShop",
+        "category": "Custom",
+        "inputFields": [
+          {
+            "name": "Name",
+            "value": "RobotShopSynthetic"
+          },
+          {
+            "name": "targetIdentifier",
+            "value": "http://turbo-metrics-dif-service.turbonomic:3000/businessApplication/RobotShopSynthetic/'$robotshopUUID'"
+          }
+        ],
+        "type": "DataIngestionFramework-Turbonomic",
+        "readonly": false
+        }
+      }')
+
+    echo $result
+    echo ""
+    echo ""
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.metrics_dif == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.metrics_dif == true
+
+
+
+
+
+
+
+# --------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
+# DEPLOY MEMORY AND CPU HOGS
+# --------------------------------------------------------------------------------------------------------
+
+- name: 🚀 TURBONOMIC - Deploy Memory and CPU Hogs
+  shell: |
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 🚀 Deploy Memory and CPU Hogs"
+    oc apply  -f ./roles/ibm-aiops-turbonomic-demo-content/templates/prime_numbers-deploy.yaml
+    oc apply  -f ./roles/ibm-aiops-turbonomic-demo-content/templates/memory_grabber.yaml
+    echo ""
+    echo ""
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.resource_hogs == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.resource_hogs == true
+
+
+
+
+# --------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
+# WEBHOOKS
+# --------------------------------------------------------------------------------------------------------
+
+- name: 🚀 TURBONOMIC - Sample Webhook
+  shell: |
+    echo "------------------------------------------------------------------------------------------------------------------------------"
+    echo " 🚀 Deploy Sample Webhook"
+
+    result=$(curl -XPOST -s -k "https://{{TURBO_URL}}/api/v3/workflows" -b /tmp/cookies  -H 'Content-Type: application/json;' -H 'accept: application/json' -d ' {
+        "displayName": "My_WebHook",
+        "className": "Workflow",
+        "description": "My First Webhook",
+        "discoveredBy":
+        {
+            "readonly": false
+        },
+       "type": "WEBHOOK",
+       "typeSpecificDetails": {
+       "url": "http://ibm.com",
+          "method": "POST",
+          "template": "My Webhook Template -- DATA: Action Details: $action.details",
+          "type": "WebhookApiDTO"
+       }
+    }')
+
+    echo $result
+    echo ""
+    echo ""
+  ignore_errors: true
+  register: output
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.metrics_dif == true
+- name: 🟣  OUTPUT
+  debug:
+    var: output.stdout_lines
+    verbosity: 1
+  when: current_ibmaiops_feature.metrics_dif == true
+
+
+
+- name: 💊 CERTIFICATES - Patch Certificates for TechZone IPI/UPI
+  shell: |
+    CLUSTER_ROUTE=$(oc get routes console -n openshift-console | tail -n 1 2>&1 )
+    CLUSTER_FQDN=$( echo $CLUSTER_ROUTE | awk '{print $2}')
+    CLUSTER_NAME=${CLUSTER_FQDN##*console.}
+
+
+    if [[ $CLUSTER_NAME =~ "cloud.techzone.ibm.com" ]];
+    then
+        echo "✅ Seems that you're on Techzone IPI/UPI"  
+        echo "✅ Let's patch the certificates"  
+
+        echo "Extracting signed cert"
+        oc get secret -n openshift-ingress letsencrypt-certs -o jsonpath='{.data.tls\.crt}'| base64 -d > cert.crt
+        oc get secret -n openshift-ingress letsencrypt-certs -o jsonpath='{.data.tls\.key}'| base64 -d > cert.key
+
+        oc create secret tls -n turbonomic nginx-ingressgateway-certs --cert=cert.crt --key=cert.key --dry-run=client -o yaml | oc apply -f -
+
+
+        REPLICAS=$(oc get pods -n turbonomic |grep nginx|wc -l |xargs)
+        oc scale Deployment/nginx --replicas=0 -n turbonomic
+        sleep 10
+        oc scale Deployment/nginx --replicas=${REPLICAS} -n turbonomic
+    else
+        echo "✅ Seems that you're NOT on Techzone IPI/UPI"  
+        echo "✅ No need to patch the certificates any further"  
+    fi
+  register: certificate_patch
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: current_ibmaiops_feature.create_valid_ingress_itz | default(false) == true
+
+
+- name: 🟢 DEBUG - Patch Certificates for TechZone IPI/UPI
+  debug: 
+    var: certificate_patch
+  when: current_ibmaiops_feature.create_valid_ingress_itz | default(false) == true

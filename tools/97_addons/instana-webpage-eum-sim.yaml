@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: instana-webpage-eum-sim
+  namespace: robot-shop
+  labels:
+    app: instana-webpage-eum-sim
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: instana-webpage-eum-sim
+  template:
+    metadata:
+      labels:
+        app: instana-webpage-eum-sim
+    spec:
+      containers:
+      - name: instana-webpage-eum-sim
+        image: docker.io/niklaushirt/eum-sim:1.0
+        env:
+          - name: API_URL
+            value: https://eum.apps.CHANGEME.cloud.techzone.ibm.com
+          - name: API_KEY
+            value: CHANGEME
+          - name: INSTANA_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+          - name: CONFIG
+            value: config-shop
+            # Change this per environment
+          - name: BACKENDS
+            value: demoeu
+          - name: PORT
+            value: '8000'
+          - name: TZ
+            value: Europe/London
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        resources:
+          limits:
+            cpu: 200m
+            memory: 300Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: instana-webpage-eum-sim-service
+  namespace: robot-shop
+spec:
+  selector:
+    app: instana-webpage-eum-sim
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: instana-webpage-eum-sim
+  namespace: robot-shop
+spec:
+  to:
+    kind: Service
+    name: instana-webpage-eum-sim-service
+    weight: 100
+  port:
+    targetPort: 8000
+  wildcardPolicy: None

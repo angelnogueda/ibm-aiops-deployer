@@ -1,0 +1,84 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: incident-job-london-underground
+  namespace: ibm-aiops-installer
+spec:
+  serviceAccountName: demo-admin
+  template:
+    spec:
+      containers:
+        - name: load
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+
+
+              export INSTALL_REPO='https://github.com/niklaushirt/ibm-aiops-deployer.git -b dev_latest'
+
+
+
+              echo "***************************************************************************************************************************************************"
+              echo "***************************************************************************************************************************************************"
+              echo "                                                                                                                                                   "
+              echo " 🚀 Install IBM AIOps                                                                                                                                                  "
+              echo "                                                                                                                                                   "
+              echo "***************************************************************************************************************************************************"
+              echo "***************************************************************************************************************************************************"
+              echo "  "
+              echo "  "
+              echo "  ⏳ INSTALLATION START TIMESTAMP: $(date)"
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 📥 Housekeeping"
+              oc delete ConsoleNotification --all>/dev/null 2>/dev/null 
+              oc delete job  -n ibm-aiops-installer --ignore-not-found $(oc get job -n ibm-aiops-installer|grep load-|awk '{print$1}'):-notfound  --ignore-not-found>/dev/null 2>/dev/null 
+              oc delete pod  -n ibm-aiops-installer $(oc get po -n ibm-aiops-installer|grep load-|awk '{print$1}'):-notfound  --ignore-not-found>/dev/null 2>/dev/null 
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Getting Installation source from GitHub"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   📥 Clone Repo $INSTALL_REPO"
+              git clone $INSTALL_REPO
+              cd ibm-aiops-deployer
+
+              echo ""
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🔎 This Repo includes those latestet Commits"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Create Incident"
+              ./tools/01_demo/tube_incident.sh
+              echo ""
+
+              while true
+              do
+                sleep 1000
+              done
+          env:
+            - name: INDEX_OVERWRITE
+              value : "true"
+            - name: VERSION
+              value : "latest"
+      restartPolicy: Never
+
+  backoffLimit: 500

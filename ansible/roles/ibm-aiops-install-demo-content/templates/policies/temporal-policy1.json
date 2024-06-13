@@ -1,0 +1,68 @@
+{
+  "id": "temporal1",
+  "metadata": {
+    "labels": {
+      "ibm.com/aiops/managed-by-analytics": "true",
+      "ibm.com/aiops/alert-insight-type": "aiops.ibm.com/insight-source/relationship/causal/temporal",
+      "ibm.com/aiops/alert-relationship-source": "aiops.ibm.com/insight-source/relationship/causal/temporal",
+      "ibm.com/aiops/alert-relationship-sources/temporal/group-id": "911755dc14f8a4cc00b3c50d37c42d8ccb352b43",
+      "ibm.com/aiops/policy/temporal/version": "3",
+      "ibm.com/aiops/policy/temporal/has-evidence": "true"
+    },
+    "name": "Planned closure of station",
+    "description": "Created by Nicks scripts",
+    "createdBy": {
+      "id": "demo",
+      "type": "user"
+    }
+  },
+  "state": "enabled",
+  "executionPriority": 50,
+  "spec": {
+    "trigger": {
+      "entityId": "alert",
+      "triggerId": "aiops.ibm.com/trigger/alert-pre-create"
+    },
+    "actions": [{
+      "actionId": "aiops.ibm.com/action/internal/conditional",
+      "arguments": {
+        "condition": " {{ alert.signature }} == \"{name=London Fields, type=undergroundStation}-No service-\" or  {{ alert.signature }} == \"{name=Northfields, type=undergroundStation}-No service-\"",
+        "then": [{
+          "actionId": "aiops.ibm.com/action/internal/insights/correlate",
+          "output": "alert.insights.[]",
+          "arguments": {
+            "entity": {
+              "$variable": "alert"
+            },
+            "correlationKey": {
+              "$variable": "policy.id"
+            },
+            "relationshipType": "aiops.ibm.com/insight-type/relationship/causal",
+            "relationshipSource": {
+              "$variable": "policy.metadata.labels.[ibm.com/aiops/alert-relationship-source]"
+            },
+            "relationshipDetails": {
+              "groupId": {
+                "$variable": "policy.metadata.labels.[ibm.com/aiops/alert-relationship-sources/temporal/group-id]"
+              },
+              "policyId": {
+                "$variable": "policy.id"
+              },
+              "window": {
+                "type": "rolling",
+                "durationMS": 900000
+              }
+            }
+          }
+        }]
+      }
+    }],
+    "hotfields": [{
+      "fieldname": "alert.signature",
+      "value": "{name=London Fields, type=undergroundStation}-No service-"
+    }, {
+      "fieldname": "alert.signature",
+      "value": "{name=Northfields, type=undergroundStation}-No service-"
+    }]
+  }
+}

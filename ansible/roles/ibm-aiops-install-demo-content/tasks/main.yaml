@@ -1,0 +1,551 @@
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#         ________  __  ___     ___    ________       
+#        /  _/ __ )/  |/  /    /   |  /  _/ __ \____  _____
+#        / // __  / /|_/ /    / /| |  / // / / / __ \/ ___/
+#      _/ // /_/ / /  / /    / ___ |_/ // /_/ / /_/ (__  ) 
+#     /___/_____/_/  /_/    /_/  |_/___/\____/ .___/____/  
+#                                           /_/
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------------------------"
+#  Installing IBM AIOps
+#
+#  IBM AIOps
+#
+#  ©2024 nikh@ch.ibm.com
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Installs:
+#
+#  - OpenLDAP & Register with IBM AIOps
+#  - RobotShop Demo App
+#  - Demo Service Account 
+#  - AWX (Open Source Ansible Tower) with preloaded Playbooks
+#  - Disables ASM Service match rule 
+#  - Train Models
+#    - Create Training Definitions (TG, LAD, CR, SI. Turn off RSA) 
+#    - Create Training Data (LAD, SNOW) 
+#    - Train Models (TG, LAD, CR, SI) 
+#  - Topology
+#    - Create K8s Observer
+#    - Create ASM merge rules
+#    - Load ASM merge Topology
+#    - Create IBM AIOps Application
+#  - Creates valid certificate for Ingress (Slack) 
+#  - External Routes (Flink, Topology, ...)
+#  - Disables ASM Service match rule 
+#  - Create Policy Creation for Stories and Runbooks 
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+ 
+
+- name: 🟣🟣🟣 INSTALLATION MODULE START - {{current_ibmaiops_feature.kind}}
+  debug: 
+    msg: 
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "                                                                                                                                                   "
+    - "      🟡🟡🟡🟡🟡  🚀 IBM AIOps - INSTALLING {{current_ibmaiops_feature.kind}} 🟡🟡🟡🟡🟡                                                        "
+    - "                                                                                                                                                   "
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+    appURL=$(oc get routes -n $AIOPS_NAMESPACE-demo-ui ibm-aiops-demo-ui  -o jsonpath="{['spec']['host']}")|| true
+    OPENSHIFT_ROUTE=$(oc get route -n openshift-console console -o jsonpath={.spec.host})
+    INSTALL_POD=$(oc get po -n ibm-aiops-installer -l app=ibm-aiops-installer --no-headers|grep "Running"|grep "1/1"|grep 'install-aiops'|awk '{print$1}')
+
+
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification-main
+    spec:
+      backgroundColor: '#141a6b'
+      color: '#fff'
+      location: {{global_config.position_final_ocp_notification | default("BannerTop")}}
+      text: 'Installing  {{current_ibmaiops_feature.kind}} - {{global_config.environment_name | default("Demo")}} - '    
+      link:
+          href: "https://$OPENSHIFT_ROUTE/k8s/ns/ibm-aiops-installer/pods/$INSTALL_POD/logs"
+          text: Open Logs   
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# INITIALIZATION
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Initialize Logging
+- name: (001/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Init Logging
+  include_tasks: "{{role_path}}/../ibm-aiops-global/tasks/01_init-logging.yaml"
+    
+
+
+- name:  (002/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡 INITIALIZATION - Installation Parameters 🟡🟡🟡"
+  debug:
+    msg:
+    - "***********************************************************************************************"
+    - " 🚀 Installing {{current_ibmaiops_feature.kind}}"
+    - "***********************************************************************************************"
+    - "-----------------------------------------------------------------------------------------------"
+    - "  📥 STORAGE"
+    - "     💾 Installation Options for SPECIFIC MODULE   {{ current_ibmaiops_feature.kind}}"
+    - "        Storage Class File Override:              {{ current_ibmaiops_feature.storage_class_file | default('no override') }}"
+    - "        Storage Class Block Override:             {{ current_ibmaiops_feature.storage_class_block | default('no override') }}"
+    - "        Storage Class InfraManagement:            {{ current_ibmaiops_feature.storage_class_file | default('no override') }}"
+    - ""
+    - "     💾 Installation Options from GLOBAL"
+    - "        Storage Class File Override:              {{ ocp_storage_class_file | default('not defined') }}"
+    - "        Storage Class Block Override:             {{ ocp_storage_class_block | default('not defined') }}"
+    - "        Storage Class InfraManagement:            {{ ocp_storage_class_file | default('not defined') }}"
+    - "-----------------------------------------------------------------------------------------------"
+    - "  🌏 GLOBAL CONFIG"
+    - "      🔐 Global Password for all Instances:       {{ global_config.global_password  | default('not defined') }}"
+    - "      📝 Create App Menu Items in OCP:            {{ global_config.create_ocp_items  | default('not defined') }}"
+    - "      📝 Create Welcome Cards in IBM AIOps:       {{ global_config.create_cards  | default('not defined') }}"
+    - "-----------------------------------------------------------------------------------------------"
+    - "  📥 TRAINING"
+    - "     🔽 Load Data for Event Temporal Training:    {{current_ibmaiops_feature.training_load_data_events | default('false')}}"
+    - "     ✅ Create Training for Temp Grouping:        {{current_ibmaiops_feature.training_create_training_temporal}}"
+    - "     ✅ Enable Log Anomaly - Golden Signals:      {{current_ibmaiops_feature.training_enable_log_golden_signals}}"
+    - "     🔽 Load Data for Metric Anomaly:             {{current_ibmaiops_feature.training_load_data_metrics}}"
+    - "     ✅ Create Training for Metric Anomaly:       {{current_ibmaiops_feature.training_create_training_metrics}}"
+    - "     🚀 Run Training for Metric Anomaly:          {{current_ibmaiops_feature.training_run_training_metrics}}"
+    - "     🔽 Load Data for Similar Incidents:          {{current_ibmaiops_feature.training_load_data_snow}}"
+    - "     ✅ Create Training for Similar Incidents:    {{current_ibmaiops_feature.training_create_training_snow}}"
+    - "     🚀 Run Training for Similar Incidents:       {{current_ibmaiops_feature.training_run_training_snow}}"
+    - "     ✅ Create Training for Season/XinY:          {{current_ibmaiops_feature.training_create_season_xiny | default('not defined') }}"
+    - "-----------------------------------------------------------------------------------------------"
+    - "  📥 TOPOLOGY"
+    - "     🈸 Install Demo Applications:                {{current_ibmaiops_feature.install_demoapps}}"
+    - "     🈸 RobotShop Color (classic/white):          {{current_ibmaiops_feature.robotshop_color | default('not defined - defaults to classic') }}"
+    - "     🛠️ Create Demo overlay topology:             {{current_ibmaiops_feature.install_custom_topology}}"
+    - "     🛠️ Create Demo K8s Observers:                {{current_ibmaiops_feature.install_demoapps_observer}}"
+    - "     🛠️ Create Demo Templates:                    {{current_ibmaiops_feature.create_topology_templates}}"
+    - "     🈸 Create Demo App:                          {{current_ibmaiops_feature.create_topology_apps}}"
+    - "-----------------------------------------------------------------------------------------------"
+    - "  📥 RUNBOOKS"
+    - "     ✅ Install AWX:                              {{current_ibmaiops_feature.install_awx}}"
+    - "     ✅ Load AWX Playbooks:                       {{current_ibmaiops_feature.load_awx_playbooks}}"
+    - "     ✅ Integrate AWX and IBM AIOps:              {{current_ibmaiops_feature.integrate_awx}}"
+    - "     ✅ Load IBM AIOps Runbooks:                  {{current_ibmaiops_feature.load_runbooks}}"
+    - "     ✅ Create Runbook Policy:                    {{current_ibmaiops_feature.create_runbook_policy}}"
+    - "-----------------------------------------------------------------------------------------------"
+    - "  📥 DEMO UI"
+    - "     ✅ Install Demo UI:                          {{current_ibmaiops_feature.install_demo_ui}}"
+    - "     👩‍💻 IBM AIOps Demo User:                      {{current_ibmaiops_feature.demoui_user}}"
+    - "     🔐 IBM AIOps Demo Password (override):       {{current_ibmaiops_feature.demoui_pwd | default('not defined')}}"
+    - "     ❗ Admin Mode:                               {{current_ibmaiops_feature.demoui_admin_mode}}"
+    - "     ❗ Create precanned Slack and SNOW Links:    {{current_ibmaiops_feature.demoui_create_slack_snow | default('false')}}"
+    - "-----------------------------------------------------------------------------------------------"
+    - "  📥 LDAP"
+    - "     ✅ LDAP Install:                             {{current_ibmaiops_feature.install_ldap}}"
+    - "     🌏 LDAP Domain:                              {{current_ibmaiops_feature.ldap_domain}}"
+    - "     🌏 LDAP Base:                                {{current_ibmaiops_feature.ldap_base}}"
+    - "     🔐 LDAP Admin Password (global override):    {{current_ibmaiops_feature.ldap_admin_password  | default('not defined')}}"
+    - "     🔐 LDAP Users Password (global override):    {{current_ibmaiops_feature.ldap_user_password  | default('not defined')}}"
+    - "     🚀 LDAP Register:                            {{current_ibmaiops_feature.ldap_register}}"
+    - "-----------------------------------------------------------------------------------------------"
+    - "  📥 MISC PARAMETERS"
+    - "     🌏 Create external routes:                   {{current_ibmaiops_feature.create_external_routes}}"
+    - "     🛠️ Create a valid ingress cert for ITZ:      {{current_ibmaiops_feature.create_valid_ingress_itz}}"
+    - "     🛠️ Create Policy for Incident Creation:      {{current_ibmaiops_feature.create_incident_policy}}"
+    - "     🛠️ Create Kafka Log connection:              {{current_ibmaiops_feature.create_log_connection}}"
+    - "     🛠️ Create Service Account:                   {{current_ibmaiops_feature.create_account}}"
+    - "-----------------------------------------------------------------------------------------------"
+    - "***********************************************************************************************"
+    - "-----------------------------------------------------------------------------------------------"
+    - "  📥 CONFIG"
+    - "  {{ current_ibmaiops_feature}}"
+    - "***********************************************************************************************"
+    - "***********************************************************************************************"
+
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# CHECK FOR INSTALLATION READY
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Check that IBM AIOPS has been completely installed
+# - name: (010/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Wait for IBM AIOps to be Ready
+#   include_tasks: 99_ibm-aiops-wait-ibm-aiops.yaml
+
+- name: (003/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Start Logging
+  include_tasks: "{{role_path}}/../ibm-aiops-global/tasks/90-log-start.yaml"
+
+
+- name: (004/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡 Get Storage Classes
+  include_tasks: "{{role_path}}/../ibm-aiops-global/tasks/05_init-get-storage-class.yaml"
+
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# INSTALL ADDONS
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Install OpenLDAP
+- name: (005/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Install OpenLDAP
+  include_tasks: 21_addons-ldap.yaml
+  when: current_ibmaiops_feature.install_ldap == true
+
+# Create Service Account and USER
+- name: (006/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create the Admin Service Account
+  include_tasks: 22_addons-user.yaml
+  when: current_ibmaiops_feature.create_account == true
+
+# Create Demo Apps (Robot-Shop)
+- name: (007/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create the Demo Apps 
+  include_tasks: 23_addons-demoapps.yaml
+  when: current_ibmaiops_feature.install_demoapps == true
+
+
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# CREATE ROUTES
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+- name: (008/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Routes
+  include_tasks: 30_ibm-aiops-create-routes.yaml
+  when: current_ibmaiops_feature.create_external_routes == true
+
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# LOAD MODEL TRAINING DATA ahead of time
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Load data
+- name: (009/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Load SNOW Training Data
+  include_tasks: 51_ibm-aiops-training-load-snow.yaml
+  when: current_ibmaiops_feature.training_load_data_snow == true
+
+- name: (011/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Load METRICS Training Data
+  include_tasks: 53_ibm-aiops-training-load-metric.yaml
+  when: current_ibmaiops_feature.training_load_data_metrics == true
+
+- name: (012/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Load EVENTS Training Data
+  include_tasks: 53_ibm-aiops-training-load-events.yaml
+  when: current_ibmaiops_feature.training_load_data_events == true | default('true')
+
+- name: (013/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Training Definition for Lags
+  include_tasks: 52_ibm-aiops-training-create-lags-configuration.yaml
+  when: current_ibmaiops_feature.training_enable_log_golden_signals | default(false) == true
+
+
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# CREATE TOPOLOGY (part 1)
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+- name: (014/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Disable Topology Match Rules
+  include_tasks: 44_ibm-aiops-disable-match-token-rule.yaml
+  when: current_ibmaiops_feature.install_custom_topology == true
+
+- name: (015/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Topology Observers
+  include_tasks: 41_ibm-aiops-create-observers.yaml
+  when: current_ibmaiops_feature.install_demoapps_observer == true
+
+- name: (016/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Load Topology Merge Rules
+  include_tasks: 42_ibm-aiops-load-topology-merge.yaml
+  when: current_ibmaiops_feature.install_custom_topology == true
+
+- name: (017/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Application Overlay Topology
+  include_tasks: 43_ibm-aiops-create-topology.yaml
+  when: current_ibmaiops_feature.install_custom_topology == true
+
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# INSTALL AWX while training data is loading   
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+- name: (018/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Install AWX
+  include_tasks: 24_addons-awx.yaml   
+  when: current_ibmaiops_feature.install_awx == true
+  
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# CREATE TOPOLOGY (part 2)
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+- name: (019/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Application Topology Templates
+  include_tasks: 45_ibm-aiops-create-aiops-application-templates.yaml
+  when: current_ibmaiops_feature.create_topology_templates == true
+
+- name: (020/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Application Topology Application
+  include_tasks: 45_ibm-aiops-create-aiops-application.yaml
+  when: current_ibmaiops_feature.create_topology_apps == true
+
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# POSTINSTALL TASKS
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Register LDAP Users
+- name: (021/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Register LDAP Server with IBM AIOPS
+  include_tasks: 25-post-ldap-register.yaml
+  when: current_ibmaiops_feature.install_ldap == true and current_ibmaiops_feature.ldap_register == true
+# Create valid certificate for Ingress (for Slack)
+- name: (022/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create a valid certificate for the IBM AIOPS Ingress
+  include_tasks: 31_ibm-aiops-patch-ingress.yaml
+  when: current_ibmaiops_feature.create_valid_ingress_itz == true | default('false')
+
+
+
+
+
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# CREATE RUNBOOKS
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Create Runbooks    
+- name: (023/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Wait for AWX to become ready
+  include_tasks: 46_ibm-aiops-wait-awx.yaml
+  when: current_ibmaiops_feature.install_awx == true
+
+- name: (024/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Load Demo Playbooks into AWX
+  include_tasks: 48_ibm-aiops-load-awx-playbooks-for-demo.yaml
+  when: current_ibmaiops_feature.load_awx_playbooks == true 
+
+- name: (025/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create AWX Connection in IBM AIOPS
+  include_tasks: 47_ibm-aiops-create-awx-connection.yaml
+  when: current_ibmaiops_feature.integrate_awx == true
+
+# Load Demo Runbooks into IBM AIOps
+- name: (026/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Load Demo Runbooks into IBM AIOPS
+  include_tasks: 49_ibm-aiops-load-runbooks-for-demo.yaml
+  when: current_ibmaiops_feature.load_runbooks == true
+
+
+
+
+
+# Restart Anomaly Pods to make anomaly detection workk
+    #- role: 89_ibm-aiops-reset-anomaly-detection
+
+
+
+
+
+ 
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# CREATE MODEL TRAINING
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Create Training definitions
+- name: (027/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Check if AI Models exist
+  include_tasks: 54_ibm-aiops-training-check-exists.yaml
+
+- name: (028/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Training Definition for Temporal Grouping
+  include_tasks: 55_ibm-aiops-training-create-tg-configuration.yaml
+  when: current_ibmaiops_feature.training_create_training_temporal and TRAINING_EXISTS==false
+
+- name: (029/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Training  Definition for Metrics
+  include_tasks: 56_ibm-aiops-training-create-metric-configuration.yaml
+  when: current_ibmaiops_feature.training_create_training_metrics == true and TRAINING_EXISTS==false
+
+- name: (030/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Training  Definition for SNOW 
+  include_tasks: 57_ibm-aiops-training-create-snow-configuration.yaml
+  when: current_ibmaiops_feature.training_create_training_snow == true and TRAINING_EXISTS==false
+
+
+- name: (032/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Training  Definition for Seasonality and XinY
+  include_tasks: 59_ibm-aiops-training-create-season-configuration.yaml
+  when: current_ibmaiops_feature.training_create_season_xiny == true | default('false')
+
+- name: (033/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Load LAGS Training Data
+  include_tasks: 58_ibm-aiops-training-load-lags.yaml
+  when: current_ibmaiops_feature.training_enable_log_golden_signals | default(false) == true
+
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Create Policies
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Create Incident Creation and Runbook Policies
+- name: (034/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Custom Incident Creation Policy
+  include_tasks: 50_ibm-aiops-create-policies-stories.yaml
+  when: current_ibmaiops_feature.create_incident_policy == true
+
+- name: (035/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Custom Runbook Trigger Policy
+  include_tasks: 50_ibm-aiops-create-policies-runbooks.yaml
+  when: current_ibmaiops_feature.create_runbook_policy == true
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# RUN MODEL TRAINING
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Train models
+- name: (036/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Wait for Trainingdata to finish loading
+  include_tasks: 60_ibm-aiops-training-load-wait.yaml
+  when: (current_ibmaiops_feature.training_enable_log_golden_signals == true or current_ibmaiops_feature.training_load_data_snow == true or current_ibmaiops_feature.training_load_data_metrics == true) and TRAINING_EXISTS==false
+
+- name: (037/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Run SNOW AI Model Training
+  include_tasks: 61_ibm-aiops-training-run-snow.yaml
+  when: current_ibmaiops_feature.training_run_training_snow == true and TRAINING_EXISTS==false
+
+- name: (039/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Run LAGS AI Model Training
+  include_tasks: 62_ibm-aiops-training-run-lags.yaml
+  when: current_ibmaiops_feature.training_enable_log_golden_signals | default(false) == true and TRAINING_EXISTS==false
+
+
+
+
+- name: (040/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Run METRICS  AI Model Training
+  include_tasks: 63_ibm-aiops-training-run-metric.yaml
+  when: current_ibmaiops_feature.training_run_training_metrics == true and TRAINING_EXISTS==false
+      
+- name: (041/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Run TEMPORAL EVENTS  AI Model Training
+  include_tasks: 64_ibm-aiops-training-run-temporal.yaml
+  when: current_ibmaiops_feature.training_run_training_temporal | default('false') == true and TRAINING_EXISTS==false
+      
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# CREATE CONNECTIONS FOR INCEPTION
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+- name: (042/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡   Create Kafka ELK connection
+  include_tasks: 65_ibm-aiops-create-kafka-connections.yaml
+  when: current_ibmaiops_feature.create_log_connection == true
+
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# IJNSTALL WEBHOOK PROBE
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# - name: (043/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡   Install the Turbonomic Probe
+#   include_tasks: 70_ibm-aiops-install-turbonomic-probe.yml
+#   when: current_ibmaiops_feature.install_webhook_probe | default('false') == true
+
+# - name: (044/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡   Install the Generic Webhook Probe
+#   include_tasks: 71_ibm-aiops-install-generic-probe.yml
+#   when: current_ibmaiops_feature.install_webhook_probe | default('false') == true
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# CREATE CUSTOM VIEWS
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+- name: (045/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Custom Views for Alerts
+  include_tasks: 72_ibm-aiops-create-custom-views.yaml
+
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# CREATE DEMO UI APP
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+- name: (046/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Install the Demo UI
+  include_tasks: 26_ibm-aiops-demo-ui.yaml
+  when: current_ibmaiops_feature.install_demo_ui == true
+
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Delete lingering Luigi Pods 
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name:   ⚠️ HACK - Delete lingering Luigi Pods  (hack)
+  shell: |
+    oc delete pod $(oc get po -n {{ current_ibmaiops_cluster.project }}|grep ImagePullBackOff|awk '{print$1}'):-notfound -n {{ current_ibmaiops_cluster.project }} --ignore-not-found
+  register: kubectl_get_pods
+  ignore_errors: true
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ENABLE LAGS TRAINING
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+- name: (047/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Enable LAGS Training
+  include_tasks: 80_ibm-aiops-training-enable-lags-configuration.yaml
+  when: current_ibmaiops_feature.training_enable_log_golden_signals | default(false) == true
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# CREATE TOPOLOGY (redo hack)
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+- name: (047.1/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Application Topology Templates
+  include_tasks: 45_ibm-aiops-create-aiops-application-templates.yaml
+  when: current_ibmaiops_feature.create_topology_templates == true
+
+- name: (047.2/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Application Topology Application
+  include_tasks: 45_ibm-aiops-create-aiops-application.yaml
+  when: current_ibmaiops_feature.create_topology_apps == true
+
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Integrate OpenShift Login with OpenLDAP
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: (048/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Integrate OpenShift Login with OpenLDAP
+  include_tasks: 90_integrate-ocp-openldap.yaml
+  when: current_ibmaiops_feature.integrate_ocp_openldap | default(false) == true  
+
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Create Tools Pod
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: (049/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Tools Pod
+  kubernetes.core.k8s:
+    state: present
+    namespace: default
+    src: ./templates/tools/create-tool-pod.yaml
+
+
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Create Openshift WebConsole Menu Item
+# --------------------------------------------------------------------------------------------------------------------------------------
+- name: (049/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Demo UI Openshift WebConsole Demo Menu Item
+  include_tasks: 91_ibm-aiops-create-ocp-demo-menu.yaml
+  when: global_config.create_ocp_items | default(true) == true  
+
+- name: (050/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  Create Demo UI Openshift WebConsole Additional Menu Item
+  include_tasks: 91_ibm-aiops-create-ocp-tools-menu.yaml
+  when: global_config.create_ocp_items | default(true) == true  
+
+# Update IBM AIOps Cards
+- name: (050/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡 Update IBM AIOps Cards
+  include_tasks: "{{role_path}}/../ibm-aiops-global/tasks/99_update_cards.yaml"
+
+
+
+- name: (051/051) - 🟡🟡🟡🟡🟡🟡🟡🟡🟡  End Logging
+  include_tasks: "{{role_path}}/../ibm-aiops-global/tasks/91-log-end.yaml"
+
+
+
+- name:  ✅ INSTALLATION MODULE DONE - {{current_ibmaiops_feature.kind}}
+  debug: 
+    msg:  
+
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "                                                                                                                                                   "
+    - "       ✅ IBM AIOps - DONE INSTALLING {{current_ibmaiops_feature.kind}}                                                                                 "
+    - "                                                                                                                                                   "
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"
+    - "***************************************************************************************************************************************************"

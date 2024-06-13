@@ -1,0 +1,7 @@
+  SLACK_URL_ROSH: "https://pirsoscom.github.io/Slack_ROBOT.html"
+  SLACK_URL_SOSH: "https://pirsoscom.github.io/Slack_SOCK.html"
+  SLACK_URL_ACME: "https://pirsoscom.github.io/Slack_ACME.html"
+  SNOW_URL_ROSH: "https://pirsoscom.github.io/INC0010003_ALERTS.html"
+  SNOW_URL_SOSH: "https://pirsoscom.github.io/INC0010002_ALERTS.html"
+  SNOW_URL_ACME: "https://pirsoscom.github.io/INC0010001_ALERTS.html"
+

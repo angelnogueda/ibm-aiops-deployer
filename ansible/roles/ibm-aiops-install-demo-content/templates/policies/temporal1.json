@@ -1,0 +1,77 @@
+{
+  "metadata": {
+    "name": "TEST1",
+    "description": "Created by Nicks scripts",
+    "createdBy": {
+      "id": "demo",
+      "type": "user"
+    },
+    "labels": {
+      "ibm.com/aiops/managed-by-analytics": "false",
+      "ibm.com/aiops/alert-insight-type": "aiops.ibm.com/insight-source/relationship/causal/temporal",
+      "ibm.com/aiops/alert-relationship-source": "aiops.ibm.com/insight-source/relationship/causal/temporal",
+      "ibm.com/aiops/alert-relationship-sources/temporal/group-id": "0a3888552c7e9d1f7a68c057de248cd7ffaa1b4d"
+    }
+
+  },
+  "state": "enabled",
+  "executionPriority": 25,
+  "spec": {
+    "trigger": {
+      "entityId": "alert",
+      "triggerId": "aiops.ibm.com/trigger/alert-pre-create"
+    },
+    "actions": [
+      {
+        "actionId": "aiops.ibm.com/action/internal/conditional",
+        "arguments": {
+          "condition": " {{ alert.signature }} == \" {metric = PodRestarts, name = mysql - predictive, node = mysql - predictive, resource = mysql - predictive} - ANOMALY: PodRestarts: PodRestarts - \" or  {{ alert.signature }} == \" {metric = PodRestarts, name = ratings - predictive, node = ratings - predictive, resource = ratings - predictive} - ANOMALY: PodRestarts: PodRestarts - \" or  {{ alert.signature }} == \" {metric = MemoryUsagePercent, name = mysql - predictive, node = mysql - predictive, resource = mysql - predictive} - ANOMALY: MemoryUsage: MemoryUsagePercent - \"",
+          "then": [
+            {
+              "actionId": "aiops.ibm.com/action/internal/insights/correlate",
+              "output": "alert.insights.[]",
+              "arguments": {
+                "entity": {
+                  "$variable": "alert"
+                },
+                "correlationKey": {
+                  "$variable": "policy.id"
+                },
+                "relationshipType": "aiops.ibm.com/insight-type/relationship/causal",
+                "relationshipSource": {
+                  "$variable": "policy.metadata.labels.[ibm.com/aiops/alert-relationship-source]"
+                },
+                "relationshipDetails": {
+                  "groupId": {
+                    "$variable": "policy.metadata.labels.[ibm.com/aiops/alert-relationship-sources/temporal/group-id]"
+                  },
+                  "policyId": {
+                    "$variable": "policy.id"
+                  },
+                  "window": {
+                    "type": "rolling",
+                    "durationMS": 900000
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "hotfields": [
+    {
+      "fieldname": "alert.signature",
+      "value": "{metric=PodRestarts, name=mysql-predictive, node=mysql-predictive, resource=mysql-predictive}-ANOMALY:PodRestarts:PodRestarts-"
+    },
+    {
+      "fieldname": "alert.signature",
+      "value": "{metric=PodRestarts, name=ratings-predictive, node=ratings-predictive, resource=ratings-predictive}-ANOMALY:PodRestarts:PodRestarts-"
+    },
+    {
+      "fieldname": "alert.signature",
+      "value": "{metric=MemoryUsagePercent, name=mysql-predictive, node=mysql-predictive, resource=mysql-predictive}-ANOMALY:MemoryUsage:MemoryUsagePercent-"
+    }
+  ]
+}

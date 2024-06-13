@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name:  ibm-aiops-simulation-config
+  namespace: ibm-aiops-experimental
+data:
+  DISCORD_BOT_TOKEN: "CHANGEME"
+  DISCORD_WEBHOOK: "CHANGEME"
+  PAGERDUTY_TOKEN: "CHANGEME"
+  TOKEN: CHANGEME
+  INSTANCE_NAME: "Tyrion"
+  LOG_ITERATIONS: "20"
+  LOG_TIME_FORMAT: "%Y-%m-%dT%H:%M:%S.000000"
+  LOG_TIME_STEPS: "1000"
+  LOG_TIME_SKEW: "0"
+  LOG_TIME_ZONE: "-1"
+  EVENTS_TIME_SKEW: "10"
+  METRIC_TIME_SKEW: "240"
+  METRIC_TIME_STEP: "100"
+

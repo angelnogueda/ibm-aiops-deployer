@@ -1,0 +1,74 @@
+﻿apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: simple
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: ibm-aiops-installer
+    server: 'https://kubernetes.default.svc'
+  project: default
+  source:
+    helm:
+      parameters:
+        - name: cp4aiops.demoui.install_demo_ui
+          value: "false"
+        - name: cp4aiops.global.globalPassword
+          value: CHANGEME
+        - name: cp4aiops.additional.create_account
+          value: "false"
+        - name: cp4aiops.additional.create_cards
+          value: "false"
+        - name: cp4aiops.additional.create_external_routes
+          value: "false"
+        - name: cp4aiops.additional.create_incident_policy
+          value: "false"
+        - name: cp4aiops.additional.create_log_connection
+          value: "false"
+        - name: cp4aiops.additional.create_valid_ingress_certificate
+          value: "false"
+        - name: cp4aiops.additional.subscription_channel
+          value: v4.x
+        - name: cp4aiops.demoui.demoui_admin_mode
+          value: "false"
+        - name: cp4aiops.demoui.demoui_simulation_mode
+          value: "false"
+        - name: cp4aiops.demoui.demoui_user
+          value: demo
+        - name: cp4aiops.global.create_ocp_items
+          value: "true"
+        - name: cp4aiops.global.create_ocp_notifications
+          value: "true"
+        - name: cp4aiops.global.instanceName
+          value: Demo
+        - name: cp4aiops.ldap.install_ldap
+          value: "false"
+        - name: cp4aiops.ldap.ldap_base
+          value: 'dc=ibm,dc=com'
+        - name: cp4aiops.ldap.ldap_domain
+          value: ibm.com
+        - name: cp4aiops.ldap.ldap_namespace
+          value: openldap
+        - name: cp4aiops.runbooks.enable_runbooks
+          value: "false"
+        - name: cp4aiops.topology.enable_demo_apps
+          value: "false"
+        - name: cp4aiops.topology.robotshop_color
+          value: white
+        - name: cp4aiops.training.experimental_enabled
+          value: "false"
+        - name: cp4aiops.training.log_enabled
+          value: "false"
+        - name: cp4aiops.training.metric_enabled
+          value: "false"
+        - name: cp4aiops.training.snow_enabled
+          value: "false"
+        - name: cp4aiops.training.temporal_enabled
+          value: "false"
+        - name: cp4aiops.training.training_data_repo
+          value: ibm-aiops-additionaldata
+        - name: cp4aiops.training.training_data_url
+          value: 'https://github.com/niklaushirt/'
+    path: tools/97_addons/experimental/gitops/content/cp4aiops-demo-content
+    repoURL: 'https://github.com/niklaushirt/ibm-aiops-deployer'
+    targetRevision: dev_latest

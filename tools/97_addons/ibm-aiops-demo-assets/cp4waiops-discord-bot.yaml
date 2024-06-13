@@ -1,0 +1,107 @@
+---
+apiVersion: v1                     
+kind: Namespace
+metadata:
+  name: ibm-aiops-experimental
+---  
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ibm-aiops-experimental-admin
+  namespace: ibm-aiops-experimental
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-experimental-admin-crb
+subjects:
+  - kind: ServiceAccount
+    name: ibm-aiops-experimental-admin
+    namespace: ibm-aiops-experimental
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibm-aiops-discord-bot
+  namespace: ibm-aiops-experimental
+  labels:
+      app: ibm-aiops-discord-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ibm-aiops-discord-bot
+  template:
+    metadata:
+      labels:
+        app: ibm-aiops-discord-bot
+    spec:
+      containers:
+      - image: quay.io/niklaushirt/ibm-aiops-discord-bot:2.0
+        imagePullPolicy: Always
+        name: ibm-aiops-discord-bot
+        command:
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "50Mi"
+          limits:
+            cpu: "550m"
+            memory: "550Mi"
+          readinessProbe:                 
+            failureThreshold: 9           
+            httpGet:                      
+              path: /health          
+              port: 8000                  
+              scheme: HTTP           
+            initialDelaySeconds: 60       
+            periodSeconds: 10             
+            successThreshold: 1           
+            timeoutSeconds: 3
+        env:
+          - name: ACTIVE
+            value: "False"
+          - name: DISCORD_BOT_TOKEN
+            value: "CHANGEME"
+          - name: DISCORD_BOT_PREFIX
+            value: "/"
+        envFrom:
+        - configMapRef:
+            name:  ibm-aiops-simulation-config
+      serviceAccountName: ibm-aiops-experimental-admin
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ibm-aiops-discord-bot-service
+  namespace: ibm-aiops-experimental
+spec:
+  selector:
+    app: ibm-aiops-discord-bot
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name:  ibm-aiops-discord-bot
+  namespace: ibm-aiops-experimental
+spec:
+  to:
+    kind: Service
+    name: ibm-aiops-discord-bot-service
+    weight: 100
+  port:
+    targetPort: 8000
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Allow
+  wildcardPolicy: None

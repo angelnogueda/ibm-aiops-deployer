@@ -1,0 +1,159 @@
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#         ________  __  ___     ___    ________       
+#        /  _/ __ )/  |/  /    /   |  /  _/ __ \____  _____
+#        / // __  / /|_/ /    / /| |  / // / / / __ \/ ___/
+#      _/ // /_/ / /  / /    / ___ |_/ // /_/ / /_/ (__  ) 
+#     /___/_____/_/  /_/    /_/  |_/___/\____/ .___/____/  
+#                                           /_/
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------------------------"
+#  DELETE Topology 
+#
+#  IBM AIOps
+#
+#  ©2024 nikh@ch.ibm.com
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+
+
+apiVersion: v1                     
+kind: Namespace
+metadata:
+  name: ibm-aiops-installer
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: ibm-aiops-installer-admin
+  namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: ibm-aiops-installer-admin
+    namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-default-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: ibm-aiops-installer
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: aiops-delete-toloplogy
+  namespace: ibm-aiops-installer
+spec:
+  serviceAccountname: ibm-aiops-installer-admin
+  template:
+    spec:
+      containers:
+        - name: install
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ STARTING: Delete Topology"
+              echo "*****************************************************************************************************************************"
+              echo ""
+              echo "  ⏳ INSTALLATION START TIMESTAMP: $(date)"
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Deleting Topology"
+             
+              export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+              oc project $AIOPS_NAMESPACE
+
+              while true; do oc port-forward statefulset/iaf-system-elasticsearch-es-aiops 9200; done &
+
+
+              oc scale deployment -l release=aiops-topology -n $AIOPS_NAMESPACE --replicas=0
+              oc scale deployment aiopsedge-instana-topology-integrator -n $AIOPS_NAMESPACE --replicas=0
+
+              oc exec -ti aiops-topology-cassandra-0 -n $AIOPS_NAMESPACE -- bash -c "/opt/ibm/cassandra/bin/cqlsh --ssl -u \$CASSANDRA_USER -p \$CASSANDRA_PASS -e \"DROP KEYSPACE janusgraph;\""
+
+              export username=$(oc get secret $(oc get secrets | grep -elastic-secret | awk '!/-min/' | awk '{print $1;}') -o jsonpath="{.data.username}"| base64 --decode)
+              export password=$(oc get secret $(oc get secrets | grep -elastic-secret | awk '!/-min/' | awk '{print $1;}') -o jsonpath="{.data.password}"| base64 --decode)
+
+              for index in $(curl -k -u $username:$password -XGET https://localhost:9200/_cat/indices | grep -E "searchservice" | awk '{print $3;}'); do
+                  echo $index
+              done
+
+              for index in $(curl -k -u $username:$password -XGET https://localhost:9200/_cat/indices | grep -E "searchservice" | awk '{print $3;}'); do
+                  curl -k -u $username:$password -XDELETE "https://localhost:9200/$index"
+              done
+
+              for index in $(curl -k -u $username:$password -XGET https://localhost:9200/_cat/indices | grep -E "searchservice" | awk '{print $3;}'); do
+                  echo $index
+              done
+
+
+              oc scale deployment -l release=aiops-topology -n $AIOPS_NAMESPACE --replicas=1
+              oc scale deployment aiopsedge-instana-topology-integrator -n $AIOPS_NAMESPACE --replicas=1
+
+              oc delete job -n $AIOPS_NAMESPACE aiops-ir-lifecycle-create-policies-job
+              oc delete job -n $AIOPS_NAMESPACE aiops-ir-lifecycle-policy-registry-svc-job
+
+              while [ `oc -n $AIOPS_NAMESPACE get pods| grep '0/' |grep -v "Completed"| grep -c ""` -gt 0 ]
+              do
+                echo "------------------------------------------------------------------------------------------------------------------------------"
+                echo "❌ $AIOPS_NAMESPACE not ready"
+                oc -n $AIOPS_NAMESPACE get pods| grep '0/' |grep -v "Completed"| awk '{print $1;}'| sed 's/^/       /'
+                sleep 15
+              done
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " ❗ Please relaunch the installation to recreate topology resources"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+
+
+              echo ""
+              echo ""
+              echo "  ⏳ INSTALLATION END TIMESTAMP: $(date)"
+              echo ""
+              echo "*****************************************************************************************************************************"
+              echo " ✅ DONE"
+              echo "*****************************************************************************************************************************"
+
+
+              while true
+              do
+                sleep 1000
+              done
+
+      restartPolicy: Never
+  backoffLimit: 500

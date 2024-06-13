@@ -1,0 +1,383 @@
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#         ________  __  ___     ___    ________       
+#        /  _/ __ )/  |/  /    /   |  /  _/ __ \____  _____
+#        / // __  / /|_/ /    / /| |  / // / / / __ \/ ___/
+#      _/ // /_/ / /  / /    / ___ |_/ // /_/ / /_/ (__  ) 
+#     /___/_____/_/  /_/    /_/  |_/___/\____/ .___/____/  
+#                                           /_/
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------------------------"
+#  Installing IBM AIOps
+#
+#  Turbonomic
+#
+#  ©2024 nikh@ch.ibm.com
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Get a Cluster from TechZone: https://techzone.ibm.com/collection/tech-zone-certified-base-images
+#   Type:               VMWare on IBM Cloud / UPI Public
+#   Worker node count:  4
+#   Flavour:            b3c.32x128 ❗ 
+#   OpenShift Version:  4.14
+#   Storage:            ODF 500GB or Managed NFS - 2TB 
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# Installs:
+#
+#  - Turbonomic
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+---
+apiVersion: v1                     
+kind: Namespace
+metadata:
+  name: ibm-aiops-installer
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ibm-aiops-install-configuration-turbo
+  namespace: ibm-aiops-installer
+immutable: false
+data:
+  TURBO_LICENSE: >-
+    <NONE>
+  INSTALLATION_CONFIG.yaml: >+
+    #*************************************************************************************************************************************************
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    # Global Configuration
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    #*************************************************************************************************************************************************
+
+    global_config:
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Passwords and Licenses
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Use this Password for all Instances
+      global_password: CHANGEME
+
+
+      # Available Names: Aajla, AIOPS, Amy, Anakin, Arya, Austin, Bart, Batman, Bear, Bob, Cara, Cassian, Cersei, Cersei1, Chewbacca, CP4AIOPS, Daenerys, Daffy, Darth, Demo, Dexter, Dilbert, Finn, Freddie, Grogu, Groot, Han, Harley, Hodor, Hofstadter, Howard, Hulk, James, Jimmy, John, Joker, Jyn, King, Kirk, Kurt, Lando, Leia, Lemmy, Luke, Nightking, Obiwan, Padme, Penny, Picard, Prince, Raj, Rey, Robin, Robot1, Robot2, Robot3, Robot4, Robot5, Sabine, Sansa, Sheldon, Sherlock, Slash, Spiderman, Spock, Strange, Superman, Tormund, Tyrion, Walker, Watson, Wedge,,,
+      environment_name: Bear
+      cloud_platform: existing-ocp
+      # Set this value to True to accept all licenses
+      accept_all_licenses: False
+      # Key to decrypt Licenses
+      #license_token: NONE
+
+
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Pull Registires
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      entitled_registry: cp.icr.io
+      entitled_registry_user: cp
+      catalog_image: icr.io/cpopen/ibm-operator-catalog:latest
+      current_supported_aiops_version: v4.6
+
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Notifications and Cards
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # Create Welcome Cards in ibm-aiops
+      create_cards: true
+      # Create App Menu Items in OCP
+      create_ocp_items: true
+      # Create Notifications in OCP
+      create_ocp_notifications: true
+      position_ocp_notifications: BannerBottom
+      position_final_ocp_notification: BannerTop
+
+
+
+
+
+    # *************************************************************************************************************************************************
+    # -------------------------------------------------------------------------------------------------------------------------------------
+    # OpenShift Configuration
+    # --------------------------------------------------------------------------------------------------------------------------------------
+    # *************************************************************************************************************************************************
+
+    openshift:
+
+    - name: "mycluster"
+      ocp_version: "4.15"
+      cluster_name: "mycluster"
+      domain_name: example.com
+      openshift_storage:
+      - storage_name: auto-storage
+        storage_type: auto
+        # Alternatively use
+        #storage_name: ibm-roks-storage
+        #storage_type: custom
+        #ocp_storage_class_file: ibmc-file-gold-gid
+        #ocp_storage_class_block: ibmc-block-gold
+
+
+
+
+    #*************************************************************************************************************************************************
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    # IBM AIOPS Configuration
+    #--------------------------------------------------------------------------------------------------------------------------------------
+    #*************************************************************************************************************************************************
+
+    ibmaiops:
+
+    
+    - project: ibm-aiops-addons
+      instances:
+      # --------------------------------------------------------------------------------------------------------------------------------------
+      # IBM AIOPS TURBONOMIC
+      # --------------------------------------------------------------------------------------------------------------------------------------
+
+      - name: ibm-aiops-turbonomic
+        kind: Turbonomic
+        install: true
+        turbo_version: 8.12.4
+
+        # --------------------------------------------------------------------------------------------------------------------------------------
+        # Storage Classes Override for this Instance (see comment below)
+        # --------------------------------------------------------------------------------------------------------------------------------------
+        #storage_class_file: automatic
+        #storage_class_block: automatic
+
+      - name: ibm-aiops-turbonomic-demo-content
+        kind: TurbonomicDemoContent
+        install: true
+        # Admin User Password (OVERRIDES GLOBAL PASSWORD)
+        #turbo_admin_password: CHANGEME
+        # ---------------------------------------------------------------------
+        # Create Demo User
+        create_user: true
+        # Demo User Name
+        demo_user: demo
+        # Demo User Password (OVERRIDES GLOBAL PASSWORD)
+        #turbo_demo_password: CHANGEME
+        # ---------------------------------------------------------------------
+        # Create Groups
+        group_vcenter_vms: true
+        group_robotshop: true
+        group_licensing: true
+
+        # ---------------------------------------------------------------------
+        # Create Targets
+        target_instana: true
+        # ---------------------------------------------------------------------
+        # Create Memory and CPU hogs
+        resource_hogs: false
+        # ---------------------------------------------------------------------
+        # Create Metrics server, DIF integration and RobotShop BuisnessApp
+        metrics_dif: true
+        # ---------------------------------------------------------------------
+        # Turbo License (optional)
+        turbo_license: NONE
+        # ---------------------------------------------------------------------
+        # Create a valid ingress certificate when on ITZ
+        create_valid_ingress_itz: false
+
+
+  INSTALL_REPO: 'https://github.com/niklaushirt/ibm-aiops-deployer.git -b main'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# DO NOT MODIFY BELOW
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: ibm-aiops-installer-admin
+  namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: ibm-aiops-installer-admin
+    namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-default-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: ibm-aiops-installer
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ibm-aiops-install-turbo
+  namespace: ibm-aiops-installer
+spec:
+
+  template:
+    metadata:
+      labels:
+        app: ibm-aiops-installer
+    spec:
+      serviceAccountName: ibm-aiops-installer-admin
+      containers:
+        - name: install
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+              echo "***************************************************************************************************************************************************"
+              echo "***************************************************************************************************************************************************"
+              echo "                                                                                                                                                   "
+              echo " 🚀 Install IBM Turbonomic                                                                                                                                                  "
+              echo "                                                                                                                                                   "
+              echo "***************************************************************************************************************************************************"
+              echo "***************************************************************************************************************************************************"
+              echo "  "
+              echo "  "
+              echo "  ⏳ INSTALLATION START TIMESTAMP: $(date)"
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 📥 Housekeeping"
+              oc delete ConsoleNotification --all>/dev/null 2>/dev/null 
+              oc delete job  -n ibm-aiops-installer --ignore-not-found $(oc get job -n ibm-aiops-installer|grep load-|awk '{print$1}'):-notfound  --ignore-not-found>/dev/null 2>/dev/null 
+              oc delete pod  -n ibm-aiops-installer $(oc get po -n ibm-aiops-installer|grep load-|awk '{print$1}'):-notfound  --ignore-not-found>/dev/null 2>/dev/null 
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Getting Installation source from GitHub"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   📥 Clone Repo $INSTALL_REPO"
+              git clone $INSTALL_REPO
+              cd ibm-aiops-deployer
+
+              echo ""
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🔎 This Repo includes those latestet Commits"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 📝 Config File"         
+              cat /tmp/config-file/INSTALLATION_CONFIG.yaml
+
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Starting Installation"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Prepare Ansible"
+              pip -q install openshift pyyaml kubernetes
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Launching Ansible Playbook"
+              export ANSIBLE_LOG_PATH=/tmp/ansible.log
+              ansible-playbook ./ansible/00_ibm-aiops-install.yaml -e "config_file_path=/tmp/config-file/INSTALLATION_CONFIG.yaml" -e cp_entitlement_key=NOTNEEDED
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "  ⏳ INSTALLATION END TIMESTAMP: $(date)"
+              echo ""
+
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Finalize Installation"
+              ./tools/90_finalizeInstallation.sh
+              echo ""
+
+              while true
+              do
+                sleep 1000
+              done
+
+
+          env:
+          - name: INSTALL_REPO
+            valueFrom:
+              configMapKeyRef:
+                name: ibm-aiops-install-configuration-turbo
+                key: INSTALL_REPO
+          - name: TURBO_LICENSE
+            valueFrom:
+              configMapKeyRef:
+                name: ibm-aiops-install-configuration-turbo
+                key: TURBO_LICENSE
+                optional: true
+          - name: INSTANA_SALES_KEY
+            valueFrom:
+              configMapKeyRef:
+                name: ibm-aiops-install-configuration-turbo
+                key: INSTANA_SALES_KEY
+                optional: true
+          - name: INSTANA_AGENT_KEY
+            valueFrom:
+              configMapKeyRef:
+                name: ibm-aiops-install-configuration-turbo
+                key: INSTANA_AGENT_KEY
+                optional: true
+          - name: ENTITLED_REGISTRY_KEY
+            valueFrom:
+              configMapKeyRef:
+                name: ibm-aiops-install-configuration-turbo
+                key: ENTITLED_REGISTRY_KEY
+                optional: true
+          volumeMounts:
+            - name: config-file
+              mountPath: /tmp/config-file
+      volumes:
+        - name: config-file
+          configMap:
+            name: ibm-aiops-install-configuration-turbo
+            items:
+            - key: INSTALLATION_CONFIG.yaml
+              path: INSTALLATION_CONFIG.yaml
+      restartPolicy: Never
+  backoffLimit: 500
+
+

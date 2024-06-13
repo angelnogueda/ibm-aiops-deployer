@@ -1,0 +1,189 @@
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#         ________  __  ___     ___    ________       
+#        /  _/ __ )/  |/  /    /   |  /  _/ __ \____  _____
+#        / // __  / /|_/ /    / /| |  / // / / / __ \/ ___/
+#      _/ // /_/ / /  / /    / ___ |_/ // /_/ / /_/ (__  ) 
+#     /___/_____/_/  /_/    /_/  |_/___/\____/ .___/____/  
+#                                           /_/
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------------------------------------------------"
+#  Delete Instana Installation and Backend
+#
+#  CloudPak for AIOps
+#
+#  ©2024 nikh@ch.ibm.com
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+# ---------------------------------------------------------------------------------------------------------------------------------------------------"
+
+
+apiVersion: v1                     
+kind: Namespace
+metadata:
+  name: ibm-aiops-installer
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: ibm-aiops-installer-admin
+  namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: ibm-aiops-installer-admin
+    namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-default-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: ibm-aiops-installer
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ibm-aiops-delete-instana
+  namespace: ibm-aiops-installer
+spec:
+  serviceAccountname: ibm-aiops-installer-admin
+  template:
+    spec:
+      containers:
+        - name: install
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ STARTING: INSTALL AI Manager with Demo Content"
+              echo "*****************************************************************************************************************************"
+              echo ""
+              echo "  ⏳ INSTALLATION START TIMESTAMP: $(date)"
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Prepare Helm"
+              curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+              chmod 700 get_helm.sh
+              ./get_helm.sh
+              echo ""
+              echo ""
+
+              
+              
+              oc scale deployment  -n instana-operator instana-operator --replicas=0
+
+              oc delete agents.instana.io -n instana-agent instana-agent
+              oc delete subscription -n openshift-operators instana-agent
+              oc delete DaemonSet -n instana-agent --all
+
+                #delete instana based on flag
+              oc -n instana-units delete unit --all &
+              oc -n instana-core delete core --all &
+
+              oc -n instana-core patch core instana-core -p '{"metadata":{"finalizers":null}}' --type=merge
+              oc -n instana-units patch unit aiops-dev -p '{"metadata":{"finalizers":null}}' --type=merge
+              oc -n instana-units patch unit aiops-prod  -p '{"metadata":{"finalizers":null}}' --type=merge
+              oc project instana-operator
+              oc delete deployment  -n instana-operator --all              
+              oc delete clusterrolebinding instana-agent
+              oc delete clusterrole instana-agent
+              echo ""
+
+
+              oc project instana-datastores
+
+              oc delete -f ./kafka-instance.yaml &
+              oc delete -f ./elasticsearch-instance.yaml &
+              oc delete -f ./postgres-instance.yaml &
+              oc delete -f ./cassandra-instance.yaml &
+              oc delete -f ./clickhouse-instance.yaml &
+
+
+              helm delete elastic-operator  &
+              helm delete instana           &
+              helm delete postgres-operator &
+              helm delete strimzi           &
+
+              oc patch ClickHouseInstallation $(oc get ClickHouseInstallation -n instana-datastores|awk '{print$1}') -n instana-datastores -p '{"metadata":{"finalizers":null}}' --type=merge 
+              oc patch zookeepercluster $(oc get zookeepercluster -n instana-datastores|awk '{print$1}') -n instana-datastores -p '{"metadata":{"finalizers":null}}' --type=merge 
+              oc patch cassandradatacenters $(oc get cassandradatacenters -n instana-datastores|awk '{print$1}') -n instana-datastores -p '{"metadata":{"finalizers":null}}' --type=merge 
+              oc patch clickhouseinstallations $(oc get clickhouseinstallations -n instana-datastores|awk '{print$1}') -n instana-datastores -p '{"metadata":{"finalizers":null}}' --type=merge 
+
+
+
+              oc delete deployment  -n instana-datastores --all  &
+              oc delete statefulset  -n instana-datastores --all  &
+              oc delete services  -n instana-datastores --all  &
+              oc delete jobs  -n instana-datastores --all  &
+              oc delete pods  -n instana-datastores --all  &
+
+              oc delete deployment  -n instana-operator --all  &
+              oc delete pvc  -n instana-datastores --all  &
+              oc delete zookeeperclusters  -n instana-datastores --all  &
+
+              oc delete clickhouseinstallations -n instana-datastores --all
+              
+              oc delete ns instana-datastores &
+              oc delete ns instana-agent &
+              oc delete ns instana-operator & 
+              oc delete ns instana-units &
+              oc delete ns instana-core &
+              oc delete ns instana-synthetic &
+              oc delete pvc  -n instana-datastores --all  &
+              oc patch cassandradatacenters $(oc get cassandradatacenters -n instana-datastores|awk '{print$1}') -n instana-datastores -p '{"metadata":{"finalizers":null}}' --type=merge 
+              oc delete pvc  -n instana-datastores --all  &
+
+
+              echo "*****************************************************************************************************************************"
+              echo " ✅ DONE"
+              echo "*****************************************************************************************************************************"
+
+
+              while true
+              do
+                sleep 1000
+              done
+
+
+          env:
+          - name: INSTALL_REPO
+            value : "https://github.com/niklaushirt/ibm-aiops-deployer.git"
+          - name: CONFIG
+            #value : "./configs/ibm-aiops-roks-aimanager-all-34.yaml"
+            value : "./configs/xxxx.yaml"
+            # The pull token for cp.icr.com from https://myibm.ibm.com/products-services/containerlibrary
+          - name: ENTITLED_REGISTRY_KEY
+            value : "<REGISTRY_TOKEN>"
+      restartPolicy: Never
+  backoffLimit: 500

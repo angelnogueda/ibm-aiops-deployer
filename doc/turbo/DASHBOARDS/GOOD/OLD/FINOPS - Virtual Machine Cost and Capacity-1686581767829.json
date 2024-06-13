@@ -1,0 +1,1079 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_TURBO_TIMESCALE",
+      "label": "Turbo Timescale",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "postgres",
+      "pluginName": "PostgreSQL"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "9.5.1"
+    },
+    {
+      "type": "datasource",
+      "id": "postgres",
+      "name": "PostgreSQL",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "v 1.0.4",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 7,
+      "panels": [],
+      "title": "Costs",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "$DB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 5000
+              },
+              {
+                "color": "red",
+                "value": 10000
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Storage.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "gbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPUs"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Memory.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "gbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Cost.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total Cost"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$DB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH vms_with_tags AS (\n SELECT DISTINCT ON (e.oid) \n \te.oid AS vm_oid\n  ,s.seed_oid as group_oid\n \t,e.name AS vm_name\n \t,(e.attrs -> 'num_cpus')::int as vcpus\n\n FROM entity e\n   JOIN scope s ON (e.oid = s.scoped_oid)\n WHERE e.type = 'VIRTUAL_MACHINE'\n   AND (s.start, s.finish)overlaps ($__timeFrom(), $__timeTo())\n   AND s.seed_oid in ($Group)\n   )\nselect g.name as \"Group Name\"\n  \n      ,sum(stor_cost) AS \"Cost of Storage\"\n   \n      ,sum(cpu_cost) AS \"Cost of vCPUs\"\n   \n      ,sum(vmem_cost) AS \"Cost of vMem\"\n      ,sum(total_cost) AS \"Total Cost\"\nfrom \n  (SELECT \n    vm_oid,\n    group_oid,\n    avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') as stor_cap,\n    avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_AMOUNT') as stor_used,\n    (avg(metric.consumed) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') - avg(metric.consumed) FILTER (WHERE metric.type = 'STORAGE_AMOUNT'))/1024 as stor_free,\n    ${costStorage}*avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') stor_cost,\n    vcpus,\n    avg(metric.capacity) FILTER (WHERE metric.type = 'VCPU') cpu_cap,\n    avg(metric.current) FILTER (WHERE metric.type = 'VCPU') cpu_used,\n    (avg(metric.capacity) FILTER (WHERE metric.type = 'VCPU')) - (avg(metric.current) FILTER (WHERE metric.type = 'VCPU')) cpu_free,\n    ${costvCPU}*vcpus cpu_cost, \n    avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') vmem_cap,\n    avg(metric.current/1024/1024) FILTER (WHERE metric.type = 'VMEM') vmem_used,\n    (avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM')) - (avg(metric.current/1024/1024) FILTER (WHERE metric.type = 'VMEM')) vmem_free,\n    ${costvMEM}*avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') vmem_cost,\n    ${costStorage}*avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED')+${costvCPU}*vcpus+${costvMEM}*avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') total_cost\n  FROM vms_with_tags\n   JOIN metric ON metric.entity_oid = vm_oid\n  WHERE metric.\"type\" IN ('VMEM', 'VCPU', 'STORAGE_AMOUNT', 'STORAGE_PROVISIONED')\n   AND $__timeFilter(metric.\"time\")\n  GROUP BY vm_oid, group_oid, vcpus) as a\njoin entity g on g.oid = a.group_oid\nwhere g.type = 'GROUP'\n and (g.first_seen, g.last_seen) overlaps ($__timeFrom(), $__timeTo())\n and g.oid in ($Group)\n group by 1\n\n\n;",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Overall Cost",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "CPU Capacity (Mhz)": false,
+              "CPU Free (Mhz)": true,
+              "CPU Used (Mhz)": false,
+              "Memory Capacity": false,
+              "Memory Free": true,
+              "Storage Capacity": false,
+              "Storage Free": true
+            },
+            "indexByName": {
+              "CPU Capacity (Mhz)": 4,
+              "CPU Core #": 1,
+              "CPU Free (Mhz)": 3,
+              "CPU Used (Mhz)": 2,
+              "Cost of Storage": 13,
+              "Cost of vCPUs": 11,
+              "Cost of vMem": 12,
+              "Group Name": 0,
+              "Memory Capacity": 7,
+              "Memory Free": 6,
+              "Memory Used": 5,
+              "Storage Capacity": 10,
+              "Storage Free": 9,
+              "Storage Used": 8,
+              "Total Cost": 14
+            },
+            "renameByName": {}
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 6,
+      "panels": [],
+      "title": "Details",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "$DB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "rgb(149, 229, 208)",
+                "value": null
+              },
+              {
+                "color": "rgb(149, 155, 229)",
+                "value": 100000
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Storage.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "gbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPUs"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Memory.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "gbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Cost.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$DB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH vms_with_tags AS (\n SELECT DISTINCT ON (e.oid) \n \te.oid AS vm_oid\n  ,s.seed_oid as group_oid\n \t,e.name AS vm_name\n \t,(e.attrs -> 'num_cpus')::int as vcpus\n\n FROM entity e\n   JOIN scope s ON (e.oid = s.scoped_oid)\n WHERE e.type = 'VIRTUAL_MACHINE'\n   AND (s.start, s.finish)overlaps ($__timeFrom(), $__timeTo())\n   AND s.seed_oid in ($Group)\n   )\nselect g.name as \"Group Name\"\n\n      ,sum(vcpus) AS \"CPU Core #\"\n      ,sum(cpu_cap) AS \"CPU Capacity (Mhz)\"\n      ,sum(cpu_used) AS \"CPU Used (Mhz)\"\n      ,sum(cpu_free) AS \"CPU Free (Mhz)\"\n      ,sum(vmem_cap) AS \"Memory Capacity\"\n      ,sum(vmem_used) AS \"Memory Used\"\n      ,sum(vmem_free) AS \"Memory Free\"\n            ,sum(stor_cap) AS \"Storage Capacity\"\n      ,sum(stor_used) AS \"Storage Used\"\n      ,sum(stor_free) AS \"Storage Free\"\nfrom \n  (SELECT \n    vm_oid,\n    group_oid,\n    avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') as stor_cap,\n    avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_AMOUNT') as stor_used,\n    (avg(metric.consumed) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') - avg(metric.consumed) FILTER (WHERE metric.type = 'STORAGE_AMOUNT'))/1024 as stor_free,\n    ${costStorage}*avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') stor_cost,\n    vcpus,\n    avg(metric.capacity) FILTER (WHERE metric.type = 'VCPU') cpu_cap,\n    avg(metric.current) FILTER (WHERE metric.type = 'VCPU') cpu_used,\n    (avg(metric.capacity) FILTER (WHERE metric.type = 'VCPU')) - (avg(metric.current) FILTER (WHERE metric.type = 'VCPU')) cpu_free,\n    ${costvCPU}*vcpus cpu_cost, \n    avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') vmem_cap,\n    avg(metric.current/1024/1024) FILTER (WHERE metric.type = 'VMEM') vmem_used,\n    (avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM')) - (avg(metric.current/1024/1024) FILTER (WHERE metric.type = 'VMEM')) vmem_free,\n    ${costvMEM}*avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') vmem_cost,\n    ${costStorage}*avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED')+${costvCPU}*vcpus+${costvMEM}*avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') total_cost\n  FROM vms_with_tags\n   JOIN metric ON metric.entity_oid = vm_oid\n  WHERE metric.\"type\" IN ('VMEM', 'VCPU', 'STORAGE_AMOUNT', 'STORAGE_PROVISIONED')\n   AND $__timeFilter(metric.\"time\")\n  GROUP BY vm_oid, group_oid, vcpus) as a\njoin entity g on g.oid = a.group_oid\nwhere g.type = 'GROUP'\n and (g.first_seen, g.last_seen) overlaps ($__timeFrom(), $__timeTo())\n and g.oid in ($Group)\n group by 1\n\n\n;",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Group Cost Showback Report",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "CPU Capacity (Mhz)": false,
+              "CPU Free (Mhz)": true,
+              "CPU Used (Mhz)": false,
+              "Memory Capacity": false,
+              "Memory Free": true,
+              "Storage Capacity": false,
+              "Storage Free": true
+            },
+            "indexByName": {
+              "CPU Capacity (Mhz)": 4,
+              "CPU Core #": 1,
+              "CPU Free (Mhz)": 3,
+              "CPU Used (Mhz)": 2,
+              "Cost of Storage": 13,
+              "Cost of vCPUs": 11,
+              "Cost of vMem": 12,
+              "Group Name": 0,
+              "Memory Capacity": 7,
+              "Memory Free": 6,
+              "Memory Used": 5,
+              "Storage Capacity": 10,
+              "Storage Free": 9,
+              "Storage Used": 8,
+              "Total Cost": 14
+            },
+            "renameByName": {}
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "uid": "$DB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "mappings": [],
+          "max": 50000,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "rgb(171, 255, 82)",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 50000
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Storage.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "gbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPUs"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Memory.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "gbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Cost.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$DB"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH vms_with_tags AS (\n SELECT DISTINCT ON (e.oid) \n \te.oid AS vm_oid\n \t,e.name AS vm_name\n \t,(e.attrs -> 'num_cpus')::int as vcpus\n\n FROM entity e\n   JOIN scope s ON (e.oid = s.scoped_oid)\n WHERE e.type = 'VIRTUAL_MACHINE'\n   AND (s.start, s.finish) OVERLAPS (now() - interval '10 minute', now())\n   AND s.seed_oid in ($Group)\n   )\n   \nSELECT \n vm_name AS \"VM name\",\n avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') AS \"Storage Capacity\",\n avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_AMOUNT') AS \"Storage Used\",\n (avg(metric.consumed) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') - avg(metric.consumed) FILTER (WHERE metric.type = 'STORAGE_AMOUNT'))/1024 AS \"Storage Free\",\n ${costStorage}*avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') AS \"Cost of Storage\",\n vcpus AS \"CPU Cores #\",\n avg(metric.capacity) FILTER (WHERE metric.type = 'VCPU') AS \"CPU Capacity (Mhz)\",\n avg(metric.current) FILTER (WHERE metric.type = 'VCPU') AS \"CPU Used (Mhz)\",\n (avg(metric.capacity) FILTER (WHERE metric.type = 'VCPU')) - (avg(metric.current) FILTER (WHERE metric.type = 'VCPU')) AS \"CPU Free (Mhz)\",\n ${costvCPU}*vcpus AS \"Cost of vCPUs\", \n avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') AS \"Memory Capacity\",\n avg(metric.current/1024/1024) FILTER (WHERE metric.type = 'VMEM') AS \"Memory Used\",\n (avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM')) - (avg(metric.current/1024/1024) FILTER (WHERE metric.type = 'VMEM')) AS \"Memory Free\",\n ${costvMEM}*avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') AS \"Cost of vMem\",\n ${costStorage}*avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED')+${costvCPU}*vcpus+${costvMEM}*avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') AS \"Total Cost\"\nFROM vms_with_tags\nJOIN metric ON metric.entity_oid = vm_oid\nWHERE metric.\"type\" IN ('VMEM', 'VCPU', 'STORAGE_AMOUNT', 'STORAGE_PROVISIONED')\n AND metric.\"time\" BETWEEN now() - interval '10 minute' and now()\nGROUP BY vm_name, vm_oid, vcpus\nORDER BY \"CPU Cores #\" desc;",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Virtual Machine Cost Showback Chart",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "CPU Capacity (Mhz)": 4,
+              "CPU Cores #": 1,
+              "CPU Free (Mhz)": 3,
+              "CPU Used (Mhz)": 2,
+              "Cost of Storage": 13,
+              "Cost of vCPUs": 5,
+              "Cost of vMem": 9,
+              "Memory Capacity": 8,
+              "Memory Free": 7,
+              "Memory Used": 6,
+              "Storage Capacity": 12,
+              "Storage Free": 11,
+              "Storage Used": 10,
+              "Total Cost": 14,
+              "VM name": 0
+            },
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "$DB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Storage.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "gbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPUs"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Memory.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "gbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tag Value"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 588
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Storage Capacity"
+            },
+            "properties": [
+              {
+                "id": "custom.width"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 3,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Total Cost"
+          }
+        ]
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$DB"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH vms_with_tags AS (\n SELECT DISTINCT ON (e.oid) \n \te.oid AS vm_oid\n  ,s.seed_oid as group_oid\n \t,e.name AS vm_name\n \t,(e.attrs -> 'num_cpus')::int as vcpus\n\n FROM entity e\n   JOIN scope s ON (e.oid = s.scoped_oid)\n WHERE e.type = 'VIRTUAL_MACHINE'\n   AND (s.start, s.finish)overlaps ($__timeFrom(), $__timeTo())\n   AND s.seed_oid in ($Group)\n   )\nselect g.name as \"Group Name\"\n      ,sum(total_cost) AS \"Total Cost\"\n      ,sum(cpu_cost) AS \"Cost of vCPUs\"\n            ,sum(vmem_cost) AS \"Cost of vMem\"\n      ,sum(stor_cost) AS \"Cost of Storage\"\n\n\n      ,sum(stor_cap) AS \"Storage Capacity\"\n      ,sum(stor_used) AS \"Storage Used\"\n      ,sum(stor_free) AS \"Storage Free\"\n\n      ,sum(vcpus) AS \"CPU Core #\"\n      ,sum(cpu_cap) AS \"CPU Capacity (Mhz)\"\n      ,sum(cpu_used) AS \"CPU Used (Mhz)\"\n      ,sum(cpu_free) AS \"CPU Free (Mhz)\"\n\n      ,sum(vmem_cap) AS \"Memory Capacity\"\n      ,sum(vmem_used) AS \"Memory Used\"\n      ,sum(vmem_free) AS \"Memory Free\"\n\nfrom \n  (SELECT \n    vm_oid,\n    group_oid,\n    avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') as stor_cap,\n    avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_AMOUNT') as stor_used,\n    (avg(metric.consumed) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') - avg(metric.consumed) FILTER (WHERE metric.type = 'STORAGE_AMOUNT'))/1024 as stor_free,\n    ${costStorage}*avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') stor_cost,\n    vcpus,\n    avg(metric.capacity) FILTER (WHERE metric.type = 'VCPU') cpu_cap,\n    avg(metric.current) FILTER (WHERE metric.type = 'VCPU') cpu_used,\n    (avg(metric.capacity) FILTER (WHERE metric.type = 'VCPU')) - (avg(metric.current) FILTER (WHERE metric.type = 'VCPU')) cpu_free,\n    ${costvCPU}*vcpus cpu_cost, \n    avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') vmem_cap,\n    avg(metric.current/1024/1024) FILTER (WHERE metric.type = 'VMEM') vmem_used,\n    (avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM')) - (avg(metric.current/1024/1024) FILTER (WHERE metric.type = 'VMEM')) vmem_free,\n    ${costvMEM}*avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') vmem_cost,\n    ${costStorage}*avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED')+${costvCPU}*vcpus+${costvMEM}*avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') total_cost\n  FROM vms_with_tags\n   JOIN metric ON metric.entity_oid = vm_oid\n  WHERE metric.\"type\" IN ('VMEM', 'VCPU', 'STORAGE_AMOUNT', 'STORAGE_PROVISIONED')\n   AND $__timeFilter(metric.\"time\")\n  GROUP BY vm_oid, group_oid, vcpus) as a\njoin entity g on g.oid = a.group_oid\nwhere g.type = 'GROUP'\n and (g.first_seen, g.last_seen) overlaps ($__timeFrom(), $__timeTo())\n and g.oid in ($Group)\n group by 1\n\n\n;",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Group Cost Showback Report",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "uid": "$DB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Storage.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "gbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPUs"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Memory.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "gbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tag Value"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 588
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Cost.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "id": 5,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "9.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$DB"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH vms_with_tags AS (\n SELECT DISTINCT ON (e.oid) \n \te.oid AS vm_oid\n \t,e.name AS vm_name\n \t,(e.attrs -> 'num_cpus')::int as vcpus\n\n FROM entity e\n   JOIN scope s ON (e.oid = s.scoped_oid)\n WHERE e.type = 'VIRTUAL_MACHINE'\n   AND (s.start, s.finish) OVERLAPS (now() - interval '10 minute', now())\n   AND s.seed_oid in ($Group)\n   )\n   \nSELECT \n vm_name AS \"VM name\",\n avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') AS \"Storage Capacity\",\n avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_AMOUNT') AS \"Storage Used\",\n (avg(metric.consumed) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') - avg(metric.consumed) FILTER (WHERE metric.type = 'STORAGE_AMOUNT'))/1024 AS \"Storage Free\",\n ${costStorage}*avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED') AS \"Cost of Storage\",\n vcpus AS \"CPU Core #\",\n avg(metric.capacity) FILTER (WHERE metric.type = 'VCPU') AS \"CPU Capacity (Mhz)\",\n avg(metric.current) FILTER (WHERE metric.type = 'VCPU') AS \"CPU Used (Mhz)\",\n (avg(metric.capacity) FILTER (WHERE metric.type = 'VCPU')) - (avg(metric.current) FILTER (WHERE metric.type = 'VCPU')) AS \"CPU Free (Mhz)\",\n ${costvCPU}*vcpus AS \"Cost of vCPUs\", \n avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') AS \"Memory Capacity\",\n avg(metric.current/1024/1024) FILTER (WHERE metric.type = 'VMEM') AS \"Memory Used\",\n (avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM')) - (avg(metric.current/1024/1024) FILTER (WHERE metric.type = 'VMEM')) AS \"Memory Free\",\n ${costvMEM}*avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') AS \"Cost of vMem\",\n ${costStorage}*avg(metric.consumed/1024) FILTER (WHERE metric.type = 'STORAGE_PROVISIONED')+${costvCPU}*vcpus+${costvMEM}*avg(metric.capacity/1024/1024) FILTER (WHERE metric.type = 'VMEM') AS \"Total Cost\"\nFROM vms_with_tags\nJOIN metric ON metric.entity_oid = vm_oid\nWHERE metric.\"type\" IN ('VMEM', 'VCPU', 'STORAGE_AMOUNT', 'STORAGE_PROVISIONED')\n AND metric.\"time\" BETWEEN now() - interval '10 minute' and now()\nGROUP BY vm_name, vm_oid, vcpus\nORDER BY \"CPU Core #\" desc;",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "VM Cost Showback Report",
+      "type": "table"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "Turbo Timescale",
+          "value": "Turbo Timescale"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "DB",
+        "options": [],
+        "query": "postgres",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_TURBO_TIMESCALE}"
+        },
+        "definition": "SELECT distinct name as __text\n               ,oid as __value\n   from entity\nWhere type = 'GROUP'\nand (first_seen, last_seen) overlaps ($__timeFrom(), $__timeTo())\nand attrs -> 'member_types' ? 'VIRTUAL_MACHINE'",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Group Name",
+        "multi": true,
+        "name": "Group",
+        "options": [],
+        "query": "SELECT distinct name as __text\n               ,oid as __value\n   from entity\nWhere type = 'GROUP'\nand (first_seen, last_seen) overlaps ($__timeFrom(), $__timeTo())\nand attrs -> 'member_types' ? 'VIRTUAL_MACHINE'",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "100",
+          "value": "100"
+        },
+        "hide": 0,
+        "label": "Cost Per vCPU",
+        "name": "costvCPU",
+        "options": [
+          {
+            "selected": true,
+            "text": "100",
+            "value": "100"
+          }
+        ],
+        "query": "100",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "100",
+          "value": "100"
+        },
+        "hide": 0,
+        "label": "Cost Per GB of Memory",
+        "name": "costvMEM",
+        "options": [
+          {
+            "selected": true,
+            "text": "100",
+            "value": "100"
+          }
+        ],
+        "query": "100",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "100",
+          "value": "100"
+        },
+        "hide": 0,
+        "label": "Cost Per GB of Storage",
+        "name": "costStorage",
+        "options": [
+          {
+            "selected": true,
+            "text": "100",
+            "value": "100"
+          }
+        ],
+        "query": "100",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "hidden": true
+  },
+  "timezone": "",
+  "title": "FINOPS - Virtual Machine Cost and Capacity",
+  "uid": "d022f049-473b-4e73-910d-86e1b8448eef",
+  "version": 5,
+  "weekStart": ""
+}

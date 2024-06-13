@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  password: bXlzdXBlcnNlY3JldHBhc3N3b3Jk
+  username: aW5zdGFuYS1zdXBlcnVzZXI=
+kind: Secret
+metadata:
+  name: superuser-secret
+  namespace: instana-datastores
+type: Opaque

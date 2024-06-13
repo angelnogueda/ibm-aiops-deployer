@@ -1,0 +1,1022 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_TURBO_TIMESCALE",
+      "label": "Turbo Timescale",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "postgres",
+      "pluginName": "PostgreSQL"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "9.5.2"
+    },
+    {
+      "type": "datasource",
+      "id": "postgres",
+      "name": "PostgreSQL",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Percentage.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Cost.*"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byType",
+              "options": "string"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "left"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cluster Name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 265
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Namespace"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 245
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total Cost"
+            },
+            "properties": [
+              {
+                "id": "custom.width"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cost of CPU"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 144
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU Consumed %"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 149
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU Consumed"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 145
+              },
+              {
+                "id": "custom.align",
+                "value": "center"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cost of Memory"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 168
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Memory Consumed %"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 172
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Memory Consumed"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 207
+              },
+              {
+                "id": "unit",
+                "value": "kbytes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Consumed %"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 151
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 19,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 14,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "CPU Cost"
+          }
+        ]
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "with nms_clusters AS (\n\tSELECT c.oid AS nms_cluster_oid\n          ,c.name AS nms_cluster_name\n\t      ,n.oid AS nms_ns_oid\n\t      ,n.name\n      FROM entity c\n      JOIN scope s ON c.oid = seed_oid \n      JOIN entity n ON n.oid = s.scoped_oid\n     WHERE scoped_type = 'NAMESPACE'\n       AND c.type = 'CONTAINER_PLATFORM_CLUSTER'\n       AND finish > now()\n       AND c.last_seen > now()\n       AND n.last_seen > now()\n       --AND (c.first_seen, c.last_seen) OVERLAPS ($__timeFrom(), $__timeTo())\n       --AND (n.first_seen, n.last_seen) OVERLAPS ($__timeFrom(), $__timeTo())\n       --AND (start, finish) OVERLAPS ($__timeFrom(), $__timeTo())\n  ),\n\nnms_util AS (\n\tSELECT entity_oid\n\t      ,AVG(consumed) FILTER (WHERE type = 'VMEM') AS nms_VMEM\n\t      ,AVG(consumed) FILTER (WHERE type = 'VCPU') AS nms_VCPU\n\t  FROM metric\n\t WHERE type IN ('VMEM', 'VCPU')\n\t   AND time >= now() - interval '30 days'\n\t   AND consumed IS NOT NULL\n\t   and entity_type = 'NAMESPACE'\n\t   --AND $__timeFilter(time)\n\t GROUP BY entity_oid\n),\n\n\n  \ncluster_totals AS (    \n    SELECT \n          SUM(nms_VMEM) AS ct_VMEM\n          ,SUM(nms_VCPU) AS ct_VCPU\n          ,s.scoped_oid as s_cluster_oid\n      FROM nms_util m\n      JOIN scope s ON m.entity_oid = seed_oid \n     WHERE scoped_type = 'CONTAINER_PLATFORM_CLUSTER'\n       AND finish > now()\n       --AND (start, finish) OVERLAPS ($__timeFrom(), $__timeTo())\n     GROUP BY s.scoped_oid )\n     \n     \nSELECT nms_cluster_name AS \"Cluster Name\"\n\n  \t  ,name AS \"Namespace\"\n \n     \n      ,nms_util.nms_VCPU/1000*${costvCPU} as \"CPU Cost\"\n      ,nms_util.nms_VMEM/1000000*${costvMEM} as \"Mem Cost\"\n      \n             ,nms_util.nms_VCPU/1000 as \"CPU Used\"\n      ,nms_util.nms_VMEM as \"Mem Used\"\n      ,(nms_util.nms_VMEM / cluster_totals.ct_VMEM * .5) +\n       (nms_util.nms_VCPU / cluster_totals.ct_VCPU * .5) as \"Consumed\"\n      ,(nms_util.nms_VMEM)/1000000*${costvMEM} +\n       (nms_util.nms_VCPU)/1000*${costvCPU} as \"Total Cost\"\n\n  FROM nms_clusters\n  JOIN nms_util ON nms_ns_oid = entity_oid\n  JOIN cluster_totals ON nms_cluster_oid = s_cluster_oid\n  ORDER BY \"Total Cost\" DESC;\n  \n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Cost Per Namespace",
+      "type": "table"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "id": 13,
+      "title": "Overall Cost",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 21,
+        "w": 3,
+        "x": 0,
+        "y": 20
+      },
+      "id": 10,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "![svg image](data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjIwMHB4IiB3aWR0aD0iMjAwcHgiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmlld0JveD0iMCAwIDY0IDY0IiB4bWw6c3BhY2U9InByZXNlcnZlIiBmaWxsPSIjMDAwMDAwIj48ZyBpZD0iU1ZHUmVwb19iZ0NhcnJpZXIiIHN0cm9rZS13aWR0aD0iMCI+PC9nPjxnIGlkPSJTVkdSZXBvX3RyYWNlckNhcnJpZXIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PC9nPjxnIGlkPSJTVkdSZXBvX2ljb25DYXJyaWVyIj4gPHN0eWxlIHR5cGU9InRleHQvY3NzIj4gLnN0MHtmaWxsOiMxODYxZDg7fSAuc3Qxe29wYWNpdHk6MC4yO30gLnN0MntmaWxsOiMyMzFGMjA7fSAuc3Qze2ZpbGw6Izc2QzJBRjt9IC5zdDR7ZmlsbDojRTBFMEQxO30gPC9zdHlsZT4gPGcgaWQ9IkxheWVyXzEiPiA8Zz4gPGNpcmNsZSBjbGFzcz0ic3QwIiBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiPjwvY2lyY2xlPiA8L2c+IDxnPiA8ZyBjbGFzcz0ic3QxIj4gPGc+IDxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik01MCwzMy4xYy0yLjIsMC00LTEuOC00LTRjMC0wLjQsMC4xLTAuNywwLjEtMUgyMS45YzAuMSwwLjMsMC4xLDAuNywwLjEsMWMwLDIuMi0xLjgsNC00LDQgYy0wLjMsMC0wLjctMC4xLTEtMC4xdjguMmMwLjMtMC4xLDAuNy0wLjEsMS0wLjFjMi4yLDAsNCwxLjgsNCw0YzAsMC4zLTAuMSwwLjctMC4xLDFoMjQuMmMtMC4xLTAuMy0wLjEtMC43LTAuMS0xIGMwLTIuMiwxLjgtNCw0LTRjMC40LDAsMC43LDAuMSwxLDAuMXYtOC4yQzUwLjcsMzMsNTAuMywzMy4xLDUwLDMzLjF6IE0zNCw0M2MtMy4zLDAtNi0yLjctNi02czIuNy02LDYtNnM2LDIuNyw2LDYgUzM3LjMsNDMsMzQsNDN6Ij48L3BhdGg+IDwvZz4gPGc+IDxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik01MCwyNUgxOGMtMC4zLDAtMC41LDAtMC44LDAuMWMtMS44LDAuNC0zLjIsMi0zLjIsMy45YzAsMC4xLDAsMC4yLDAsMC4zdjE1LjNjMCwwLjEsMCwwLjIsMCwwLjMgYzAsMi4yLDEuOCw0LDQsNGMwLjEsMCwwLjIsMCwwLjMsMGgzMS4zYzAuMSwwLDAuMiwwLDAuMywwYzIsMCwzLjYtMS40LDMuOS0zLjJDNTQsNDUuNSw1NCw0NS4zLDU0LDQ1VjI5IEM1NCwyNi44LDUyLjIsMjUsNTAsMjV6IE01MCw0MWMtMi4yLDAtNCwxLjgtNCw0YzAsMC4zLDAuMSwwLjcsMC4xLDFIMjEuOWMwLjEtMC4zLDAuMS0wLjcsMC4xLTFjMC0yLjItMS44LTQtNC00IGMtMC4zLDAtMC43LDAuMS0xLDAuMXYtOC4yYzAuMywwLjEsMC43LDAuMSwxLDAuMWMyLjIsMCw0LTEuOCw0LTRjMC0wLjQtMC4xLTAuNy0wLjEtMWgyNC4yYy0wLjEsMC4zLTAuMSwwLjctMC4xLDEgYzAsMi4yLDEuOCw0LDQsNGMwLjQsMCwwLjctMC4xLDEtMC4xdjguMkM1MC43LDQxLDUwLjMsNDEsNTAsNDF6Ij48L3BhdGg+IDwvZz4gPGc+IDxjaXJjbGUgY2xhc3M9InN0MiIgY3g9IjM0IiBjeT0iMzciIHI9IjYiPjwvY2lyY2xlPiA8L2c+IDwvZz4gPGc+IDxnPiA8cGF0aCBjbGFzcz0ic3QzIiBkPSJNMTgsNDZjLTEuNywwLTMtMS4zLTMtM1YyN2MwLTEuNywxLjMtMywzLTNoMzJjMS43LDAsMywxLjMsMywzdjE2YzAsMS43LTEuMywzLTMsM0gxOHoiPjwvcGF0aD4gPC9nPiA8Zz4gPHBhdGggY2xhc3M9InN0NCIgZD0iTTUwLDI1YzEuMSwwLDIsMC45LDIsMnYxNmMwLDEuMS0wLjksMi0yLDJIMThjLTEuMSwwLTItMC45LTItMlYyN2MwLTEuMSwwLjktMiwyLTJINTAgTTUwLDIzSDE4IGMtMi4yLDAtNCwxLjgtNCw0djE2YzAsMi4yLDEuOCw0LDQsNGgzMmMyLjIsMCw0LTEuOCw0LTRWMjdDNTQsMjQuOCw1Mi4yLDIzLDUwLDIzTDUwLDIzeiI+PC9wYXRoPiA8L2c+IDwvZz4gPGc+IDxjaXJjbGUgY2xhc3M9InN0MCIgY3g9IjM0IiBjeT0iMzUiIHI9IjYiPjwvY2lyY2xlPiA8L2c+IDxnPiA8Y2lyY2xlIGNsYXNzPSJzdDQiIGN4PSI1MCIgY3k9IjI3IiByPSI0Ij48L2NpcmNsZT4gPC9nPiA8Zz4gPGNpcmNsZSBjbGFzcz0ic3Q0IiBjeD0iMTgiIGN5PSIyNyIgcj0iNCI+PC9jaXJjbGU+IDwvZz4gPGc+IDxjaXJjbGUgY2xhc3M9InN0NCIgY3g9IjUwIiBjeT0iNDMiIHI9IjQiPjwvY2lyY2xlPiA8L2c+IDxnPiA8Y2lyY2xlIGNsYXNzPSJzdDQiIGN4PSIxOCIgY3k9IjQzIiByPSI0Ij48L2NpcmNsZT4gPC9nPiA8L2c+IDxnPiA8ZyBjbGFzcz0ic3QxIj4gPGc+IDxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik00OCwyOS4xYy0yLjIsMC00LTEuOC00LTRjMC0wLjQsMC4xLTAuNywwLjEtMUgxOS45YzAuMSwwLjMsMC4xLDAuNywwLjEsMWMwLDIuMi0xLjgsNC00LDQgYy0wLjMsMC0wLjctMC4xLTEtMC4xdjguMmMwLjMtMC4xLDAuNy0wLjEsMS0wLjFjMi4yLDAsNCwxLjgsNCw0YzAsMC4zLTAuMSwwLjctMC4xLDFoMjQuMmMtMC4xLTAuMy0wLjEtMC43LTAuMS0xIGMwLTIuMiwxLjgtNCw0LTRjMC40LDAsMC43LDAuMSwxLDAuMXYtOC4yQzQ4LjcsMjksNDguMywyOS4xLDQ4LDI5LjF6IE0zMiwzOWMtMy4zLDAtNi0yLjctNi02czIuNy02LDYtNnM2LDIuNyw2LDYgUzM1LjMsMzksMzIsMzl6Ij48L3BhdGg+IDwvZz4gPGc+IDxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik00OCwyMUgxNmMtMC4zLDAtMC41LDAtMC44LDAuMWMtMS44LDAuNC0zLjIsMi0zLjIsMy45YzAsMC4xLDAsMC4yLDAsMC4zdjE1LjNjMCwwLjEsMCwwLjIsMCwwLjMgYzAsMi4yLDEuOCw0LDQsNGMwLjEsMCwwLjIsMCwwLjMsMGgzMS4zYzAuMSwwLDAuMiwwLDAuMywwYzIsMCwzLjYtMS40LDMuOS0zLjJDNTIsNDEuNSw1Miw0MS4zLDUyLDQxVjI1IEM1MiwyMi44LDUwLjIsMjEsNDgsMjF6IE00OCwzN2MtMi4yLDAtNCwxLjgtNCw0YzAsMC4zLDAuMSwwLjcsMC4xLDFIMTkuOWMwLjEtMC4zLDAuMS0wLjcsMC4xLTFjMC0yLjItMS44LTQtNC00IGMtMC4zLDAtMC43LDAuMS0xLDAuMXYtOC4yYzAuMywwLjEsMC43LDAuMSwxLDAuMWMyLjIsMCw0LTEuOCw0LTRjMC0wLjQtMC4xLTAuNy0wLjEtMWgyNC4yYy0wLjEsMC4zLTAuMSwwLjctMC4xLDEgYzAsMi4yLDEuOCw0LDQsNGMwLjQsMCwwLjctMC4xLDEtMC4xdjguMkM0OC43LDM3LDQ4LjMsMzcsNDgsMzd6Ij48L3BhdGg+IDwvZz4gPGc+IDxjaXJjbGUgY2xhc3M9InN0MiIgY3g9IjMyIiBjeT0iMzMiIHI9IjYiPjwvY2lyY2xlPiA8L2c+IDwvZz4gPGc+IDxnPiA8cGF0aCBjbGFzcz0ic3QzIiBkPSJNMTQsNDJjLTEuNywwLTMtMS4zLTMtM1YyM2MwLTEuNywxLjMtMywzLTNoMzJjMS43LDAsMywxLjMsMywzdjE2YzAsMS43LTEuMywzLTMsM0gxNHoiPjwvcGF0aD4gPC9nPiA8Zz4gPHBhdGggY2xhc3M9InN0NCIgZD0iTTQ2LDIxYzEuMSwwLDIsMC45LDIsMnYxNmMwLDEuMS0wLjksMi0yLDJIMTRjLTEuMSwwLTItMC45LTItMlYyM2MwLTEuMSwwLjktMiwyLTJINDYgTTQ2LDE5SDE0IGMtMi4yLDAtNCwxLjgtNCw0djE2YzAsMi4yLDEuOCw0LDQsNGgzMmMyLjIsMCw0LTEuOCw0LTRWMjNDNTAsMjAuOCw0OC4yLDE5LDQ2LDE5TDQ2LDE5eiI+PC9wYXRoPiA8L2c+IDwvZz4gPGc+IDxjaXJjbGUgY2xhc3M9InN0MCIgY3g9IjMwIiBjeT0iMzEiIHI9IjYiPjwvY2lyY2xlPiA8L2c+IDxnPiA8Y2lyY2xlIGNsYXNzPSJzdDQiIGN4PSI0NiIgY3k9IjIzIiByPSI0Ij48L2NpcmNsZT4gPC9nPiA8Zz4gPGNpcmNsZSBjbGFzcz0ic3Q0IiBjeD0iMTQiIGN5PSIyMyIgcj0iNCI+PC9jaXJjbGU+IDwvZz4gPGc+IDxjaXJjbGUgY2xhc3M9InN0NCIgY3g9IjQ2IiBjeT0iMzkiIHI9IjQiPjwvY2lyY2xlPiA8L2c+IDxnPiA8Y2lyY2xlIGNsYXNzPSJzdDQiIGN4PSIxNCIgY3k9IjM5IiByPSI0Ij48L2NpcmNsZT4gPC9nPiA8L2c+IDwvZz4gPGcgaWQ9IkxheWVyXzIiPiA8L2c+IDwvZz48L3N2Zz4)\n\n\n# Overall Cost\n\nThis dashboard shows the overall cost for Clusters and the top Pods.\n",
+        "mode": "markdown"
+      },
+      "pluginVersion": "9.5.2",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total Cost"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "super-light-orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 21,
+        "x": 3,
+        "y": 20
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "panelId": 4,
+          "refId": "A"
+        }
+      ],
+      "title": "Panel Title",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "CPU Used": true,
+              "Consumed": true,
+              "Mem Used": true,
+              "Pod Name": true
+            },
+            "indexByName": {
+              "CPU Cost": 3,
+              "CPU Used": 5,
+              "Cluster Name": 2,
+              "Consumed": 7,
+              "Mem Cost": 4,
+              "Mem Used": 6,
+              "Pod Name": 0,
+              "Total Cost": 1
+            },
+            "renameByName": {}
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_TURBO_TIMESCALE}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mem Used"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "kbytes"
+              },
+              {
+                "id": "custom.width",
+                "value": 103
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Consumed"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "custom.width",
+                "value": 132
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total Cost"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "CPU Used"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 115
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Cost.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "custom.width",
+                "value": 115
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 21,
+        "x": 3,
+        "y": 29
+      },
+      "id": 4,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Total Cost"
+          }
+        ]
+      },
+      "pluginVersion": "9.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH pods_by_cluster as (\n    SELECT DISTINCT e.name as cluster_name\n          ,e.oid as cluster_oid\n          ,pod.name as pod_name\n          ,s.scoped_oid as pod_oid\n      FROM entity e\n      JOIN scope s on s.seed_oid = e.oid\n      JOIN entity pod on pod.oid = s.scoped_oid\n       AND (e.first_seen, e.last_seen) OVERLAPS ($__timeFrom(), $__timeTo())\n       AND (pod.first_seen, pod.last_seen) OVERLAPS ($__timeFrom(), $__timeTo())\n       AND (start, finish) OVERLAPS ($__timeFrom(), $__timeTo())\n       AND e.type = 'CONTAINER_PLATFORM_CLUSTER'\n       AND s.scoped_type = 'CONTAINER_POD'\n),\n\npod_stats as (\n    SELECT entity_oid as pod_oid\n          ,AVG(current) FILTER (WHERE type = 'VMEM') as vmem_used\n          ,AVG(capacity) FILTER (WHERE type = 'VMEM') as vmem_capacity\n          ,AVG(current) FILTER (WHERE type = 'VCPU') as millicore_used\n          ,AVG(capacity) FILTER (WHERE type = 'VCPU') as millicore_capacity\n      FROM metric\n     WHERE $__timeFilter(time)\n       AND type IN ('VMEM', 'VCPU')\n       AND entity_type = 'CONTAINER_POD'\n       AND entity_oid IN (SELECT pod_oid from pods_by_cluster)\n       AND consumed IS NULL\n     GROUP BY 1\n),\n\ncluster_costs as (\n    SELECT seed_oid as cluster_oid\n          ,SUM(current) AS cc_cost\n \t  FROM scope s\n      JOIN metric ec ON scoped_oid = entity_oid\n     WHERE scoped_type = 'VIRTUAL_MACHINE'\n       AND seed_oid IN (SELECT DISTINCT cluster_oid FROM pods_by_cluster)\n       AND ec.type = 'VCPU'\n       AND $__timeFilter(ec.time)\n       AND (start, finish) OVERLAPS ($__timeFrom(), $__timeTo())\n     GROUP BY 1\n),\n\ncluster_stats as (\n    SELECT cluster_oid\n          ,SUM(vmem_used) as cluster_vmem_used\n          ,SUM(vmem_capacity) as cluster_vmem_cap\n          ,SUM(millicore_used) as cluster_vcpu_used\n          ,SUM(millicore_capacity) as cluster_vcpu_cap\n      FROM pods_by_cluster pbc\n      JOIN pod_stats ps on ps.pod_oid = pbc.pod_oid\n     GROUP BY 1\n)\n\nSELECT pod_name as \"Pod Name\"\n      ,cluster_name as \"Cluster Name\"\n     \n      ,ps.millicore_used/1000*${costvCPU} as \"CPU Cost\"\n      ,ps.vmem_used/1000000*${costvMEM} as \"Mem Cost\"\n      \n             ,ps.millicore_used/1000 as \"CPU Used\"\n      ,ps.vmem_used as \"Mem Used\"\n      ,(ps.vmem_used / cs.cluster_vmem_used * .5) +\n       (ps.millicore_used / cs.cluster_vcpu_used * .5) as \"Consumed\"\n      ,(ps.vmem_used)/1000000*${costvMEM} +\n       (ps.millicore_used)/1000*${costvCPU} as \"Total Cost\"\n  FROM pods_by_cluster pbc\n  JOIN pod_stats ps on pbc.pod_oid = ps.pod_oid\n  JOIN cluster_costs cc on cc.cluster_oid = pbc.cluster_oid\n  JOIN cluster_stats cs on cs.cluster_oid = pbc.cluster_oid",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "savings"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          },
+          "table": "completed_action",
+          "timeColumn": "recommendation_time",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Cost Per Pod",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "CPU Cost": 3,
+              "CPU Used": 5,
+              "Cluster Name": 1,
+              "Consumed": 7,
+              "Mem Cost": 4,
+              "Mem Used": 6,
+              "Pod Name": 0,
+              "Total Cost": 2
+            },
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "limit",
+          "options": {}
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "id": 12,
+      "panels": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "gridPos": {
+            "h": 21,
+            "w": 3,
+            "x": 0,
+            "y": 31
+          },
+          "id": 11,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "![svg image](data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAyNCAxMDI0IiBjbGFzcz0iaWNvbiIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9IiMwMDAwMDAiPjxnIGlkPSJTVkdSZXBvX2JnQ2FycmllciIgc3Ryb2tlLXdpZHRoPSIwIj48L2c+PGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48L2c+PGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPjxwYXRoIGQ9Ik02ODIuNjY2NjY3IDUxMm0tMTkyIDBhMTkyIDE5MiAwIDEgMCAzODQgMCAxOTIgMTkyIDAgMSAwLTM4NCAwWiIgZmlsbD0iI0IyRUJGMiI+PC9wYXRoPjxwYXRoIGQ9Ik02ODIuNjY2NjY3IDI1NmMtMTQwLjggMC0yNTYgMTE1LjItMjU2IDI1NnMxMTUuMiAyNTYgMjU2IDI1NiAyNTYtMTE1LjIgMjU2LTI1Ni0xMTUuMi0yNTYtMjU2LTI1NnogbTAgNDI2LjY2NjY2N2MtOTMuODY2NjY3IDAtMTcwLjY2NjY2Ny03Ni44LTE3MC42NjY2NjctMTcwLjY2NjY2N3M3Ni44LTE3MC42NjY2NjcgMTcwLjY2NjY2Ny0xNzAuNjY2NjY3IDE3MC42NjY2NjcgNzYuOCAxNzAuNjY2NjY2IDE3MC42NjY2NjctNzYuOCAxNzAuNjY2NjY3LTE3MC42NjY2NjYgMTcwLjY2NjY2N3oiIGZpbGw9IiM0REQwRTEiPjwvcGF0aD48cGF0aCBkPSJNNTQxLjg2NjY2NyA0NjkuMzMzMzMzTDQyMi40IDEwOC44bC0xMzIuMjY2NjY3IDQ4Mi4xMzMzMzMtNDYuOTMzMzMzLTEyMS42SDg1LjMzMzMzM3Y4NS4zMzMzMzRoOTguMTMzMzM0bDEyMy43MzMzMzMgMzA1LjA2NjY2NiAxMjMuNzMzMzMzLTQ1Ni41MzMzMzMgNTEuMiAxNTEuNDY2NjY3SDY0MHYtODUuMzMzMzM0eiIgZmlsbD0iIzNGNTFCNSI+PC9wYXRoPjxwYXRoIGQ9Ik02ODIuNjY2NjY3IDUxMm0tODUuMzMzMzM0IDBhODUuMzMzMzMzIDg1LjMzMzMzMyAwIDEgMCAxNzAuNjY2NjY3IDAgODUuMzMzMzMzIDg1LjMzMzMzMyAwIDEgMC0xNzAuNjY2NjY3IDBaIiBmaWxsPSIjM0Y1MUI1Ij48L3BhdGg+PC9nPjwvc3ZnPg)\n\n\n# Individual Cost\n\nThis dashboard shows the individual cost for Pods for the selected, tagged Application.\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.5.2",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_TURBO_TIMESCALE}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": ".*Cost.*"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "currencyUSD"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 115
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": ".*Used.*"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 120
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Consumed"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 120
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 21,
+            "w": 21,
+            "x": 3,
+            "y": 31
+          },
+          "id": 8,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": true
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Total Cost"
+              }
+            ]
+          },
+          "pluginVersion": "9.5.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_TURBO_TIMESCALE}"
+              },
+              "editorMode": "code",
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "\n  WITH pods_by_cluster as (\n    SELECT DISTINCT e.name as cluster_name\n          ,e.oid as cluster_oid\n          ,pod.name as pod_name\n          ,s.scoped_oid as pod_oid\n      FROM entity e\n      JOIN scope s on s.seed_oid = e.oid\n      JOIN entity pod on pod.oid = s.scoped_oid\n       AND (e.first_seen, e.last_seen) OVERLAPS ($__timeFrom(), $__timeTo())\n       AND (pod.first_seen, pod.last_seen) OVERLAPS ($__timeFrom(), $__timeTo())\n       AND (start, finish) OVERLAPS ($__timeFrom(), $__timeTo())\n       AND e.type = 'CONTAINER_PLATFORM_CLUSTER'\n       AND s.scoped_type = 'CONTAINER_POD'\n        AND pod.attrs -> 'tags' -> '[k8s label] app' ->> 0 = ${labelValue:singlequote}\n\n),\n\npod_stats as (\n    SELECT entity_oid as pod_oid\n          ,AVG(current) FILTER (WHERE type = 'VMEM') as vmem_used\n          ,AVG(capacity) FILTER (WHERE type = 'VMEM') as vmem_capacity\n          ,AVG(current) FILTER (WHERE type = 'VCPU') as millicore_used\n          ,AVG(capacity) FILTER (WHERE type = 'VCPU') as millicore_capacity\n      FROM metric\n     WHERE $__timeFilter(time)\n       AND type IN ('VMEM', 'VCPU')\n       AND entity_type = 'CONTAINER_POD'\n       AND entity_oid IN (SELECT pod_oid from pods_by_cluster)\n       AND consumed IS NULL\n     GROUP BY 1\n),\n\ncluster_costs as (\n    SELECT seed_oid as cluster_oid\n          ,SUM(current) AS cc_cost\n \t  FROM scope s\n      JOIN metric ec ON scoped_oid = entity_oid\n     WHERE scoped_type = 'VIRTUAL_MACHINE'\n       AND seed_oid IN (SELECT DISTINCT cluster_oid FROM pods_by_cluster)\n       AND ec.type = 'VCPU'\n       AND $__timeFilter(ec.time)\n       AND (start, finish) OVERLAPS ($__timeFrom(), $__timeTo())\n     GROUP BY 1\n),\n\ncluster_stats as (\n    SELECT cluster_oid\n          ,SUM(vmem_used) as cluster_vmem_used\n          ,SUM(vmem_capacity) as cluster_vmem_cap\n          ,SUM(millicore_used) as cluster_vcpu_used\n          ,SUM(millicore_capacity) as cluster_vcpu_cap\n      FROM pods_by_cluster pbc\n      JOIN pod_stats ps on ps.pod_oid = pbc.pod_oid\n     GROUP BY 1\n)\n\nSELECT pod_name as \"Pod Name\"\n      ,cluster_name as \"Cluster Name\"\n     \n      ,ps.millicore_used/1000*${costvCPU} as \"CPU Cost\"\n      ,ps.vmem_used/1000000*${costvMEM} as \"Mem Cost\"\n      \n             ,ps.millicore_used/1000 as \"CPU Used\"\n      ,ps.vmem_used as \"Mem Used\"\n      ,(ps.vmem_used / cs.cluster_vmem_used * .5) +\n       (ps.millicore_used / cs.cluster_vcpu_used * .5) as \"Consumed\"\n      ,(ps.vmem_used)/1000000*${costvMEM} +\n       (ps.millicore_used)/1000*${costvCPU} as \"Total Cost\"\n  FROM pods_by_cluster pbc\n  JOIN pod_stats ps on pbc.pod_oid = ps.pod_oid\n  JOIN cluster_costs cc on cc.cluster_oid = pbc.cluster_oid\n  JOIN cluster_stats cs on cs.cluster_oid = pbc.cluster_oid",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "savings"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              },
+              "table": "completed_action",
+              "timeColumn": "recommendation_time",
+              "timeColumnType": "timestamp",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "Total Cost",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {},
+                "indexByName": {
+                  "CPU Cost": 3,
+                  "CPU Used": 5,
+                  "Cluster Name": 1,
+                  "Consumed": 7,
+                  "Mem Cost": 4,
+                  "Mem Used": 6,
+                  "Pod Name": 0,
+                  "Total Cost": 2
+                },
+                "renameByName": {}
+              }
+            }
+          ],
+          "type": "table"
+        }
+      ],
+      "title": "Individual Cost",
+      "type": "row"
+    }
+  ],
+  "refresh": "",
+  "revision": 1,
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_TURBO_TIMESCALE}"
+        },
+        "definition": "SELECT DISTINCT attrs -> 'tags' -> '[k8s label] app' ->> 0\n  FROM entity\n WHERE attrs -> 'tags' -> '[k8s label] app' IS NOT NULL\n   AND (first_seen, last_seen) OVERLAPS ($__timeFrom(), $__timeTo())\n ORDER BY 1",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Label Value",
+        "multi": false,
+        "name": "labelValue",
+        "options": [],
+        "query": "SELECT DISTINCT attrs -> 'tags' -> '[k8s label] app' ->> 0\n  FROM entity\n WHERE attrs -> 'tags' -> '[k8s label] app' IS NOT NULL\n   AND (first_seen, last_seen) OVERLAPS ($__timeFrom(), $__timeTo())\n ORDER BY 1",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "definition": "SELECT DISTINCT attrs -> 'tags' -> 'app' ->> 0\n  FROM entity\n WHERE attrs -> 'tags' -> 'app' IS NOT NULL\n   AND (first_seen, last_seen) OVERLAPS ($__timeFrom(), $__timeTo())\n ORDER BY 1",
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "query0",
+        "options": [],
+        "query": "SELECT DISTINCT attrs -> 'tags' -> 'app' ->> 0\n  FROM entity\n WHERE attrs -> 'tags' -> 'app' IS NOT NULL\n   AND (first_seen, last_seen) OVERLAPS ($__timeFrom(), $__timeTo())\n ORDER BY 1",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "10",
+          "value": "10"
+        },
+        "description": "Cost per CPU Core",
+        "hide": 0,
+        "label": "Cost per CPU Core",
+        "name": "costvCPU",
+        "options": [
+          {
+            "selected": true,
+            "text": "10",
+            "value": "10"
+          }
+        ],
+        "query": "10",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "1",
+          "value": "1"
+        },
+        "description": "Cost per GB of Memory",
+        "hide": 0,
+        "label": "Cost per GB of Memory",
+        "name": "costvMEM",
+        "options": [
+          {
+            "selected": true,
+            "text": "1",
+            "value": "1"
+          }
+        ],
+        "query": "1",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "FINOPS - Container Pod Show Back Report",
+  "uid": "ZnqzJLrnk",
+  "version": 18,
+  "weekStart": ""
+}

@@ -1,0 +1,56 @@
+
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Waiting for IBM AIOPS installation to finish
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+    
+
+
+- name: Log
+  shell: |
+    export MESSAGE=" 🕦 Wait for IBM AIOps to become ready for HACK"
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "$MESSAGE  >> ../install_{{current_ibmaiops_feature.kind}}.log
+  ignore_errors: true
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ff7700'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - 🕦 Wait for IBM AIOps to become ready for HACK - Started at $(date +%H:%M) UTC'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+
+
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Wait for {{ current_ibmaiops_cluster.project }} Namespace to be ready
+# --------------------------------------------------------------------------------------------------------------------------------------
+
+- name: 🕦 CHECK -  Wait for more than > 60 pods in namespace {{ current_ibmaiops_cluster.project }} (this might take some time)
+  shell: |
+    NUM_PODS=$(oc get po -n {{ current_ibmaiops_cluster.project }} |grep Running| wc -l)
+    echo $NUM_PODS
+  register: kubectl_num_pods
+  until: kubectl_num_pods.stdout|int > 60
+  retries: 500
+  delay: 15
+
+
+
+- name:   🚀 IBM AIOPS - HACK
+  kubernetes.core.k8s:
+    state: present
+    src: ./templates/aiops/patches/CP4AIOPS_INSTALL_HACK.yaml
+

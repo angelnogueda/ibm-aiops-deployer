@@ -1,0 +1,7 @@
+V:{"_operation": "InsertUpdate", "app":"test" ,"uniqueId": "test01-id", "fromFile":"true", "entityTypes": ["device"], "name": "test01", "_references": [],"matchTokens":["test01","test01-id"],"mergeTokens":["test01","test01-id"],"tags":["tag1","app:custom-demo"], "city":"Richmond", "area": "Broad Meadows", "geolocation": { "geometry": { "coordinates": [-77.56121810464228, 37.64360674606608],"type": "Point"}}}
+V:{"_operation": "InsertUpdate", "app":"test" ,"uniqueId": "test02-id", "fromFile":"true", "entityTypes": ["device"], "name": "test02", "_references": [],"matchTokens":["test02","test02-id"],"mergeTokens":["test02","test02-id"],"tags":["tag1","app:custom-demo"], "city":"Richmond", "area": "Broad Meadows", "geolocation": { "geometry": { "coordinates": [-77.56121810464228, 37.64360674606608],"type": "Point"}}}
+V:{"_operation": "InsertUpdate", "app":"test" ,"uniqueId": "test03-id", "fromFile":"true", "entityTypes": ["device"], "name": "test03", "_references": [],"matchTokens":["test03","test03-id"],"mergeTokens":["test03","test03-id"],"tags":["tag1","app:custom-demo"], "city":"Richmond", "area": "Broad Meadows", "geolocation": { "geometry": { "coordinates": [-77.56121810464228, 37.64360674606608],"type": "Point"}}}
+E:{"_fromUniqueId":"test01-id","_toUniqueId":"test02-id","_edgeType":"connectedTo", "fromFile":"true"}
+E:{"_fromUniqueId":"test01-id","_toUniqueId":"test03-id","_edgeType":"connectedTo", "fromFile":"true"}
+E:{"_fromUniqueId":"test02-id","_toUniqueId":"test03-id","_edgeType":"connectedTo", "fromFile":"true"}
+

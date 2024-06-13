@@ -1,0 +1,118 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ibm-aiops-aiops-install-demo-content
+  namespace: ibm-aiops-installer
+spec:
+  serviceAccountname: ibm-aiops-installer-admin
+  template:
+    metadata:
+      labels:
+        app: ibm-aiops-installer
+    spec:
+      serviceAccountName: ibm-aiops-installer-admin
+      containers:
+        - name: install
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              #set -x
+              echo "***************************************************************************************************************************************************"
+              echo "***************************************************************************************************************************************************"
+              echo "                                                                                                                                                   "
+              echo " 🚀 Install IBM AIOps                                                                                                                                                  "
+              echo "                                                                                                                                                   "
+              echo "***************************************************************************************************************************************************"
+              echo "***************************************************************************************************************************************************"
+              echo "  "
+              echo "  "
+              echo "  ⏳ INSTALLATION START TIMESTAMP: $(date)"
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 📥 Housekeeping"
+              oc delete ConsoleNotification --all>/dev/null 2>/dev/null 
+              oc delete job  -n ibm-aiops-installer --ignore-not-found $(oc get job -n ibm-aiops-installer|grep load-|awk '{print$1}'):-notfound  --ignore-not-found>/dev/null 2>/dev/null 
+              oc delete pod  -n ibm-aiops-installer $(oc get po -n ibm-aiops-installer|grep load-|awk '{print$1}'):-notfound  --ignore-not-found>/dev/null 2>/dev/null 
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Getting Installation source from GitHub"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   📥 Clone Repo $INSTALL_REPO"
+              git clone $INSTALL_REPO
+              cd ibm-aiops-deployer
+
+              echo ""
+              echo ""
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "   🔎 This Repo includes those latestet Commits"
+              git log|head -n 17
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 📝 Config File"         
+              cat /tmp/config-file/INSTALLATION_CONFIG.yaml
+
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Starting Installation"
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Prepare Ansible"
+              pip -q install openshift pyyaml kubernetes
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Launching Ansible Playbook"
+              export ANSIBLE_LOG_PATH=/tmp/ansible.log
+              ansible-playbook ./ansible/00_ibm-aiops-install.yaml -e "config_file_path=/tmp/config-file/INSTALLATION_CONFIG.yaml" -e cp_entitlement_key=$ENTITLED_REGISTRY_KEY
+              echo ""
+              echo ""
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo "  ⏳ INSTALLATION END TIMESTAMP: $(date)"
+              echo ""
+
+
+              echo "------------------------------------------------------------------------------------------------------------------------------"
+              echo " 🚀 Finalize Installation"
+              ./tools/90_finalizeInstallation.sh
+              echo ""
+
+
+
+          env:
+          - name: INSTALL_REPO
+            valueFrom:
+              configMapKeyRef:
+                name: ibm-aiops-install-configuration-aiops-demo-content
+                key: INSTALL_REPO
+          volumeMounts:
+            - name: config-file
+              mountPath: /tmp/config-file
+      volumes:
+        - name: config-file
+          configMap:
+            name: ibm-aiops-install-configuration-aiops-demo-content
+            items:
+            - key: INSTALLATION_CONFIG.yaml
+              path: INSTALLATION_CONFIG.yaml
+      restartPolicy: Never
+  backoffLimit: 500

@@ -1,0 +1,117 @@
+---
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# IBMAIOPS INSTANCES
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+
+global_config:
+  # Available Names: Test, Demo, AIOPS, CP4AIOPS, Arya,Bear,Cersei,Cersei1,Daenerys,Groot,Hodor,Hofstadter,Howard,Jimmy,John,King,Lemmy,Nightking,Penny,Raj,Robot1,Robot2,Robot3,Robot4,Robot5,Sansa,Sheldon,Sherlock,Slash,Tormund,Tyrion,Walker,Watson
+  environment_name: Demo
+  cloud_platform: existing-ocp
+
+  # --------------------------------------------------------------------------------------------------------------------------------------
+  # Pull Registires
+  # --------------------------------------------------------------------------------------------------------------------------------------
+  entitled_registry: cp.icr.io
+  entitled_registry_user: cp
+  catalog_image: icr.io/cpopen/ibm-operator-catalog:latest
+
+  # --------------------------------------------------------------------------------------------------------------------------------------
+  # Notifications and Cards
+  # --------------------------------------------------------------------------------------------------------------------------------------
+  # Create Welcome Cards in ibm-aiops
+  create_cards: true
+  # Create App Menu Items in OCP
+  create_ocp_items: true
+  # Create Notifications in OCP
+  create_ocp_notifications: true
+  position_ocp_notifications: BannerBottom
+  position_final_ocp_notification: BannerTop
+
+
+  # --------------------------------------------------------------------------------------------------------------------------------------
+  # Passwords and Licenses
+  # --------------------------------------------------------------------------------------------------------------------------------------
+  # Use this Password for all Instances
+  global_password: CHANGEME
+  # Set this value to True to accept all licenses
+  accept_all_licenses: False
+  # Key to decrypt Licenses
+  # license_token: NONE
+
+
+# *************************************************************************************************************************************************
+# -------------------------------------------------------------------------------------------------------------------------------------
+# OpenShift Configuration
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+
+openshift:
+
+- name: "mycluster"
+  ocp_version: "4.15"
+  cluster_name: "mycluster"
+  domain_name: example.com
+  openshift_storage:
+  - storage_name: auto-storage
+    storage_type: auto
+    # Alternatively use
+    #storage_name: ibm-roks-storage
+    #storage_type: custom
+    #ocp_storage_class_file: ibmc-file-gold-gid
+    #ocp_storage_class_block: ibmc-block-gold
+
+
+
+
+#*************************************************************************************************************************************************
+#--------------------------------------------------------------------------------------------------------------------------------------
+# IBM AIOPS Configuration
+#--------------------------------------------------------------------------------------------------------------------------------------
+#*************************************************************************************************************************************************
+
+ibmaiops:
+  # --------------------------------------------------------------------------------------------------------------------------------------
+  # IBM AIOPS INSTANA
+  # --------------------------------------------------------------------------------------------------------------------------------------
+
+  - name: ibm-aiops-instana
+    kind: Instana
+    install: true
+    # Check Version here https://artifact-public.instana.io/artifactory/rel-generic-instana-virtual/infrastructure/kubectl/
+    instana_version: 261-0
+    # Can be large, medium (default), small 
+    instana_size: small
+
+    # ---------------------------------------------------------------------
+    # INSTANA LICENSE
+    sales_key: 'NONE'
+    agent_key: 'NONE'
+
+    # ---------------------------------------------------------------------
+    # INSTANA DATASTORE
+    instana_beeinstana_mirrors: 2  # Set to 1 for single node installations
+
+    # ---------------------------------------------------------------------
+    # INSTANA ADMIN LOGIN
+    # Admin User Name
+    instana_admin_user: "admin@instana.local"
+    #instana_admin_user: "demo"
+    # Admin User Password (OVERRIDES GLOBAL PASSWORD)
+    #instana_admin_pass: 'CHANGEME'
+    
+    # ---------------------------------------------------------------------
+    # INSTALL INSTANA AGENT
+    install_agent: true
+
+    # --------------------------------------------------------------------------------------------------------------------------------------
+    # INTEGRATIONS
+    integrate_ibmaiops: true
+    #integrate_turbonomic: true
+    
+    # --------------------------------------------------------------------------------------------------------------------------------------
+    # Storage Classes Override for this Instance (see comment below)
+    # --------------------------------------------------------------------------------------------------------------------------------------
+    #storage_class_file: automatic
+    #storage_class_block: automatic

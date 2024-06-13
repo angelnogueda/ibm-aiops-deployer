@@ -1,0 +1,95 @@
+
+  
+# -----------------------------------------------------------------------------
+# CP4AIOps parameters
+# -----------------------------------------------------------------------------
+cp4aiops:
+  global:
+    # Available Names: Test, Demo, AIOPS, CP4AIOPS, Arya,Bear,Cersei,Cersei1,Daenerys,Groot,Hodor,Hofstadter,Howard,Jimmy,John,King,Lemmy,Nightking,Penny,Raj,Robot1,Robot2,Robot3,Robot4,Robot5,Sansa,Sheldon,Sherlock,Slash,Tormund,Tyrion,Walker,Watson
+    instanceName: Demo
+    globalPassword: CHANGEME
+    create_ocp_items: true
+    create_ocp_notifications: true
+
+
+  training:
+    # ---------------------------------------------------------------------
+    # TRAINING
+    # Train the Models based on pre-canned content
+
+    log_enabled: false
+    metric_enabled: false
+    snow_enabled: false
+    experimental_enabled: false
+    temporal_enabled: false
+
+    training_data_url: https://github.com/niklaushirt/
+    training_data_repo: ibm-aiops-additionaldata
+
+
+
+  topology:
+    # ---------------------------------------------------------------------
+    # TOPOLOGY
+    # Install DemoApps Application
+    enable_demo_apps: false
+    # RobotShop interface color (classic/white)
+    robotshop_color: white
+
+
+  runbooks:
+    # ---------------------------------------------------------------------
+    # RUNBOOKS
+    # Install AWX and create Runbooks
+    enable_runbooks: false
+
+
+
+  demoui:
+    # ---------------------------------------------------------------------
+    # Demo UI
+    install_demo_ui: false
+    demoui_admin_mode: "false"
+    demoui_simulation_mode: "false"
+    demoui_user: demo
+    # Password for the Demo UI (OVERRIDES GLOBAL PASSWORD)
+    #demoui_pwd: CHANGEME
+
+
+  ldap:
+    # ---------------------------------------------------------------------
+    # LDAP
+    install_ldap: false
+    # ldap domain
+    ldap_domain: ibm.com
+    # ldap base
+    ldap_base: dc=ibm,dc=com
+    # LDAP Admin Password (OVERRIDES GLOBAL PASSWORD)
+    #ldap_admin_password: CHANGEME
+    # LDAP Password for all Users (OVERRIDES GLOBAL PASSWORD)
+    #ldap_user_password: CHANGEME
+    # ldap namespace
+    ldap_namespace: openldap
+
+
+  additional:
+    # ---------------------------------------------------------------------
+    # MISC PARAMETERS (you should not modify those)
+
+    create_cards: false
+
+    # Create external routes (needed to create demo content)
+    create_external_routes: false
+
+    # Create a valid ingress certificate (needed for Slack integration)
+    create_valid_ingress_certificate: false
+
+    # Create Policy for Story Creation
+    create_incident_policy: false
+
+    # Create Kafka connection for Log inception (needed to create log anomalies in the demo environment)
+    create_log_connection: false
+
+    # Create Service Account
+    create_account: false
+

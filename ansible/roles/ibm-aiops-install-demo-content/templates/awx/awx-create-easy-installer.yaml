@@ -1,0 +1,72 @@
+apiVersion: v1                     
+kind: Namespace
+metadata:
+  name: ibm-aiops-installer
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: ibm-aiops-installer-admin
+  namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: ibm-aiops-installer-admin
+    namespace: ibm-aiops-installer
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-aiops-installer-default-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: ibm-aiops-installer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibm-aiops-installer
+  namespace: default
+  labels:
+      app: ibm-aiops-installer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ibm-aiops-installer
+  template:
+    metadata:
+      labels:
+        app: ibm-aiops-installer
+    spec:
+      serviceAccountName: ibm-aiops-installer-admin
+      containers:
+      - image: quay.io/niklaushirt/ibm-aiops-installer:2.0
+        imagePullPolicy: Always
+        name: installer
+        command:
+        ports:
+        - containerPort: 22
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "50Mi"
+          limits:
+            cpu: "250m"
+            memory: "250Mi"
+        env:
+          - name: INSTALL_REPO
+            value : "https://github.com/niklaushirt/aiops-install-awx-33.git"

@@ -1,0 +1,36 @@
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: demo-inception-job
+  namespace: ibm-aiops-installer
+spec:
+  serviceAccountName: demo-admin
+  template:
+    spec:
+      containers:
+        - name: load
+          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "150m"
+            limits:
+              memory: "2024Mi"
+              cpu: "1200m"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              set -x
+
+              export GIT_REPO=https://github.com/niklaushirt/ibm-aiops-trainingdata.git
+              git clone $GIT_REPO
+              cd ibm-aiops-trainingdata
+              ./tools/01_demo/robotshop_incident_memory.sh
+              sleep 6000000
+      restartPolicy: Never
+
+  backoffLimit: 500

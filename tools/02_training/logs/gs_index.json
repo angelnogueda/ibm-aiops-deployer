@@ -1,0 +1,28 @@
+{
+	"_index": "1000-1000-la_golden_signals-models",
+	"_type": "_doc",
+	"_id": "la_golden_signals_enabled_flag",
+	"_version": 18,
+	"_seq_no": 18,
+	"_primary_term": 1,
+	"found": true,
+	"_source": {
+		"enabled": true,
+		"utc_timestamp": "2023-10-19T12:40:00.355Z",
+		"es_doc_type": "la_golden_signals_enabled"
+	}
+}
+{
+	"_index": "1000-1000-la_golden_signals-models",
+	"_type": "_doc",
+	"_id": "mad_inference_enabled_flag",
+	"_version": 1,
+	"_seq_no": 11,
+	"_primary_term": 1,
+	"found": true,
+	"_source": {
+		"enabled": true,
+		"utc_timestamp": "2023-10-19T14:56:51.384Z",
+		"es_doc_type": "mad_inference_enabled"
+	}
+}

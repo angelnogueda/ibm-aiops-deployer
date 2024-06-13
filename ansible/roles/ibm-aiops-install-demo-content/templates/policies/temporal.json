@@ -1,0 +1,60 @@
+{
+  "state": "enabled",
+  "executionPriority": 50,
+  "metadata": {
+    "name": "Database not responding ",
+    "createdBy": {
+      "id": "demo",
+      "type": "user"
+    },
+    "lastUpdatedBy": {
+      "id": "demo",
+      "type": "user",
+      "changeDetails": "Policy deployed and enabled"
+    }
+  },
+  "spec": {
+    "trigger": {
+      "entityId": "alert",
+      "triggerId": "aiops.ibm.com/trigger/alert-pre-create"
+    },
+    "actions": [
+      {
+        "actionId": "aiops.ibm.com/action/internal/conditional",
+        "arguments": {
+          "condition": " {{ alert.signature }} == \"{application=robot-shop, name=mysql-db, sourceId=database, type=host}-Instana Issue-\" or  {{ alert.signature }} == \"{application=robot-shop, name=mysql-db, sourceId=database, type=host}-Github Commit-\" or  {{ alert.signature }} == \"{accessScope=default, application=robot-shop, buildName=robot-shop-build-main-#11356, buildUrl=https://pirsoscom.github.io/JENKINS_PIPELINE_RUN.html, buildVars=none, event=success, name=mysql, projectName=test job, service=robot-shop, sourceId=database, type=database}-CI/CD Build-\" or  {{ alert.signature }} == \"{accessScope=default, application=robot-shop, interface=DSwitch 1-VM Network Port 1, ipAddress=9.123.123.1, location=Dallas 10, name=mysql-db, service=robot-shop, sourceId=database, type=host}-Security Change-> 30 seconds\" or  {{ alert.signature }} == \"{application=robot-shop, name=ratings-predictive, sourceId=kubernetes, type=host}-Instana Issue-\" or  {{ alert.signature }} == \"{accessScope=default, application=robot-shop, interface=DSwitch 1-VM Network Port 1, ipAddress=9.123.123.1, location=Dallas 10, name=mysql-db, service=robot-shop, sourceId=database, type=host}-Instana Change-\" or  {{ alert.signature }} == \"{accessScope=default, application=robot-shop, interface=DSwitch 1-VM Network Port 1, ipAddress=9.123.123.1, location=Dallas 10, name=DCW1-000484, service=robot-shop, sourceId=vm, type=host}-VM - RESIZE-\" or  {{ alert.signature }} == \"{accessScope=default, application=robot-shop, interface=eth0, ipAddress=9.123.123.1, location=Dallas 10, name=ratings-log, service=robot-shop, sourceId=kubernetes, type=host}-Log Event-\" or  {{ alert.signature }} == \"{application=robot-shop, name=ratings, sourceId=kubernetes, type=host}-Instana Incident-\" or  {{ alert.signature }} == \"{accessScope=default, app_name=robot-shop, application=robot-shop, buildName=robot-shop-build-main-#11356, buildVars=none, context=continuous-delivery/robot-shop, description=ArgoCD, errormessage=none, event=running, name=robot-shop, operationState=running, projectName=robot-shop, repo=robot-shop, service=robot-shop, sourceId=database, status=running, type=database, url=/applications/robot-shop}-CI/CD Deploy-\" or  {{ alert.signature }} == \"{accessScope=default, application=robot-shop, cluster=selenium.grid, component=selenium.grid, controller=selenium, hostname=selenium.grid.ibm.com, interface=eth0, ipAddress=9.123.123.1, location=NewYork 1, name=web, port=8080, service=robot-shop, sourceId=kubernetes, type=host}-Functional Test-> 30 seconds\"",
+          "then": [
+            {
+              "actionId": "aiops.ibm.com/action/internal/insights/correlate",
+              "output": "alert.insights.[]",
+              "arguments": {
+                "entity": {
+                  "$variable": "alert"
+                },
+                "correlationKey": {
+                  "$variable": "policy.id"
+                },
+                "relationshipType": "aiops.ibm.com/insight-type/relationship/causal",
+                "relationshipSource": {
+                  "$variable": "policy.metadata.labels.[ibm.com/aiops/alert-relationship-source]"
+                },
+                "window": {
+                  "type": "fixed",
+                  "durationMS": 3197000
+                },
+                "relationshipDetails": {
+                  "groupId": {
+                    "$variable": "policy.metadata.labels.[ibm.com/aiops/alert-relationship-sources/temporal/group-id]"
+                  },
+                  "policyId": {
+                    "$variable": "policy.id"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

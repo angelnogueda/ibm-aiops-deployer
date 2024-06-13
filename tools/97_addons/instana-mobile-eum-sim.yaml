@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: instana-mobile-eum-sim
+  namespace: robot-shop
+  labels:
+    app: mobile-simulator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mobile-simulator
+  template:
+    metadata:
+      labels:
+        app: mobile-simulator
+    spec:
+      containers:
+      - name: mobile-simulator
+        image: docker.io/niklaushirt/eum-sim-mobile:1.0
+        imagePullPolicy: Always
+        env:
+          - name: INSTANA_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+          - name: REPORT_ENV
+            value: demoeu
+          - name: APIURL
+            value: https://dev-aiops.apps.CHANGEME.cloud.techzone.ibm.com
+          - name: APITOKEN
+            value: CHANGEME
+          - name: REPORTINGURL
+            value: https://eum.apps.CHANGEME.cloud.techzone.ibm.com/mobile
+          - name: REPORTINGKEY
+            value: CHANGEME
+        resources:
+          limits:
+            cpu: 200m
+            memory: 300Mi
+          requests:
+            cpu: 50m
+            memory: 100Mi

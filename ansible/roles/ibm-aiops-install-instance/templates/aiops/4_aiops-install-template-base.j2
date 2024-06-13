@@ -1,0 +1,27 @@
+apiVersion: orchestrator.aiops.ibm.com/v1alpha1
+kind: Installation
+metadata:
+  name: {{ current_ibmaiops_feature.aiops_name }}
+  namespace: {{ current_ibmaiops_cluster.project }}
+spec:
+  imagePullSecret: ibm-entitlement-key
+  license:
+    accept: true
+  enableConnectionModule: true
+  pakModules:
+    - enabled: true
+      name: aiManager
+    - enabled: true
+      name: aiopsFoundation
+    - enabled: true
+      name: applicationManager
+    - enabled: true
+      name: connection
+    - enabled: false
+      name: logAnomalyDetection
+    - enabled: '{{ current_ibmaiops_feature.topologyModel | default("application") }}'
+      name: topologyModel
+  size: {{ current_ibmaiops_feature.aiops_size }}
+  storageClass: '{{ AIOPS_STORAGE_CLASS_FILE }}'
+  storageClassLargeBlock: '{{ AIOPS_STORAGE_CLASS_LARGE_BLOCK }}'
+  #resourceOverrides: aiops-custom-size-profile

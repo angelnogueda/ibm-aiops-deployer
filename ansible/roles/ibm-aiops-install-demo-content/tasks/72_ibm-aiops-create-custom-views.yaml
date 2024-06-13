@@ -1,0 +1,77 @@
+# https://www.ibm.com/docs/en/netcoolomnibus/8?topic=aiops-deploying-generic-webhook-probe
+
+- name: 🛰️  START - CREATE CUSTOM VIEWS
+  debug: 
+    msg="{{ lookup('pipe','date +%d.%m.%Y---%H:%M:%S') }}"
+
+
+
+- name: Log
+  shell: |
+    export MESSAGE="Create Custom Views"
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "$MESSAGE  >> ../install_{{current_ibmaiops_feature.kind}}.log
+  ignore_errors: true
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ffd500'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - Create Custom Views'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+
+
+
+
+
+
+
+- name: 🚀 Create Custom View - DEMO Incidents View
+  shell: |
+    set -x
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+    export CONSOLE_ROUTE=$(oc get route -n $AIOPS_NAMESPACE cp-console  -o jsonpath={.spec.host})          
+    export CPD_ROUTE=$(oc get route -n $AIOPS_NAMESPACE cpd  -o jsonpath={.spec.host})          
+    export CPADMIN_PWD=$(oc -n $AIOPS_NAMESPACE get secret platform-auth-idp-credentials -o jsonpath='{.data.admin_password}' | base64 -d && echo)
+    export CPADMIN_USER=$(oc -n $AIOPS_NAMESPACE get secret platform-auth-idp-credentials -o jsonpath='{.data.admin_username}' | base64 -d && echo)
+    export ACCESS_TOKEN=$(curl -s -k -H "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" -d "grant_type=password&username=$CPADMIN_USER&password=$CPADMIN_PWD&scope=openid" https://$CONSOLE_ROUTE/idprovider/v1/auth/identitytoken|jq -r '.access_token')
+    export ZEN_API_HOST=$(oc get route -n $AIOPS_NAMESPACE cpd -o jsonpath='{.spec.host}')
+    export ZEN_TOKEN=$(curl -k -XGET https://$ZEN_API_HOST/v1/preauth/validateAuth \
+    -H "username: $CPADMIN_USER" \
+    -H "iam-token: $ACCESS_TOKEN"|jq -r '.accessToken')
+    echo $ZEN_TOKEN
+
+    export ROUTE=$(oc get route -n $AIOPS_NAMESPACE cpd -o jsonpath={.spec.host})
+
+    curl https://$ROUTE/api/p/hdm_ea_uiapi \
+      -H 'content-type: application/json' \
+      -H 'accept: */*' \
+        -H 'content-type: application/json' \
+        -H "Cookie: ___tk67142224=1655282500640; ibm-private-cloud-session=$ZEN_TOKEN" \
+      --data-raw $'{"variables":{"tenantId":"cfd95b7e-3bc7-4006-a4a8-a73a79c71255","viewInput":{"type":"alert","name":"DEMO Incidents View","description":"Default view for alerts in incidents","tags":[],"accessControlList":{"admin":{"users":["demo"],"teams":[]},"write":{"users":[],"teams":[]},"read":{"users":[],"teams":[]}},"columns":[{"columnWidth":4,"dataJustify":"center","fieldName":"severity","fieldTitle":"Sev","fieldType":"integer","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"center","titleText":"Sev","titleType":"String","hidden":false},{"columnWidth":5,"dataJustify":"left","fieldName":"@insights.type=\'aiops.ibm.com/insight-type/probable-cause\'","fieldTitle":"Ranking","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"left","titleText":"Ranking","titleType":"String","hidden":false},{"columnWidth":4,"dataJustify":"center","fieldName":"state","fieldTitle":"State","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"center","titleText":"State","titleType":"String","hidden":false},{"columnWidth":35,"dataJustify":"left","fieldName":"summary","fieldTitle":"Summary","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"left","titleText":"Summary","titleType":"String","hidden":false},{"columnWidth":8,"dataJustify":"left","fieldName":"type.classification","fieldTitle":"Event type","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"left","titleText":"Event type","titleType":"String","hidden":false},{"columnWidth":10,"dataJustify":"left","fieldName":"sender.name","fieldTitle":"Sender","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"left","titleText":"Sender","titleType":"String","hidden":false},{"columnWidth":13,"dataJustify":"left","fieldName":"resource.name","fieldTitle":"Resource","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"left","titleText":"Resource","titleType":"String","hidden":false},{"fieldName":"links","fieldTitle":"Links","fieldType":"string","titleText":"Links","titleType":"String","titleJustify":"left","dataJustify":"left","columnWidth":10,"frozen":false,"html":false,"isLink":true,"specificLinks":"","hidden":false},{"columnWidth":13,"dataJustify":"left","fieldName":"firstOccurrenceTime","fieldTitle":"First occurrence","fieldType":"date-time","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"left","titleText":"First occurrence","titleType":"String","hidden":false},{"columnWidth":13,"dataJustify":"left","fieldName":"lastOccurrenceTime","fieldTitle":"Last occurrence","fieldType":"date-time","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"left","titleText":"Last occurrence","titleType":"String","hidden":false},{"columnWidth":8,"dataJustify":"left","fieldName":"@insights.type=\'aiops.ibm.com/insight-type/business/criticality\'","fieldTitle":"Business criticality","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"left","titleText":"Business criticality","titleType":"Icon","hidden":false},{"columnWidth":4,"dataJustify":"center","fieldName":"@insights.type=\'aiops.ibm.com/insight-type/runbook\'","fieldTitle":"Runbooks","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"center","titleText":"Runbooks","titleType":"Icon","hidden":false},{"columnWidth":4,"dataJustify":"center","fieldName":"@insights.type=\'aiops.ibm.com/insight-type/topology/resource\'","fieldTitle":"Topology","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"center","titleText":"Topology","titleType":"Icon","hidden":false},{"columnWidth":4,"dataJustify":"center","fieldName":"@insights.type=\'aiops.ibm.com/insight-type/seasonal-occurrence\'","fieldTitle":"Seasonal","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"center","titleText":"Seasonal","titleType":"Icon","hidden":false},{"columnWidth":8,"dataJustify":"center","fieldName":"@insights.type=\'aiops.ibm.com/insight-type/lad/resolutions\'","fieldTitle":"Resolutions","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"center","titleText":"Resolutions","titleType":"Icon","hidden":true},{"columnWidth":6,"dataJustify":"center","fieldName":"@insights.type=\'aiops.ibm.com/insight-type/lad/templates\'","fieldTitle":"Templates","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"center","titleText":"Templates","titleType":"Icon","hidden":true},{"columnWidth":10,"dataJustify":"left","fieldName":"relatedStoryIds","fieldTitle":"RelatedStoryIds","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"left","titleText":"RelatedStoryIds","titleType":"String","hidden":false},{"columnWidth":4,"dataJustify":"center","fieldName":"suppressed","fieldTitle":"Suppressed","fieldType":"boolean","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"center","titleText":"","titleType":"String","hidden":false},{"columnWidth":5,"dataJustify":"center","fieldName":"@insights.type=\'aiops.ibm.com/insight-type/anomaly\'","fieldTitle":"Anomaly insights","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"center","titleText":"Anomaly insights","titleType":"String","hidden":true},{"columnWidth":4,"dataJustify":"center","fieldName":"@insights.type=\'aiops.ibm.com/insight-type/incidentcontrol\'","fieldTitle":"Incident control","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"center","titleText":"Incident control","titleType":"String","hidden":true},{"columnWidth":4,"dataJustify":"center","fieldName":"@insights.type=\'aiops.ibm.com/insight-type/relationship/causal\' and insights.source=\'aiops.ibm.com/insight-source/relationship/causal/topological-group\'","fieldTitle":"Sub-Topology group","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"center","titleText":"Sub-Topology group","titleType":"String","hidden":true},{"columnWidth":4,"dataJustify":"center","fieldName":"@insights.type=\'aiops.ibm.com/insight-type/relationship/causal\' and insights.source=\'aiops.ibm.com/insight-source/relationship/causal/custom\'","fieldTitle":"Scope group","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"center","titleText":"Scope group","titleType":"String","hidden":true},{"columnWidth":4,"dataJustify":"center","fieldName":"@insights.type=\'aiops.ibm.com/insight-type/relationship/causal\' and insights.source=\'aiops.ibm.com/insight-source/relationship/causal/temporal\'","fieldTitle":"Temporal","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"center","titleText":"Temporal","titleType":"String","hidden":true},{"columnWidth":8,"dataJustify":"left","fieldName":"owner","fieldTitle":"Owner","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"left","titleText":"","titleType":"String","hidden":true},{"columnWidth":13,"dataJustify":"left","fieldName":"@insights.type=\'aiops.ibm.com/insight-type/golden-signal\'","fieldTitle":"Golden signal","fieldType":"string","frozen":false,"html":false,"isLink":false,"specificLinks":"","titleJustify":"left","titleText":"Golden signal","titleType":"String","hidden":false}],"sortColumns":[{"fieldName":"lastOccurrenceTime","order":"desc"}],"metadata":{"createdBy":"demo"},"viewName":"Default Incidents View"}},"query":"mutation ($tenantId: ID\u0021, $viewInput: JSON\u0021) {\\n  createView(tenantId: $tenantId, viewInput: $viewInput)\\n}"}' \
+      --compressed
+
+
+  register: output_string
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+- name: 🟣  OUTPUT
+  debug:
+    var: output_string.stdout_lines
+    verbosity: 1
+
+

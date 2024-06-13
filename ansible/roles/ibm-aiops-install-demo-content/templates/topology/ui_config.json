@@ -1,0 +1,209 @@
+[{
+      "name": "AddEdgeProperty",
+      "itemType": "Relationship",
+      "description": "A tool to add an edge property via prompts",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": 2,
+      "validForTypes": [
+         "*"
+      ],
+      "script": "var name = prompt(\"property name\", \"name\");\nvar value = prompt(\"property value\", \"value\");\nvar options = {\n    method: 'POST',\n    headers: {\n        \"X-TenantID\": \"cfd95b7e-3bc7-4006-a4a8-a73a79c71255\",\n        \"Authorization\": \"Basic MY_TOKEN\",\n        \"Content-type\": \"application/json\"\n    },\n    body: '{ \"' + name + '\": \"' + value + '\"}',\n    onSuccess: _onSuccess,\n    onError: _onError\n};\nasmFunctions.sendHttpRequest('https://MY_TOPO_URL/1.0/topology/resources/' + asmProperties._fromId + '/references/out/' + asmProperties._edgeType + '/' + asmProperties._toId, options);\n\nfunction _onSuccess(response, status, headers) {\n  asmFunctions.showToasterMessage(\"normal\", \"Resource updated.\")\n}\nfunction _onError(response, status, headers) {\n  var msg = JSON.parse(response);\n  asmFunctions.showToasterMessage(\"critical\", msg._error.description );\n}",
+      "menuLabel": "Add Vertex Property",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ],
+      "databaseSource": "metadata"
+   },
+   {
+      "name": "AddVertexProperty",
+      "itemType": "Resource",
+      "description": "A tool to add a vertex property via prompts",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": 2,
+      "validForTypes": [
+         "*"
+      ],
+      "script": "var name = prompt(\"property name\", \"name\");\nvar value = prompt(\"property value\", \"value\");\nvar options = {\n    method: 'POST',\n    headers: {\n        \"X-TenantID\": \"cfd95b7e-3bc7-4006-a4a8-a73a79c71255\",\n        \"Authorization\": \"Basic MY_TOKEN\",\n        \"Content-type\": \"application/json\"\n    },\n    body: '{ \"' + name + '\": \"' + value + '\"}',\n    onSuccess: _onSuccess,\n    onError: _onError\n};\nasmFunctions.sendHttpRequest('https://MY_TOPO_URL/1.0/topology/resources/' + asmProperties._id, options);\n\nfunction _onSuccess(response, status, headers) {\n  asmFunctions.showToasterMessage(\"normal\", \"Resource updated.\")\n}\n\nfunction _onError(response, status, headers) {\n  var msg = JSON.parse(response);\n  asmFunctions.showToasterMessage(\"critical\", msg._error.description );\n}",
+      "menuLabel": "Add Vertex Property",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ],
+      "databaseSource": "metadata"
+   },
+   {
+      "name": "DeleteVertex",
+      "itemType": "Resource",
+      "description": "Delete a vertex from the topology service",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": 2,
+      "validForTypes": [
+         "*"
+      ],
+      "script": "var options = {\n    method: 'DELETE',\n    headers: {\n        \"X-TenantID\": \"cfd95b7e-3bc7-4006-a4a8-a73a79c71255\",\n        \"Authorization\": \"Basic MY_TOKEN\",\n        \"Content-type\": \"application/json\"\n    },\n    onSuccess: _onSuccess,\n    onError: _onError\n};\nasmFunctions.sendHttpRequest('https://MY_TOPO_URL/1.0/topology/resources/' + asmProperties._id, options);\n\nfunction _onSuccess(response, status, headers) {\n  asmFunctions.showToasterMessage(\"Information\", \"Resource '\" + asmProperties.name + \"' deleted.\")\n}\n\nfunction _onError(response, status, headers) {\n  var msg = JSON.parse(response);\n  asmFunctions.showToasterMessage(\"critical\", msg._error.description );\n}",
+      "menuLabel": "Delete Vertex",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ],
+      "databaseSource": "metadata"
+   },
+   {
+      "name": "AddVertex",
+      "itemType": "Resource",
+      "description": "Add a vertex to the topology service, and a reference to the selected vertex",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": 2,
+      "validForTypes": [
+         "*"
+      ],
+      "script": "var name = prompt(\"Name\", \"name\");\nvar type = prompt(\"Type\", \"host\");\nvar edgeType = prompt(\"Edge type\", \"connectedTo\");\nvar toOrFrom = prompt(\"Edge 'to' or 'from' the selected node?\", \"to\");\nvar options = {\n    method: 'POST',\n    headers: {\n        \"X-TenantID\": \"cfd95b7e-3bc7-4006-a4a8-a73a79c71255\",\n        \"Authorization\": \"Basic MY_TOKEN\",\n        \"Content-type\": \"application/json\"\n    },\n    body: '{ \"name\":\"' + name + '\", \"entityTypes\": [\"' + type + '\"], \"_references\":[{\"_' + toOrFrom + 'Id\": \"' + asmProperties._id +'\",\"_edgeType\": \"' + edgeType + '\"}]}',\n    onSuccess: _onSuccess,\n    onError: _onError\n};\nasmFunctions.sendHttpRequest('https://MY_TOPO_URL/1.0/topology/resources', options);\n\n\nfunction _onSuccess(response, status, headers) {\n    asmFunctions.showToasterMessage('information', status + ': Created resource ' + headers.entityid);\n}\nfunction _onError(response, status, headers) {\n  var msg = JSON.parse(response);\n  asmFunctions.showToasterMessage(\"critical\", msg._error.description );\n}",
+      "menuLabel": "Add Vertex",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ],
+      "databaseSource": "metadata"
+   },
+   {
+      "name": "Portainer",
+      "itemType": "Resource",
+      "description": "Launch Portainer in an iFrame for docker resources",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": "5",
+      "validForTypes": [
+         "image",
+         "network"
+      ],
+      "script": "var portainerUrl = \"http://MY_TOPO_URL:9000/#/\";\nwindow.open(portainerUrl + asmProperties.entityTypes[0] + \"s/\" + asmProperties.dockerId + \"/\", \"portainer\", \"width=1200,height=800\");",
+      "menuLabel": "Portainer",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "name": "PortainerConsole",
+      "itemType": "Resource",
+      "description": "Launch console via portainer",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": "5",
+      "validForTypes": [
+         "container"
+      ],
+      "script": "var portainerUrl = \"http://MY_TOPO_URL:9000/#/\";\nwindow.open(portainerUrl + asmProperties.entityTypes[0] + \"s/\" + asmProperties.dockerId + \"/console\", \"portainer\", \"width=1200,height=800\");",
+      "menuLabel": "Launch Console",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "name": "PortainerContainerStats",
+      "itemType": "Resource",
+      "description": "show container stats",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": "5",
+      "validForTypes": [
+         "container"
+      ],
+      "script": "var portainerUrl = \"http://MY_TOPO_URL:9000/#/\";\nwindow.open(portainerUrl + asmProperties.entityTypes[0] + \"s/\" + asmProperties.dockerId + \"/stats\", \"portainer\", \"width=1200,height=800\");",
+      "menuLabel": "Portainer Stats",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "name": "PortainerSwarmNode",
+      "itemType": "Resource",
+      "description": "launch node ui in portainer for a docker-engine",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": "5",
+      "validForTypes": [
+         "application"
+      ],
+      "script": "var portainerUrl = \"http://MY_TOPO_URL:9000/#/\";\nwindow.open(portainerUrl + \"nodes/\" + asmProperties.uniqueId + \"/\", \"portainer\", \"width=1200,height=800\");",
+      "menuLabel": "Portainer",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "name": "PortainerService",
+      "itemType": "Resource",
+      "description": "Launch portainer UI for service",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": "5",
+      "validForTypes": [
+         "service"
+      ],
+      "script": "var portainerUrl = \"http://MY_TOPO_URL:9000/#/\";\nwindow.open(portainerUrl + asmProperties.entityTypes[0] + \"/\" + asmProperties.dockerId + \"/\", \"portainer\", \"width=1200,height=800\");",
+      "menuLabel": "Portainer",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "name": "PortainerContainerVolumes",
+      "itemType": "Resource",
+      "description": "Portainer tool for containers and volumes",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": "5",
+      "validForTypes": [
+         "container",
+         "volume"
+      ],
+      "script": "var portainerUrl = \"http://MY_TOPO_URL:9000/#/\";\nwindow.open(portainerUrl + asmProperties.entityTypes[0] + \"s/\" + asmProperties.dockerId, \"portainer\", \"width=1200,height=800\");",
+      "menuLabel": "Portainer",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "name": "PortainerTask",
+      "itemType": "Both",
+      "description": "Launch UI for docker tasks",
+      "entityTypes": [
+         "ASM_UI_TOPOLOGY_TOOL"
+      ],
+      "priority": "5",
+      "validForTypes": [
+         "task"
+      ],
+      "script": "var portainerUrl = \"http://MY_TOPO_URL:9000/#/\";\nwindow.open(portainerUrl + asmProperties.entityTypes[0] + \"/\" + asmProperties.dockerId, \"portainer\", \"width=1200,height=800\");",
+      "menuLabel": "Portainer",
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   },
+   {
+      "entityTypes": [
+         "ASM_UI_GLOBAL_SETTINGS"
+      ],
+      "uniqueId": "globalSettings",
+      "trustedSites": [
+         "asm-develop-svt.fyre.ibm.com",
+         "MY_TOPO_URL"
+      ],
+      "tags": [
+         "ASM_UI_CONFIG"
+      ]
+   }
+
+  
+]

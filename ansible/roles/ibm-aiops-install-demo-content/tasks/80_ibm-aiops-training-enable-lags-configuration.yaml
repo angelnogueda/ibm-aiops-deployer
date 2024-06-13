@@ -1,0 +1,147 @@
+
+
+
+- name: 🛰️  START - ENABLE LOG GOLDEN SIGNALS ANALYSIS
+  debug: 
+    msg="{{ lookup('pipe','date +%d.%m.%Y---%H:%M:%S') }}"
+
+
+
+
+- name: Log
+  shell: |
+    export MESSAGE="Enable LAGS Training Definition"
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "$MESSAGE  >> ../install_{{current_ibmaiops_feature.kind}}.log
+  ignore_errors: true
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ffd500'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - Enable LAGS Training Definition'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+
+
+- name: 🚀 TRAINING ENABLE LAGS - REIMPORT LAGS DATA
+  shell: |
+    set -x
+    export ROUTE=""
+    pwd
+
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+    echo "       ✅ OK - IBMAIOps:    $AIOPS_NAMESPACE"
+
+    echo "***************************************************************************************************************************************************"
+    echo "   🛠️   RE-START - LOAD LOG TRAINING DATA"
+    oc delete pod -n ibm-aiops-installer --ignore-not-found $(oc get po -n ibm-aiops-installer|grep load-lags-indexes|awk '{print$1}')
+
+  register: output_string
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+    
+- name: 🟣 TRAINING CREATE LAGS - RESULT
+  debug: 
+    var: output_string.stdout_lines
+    #verbosity: 1
+
+- name: 🚀 PATCH LAGS - RESET LAGS POD
+  shell: |
+    set -x
+    export ROUTE=""
+    pwd
+
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+    echo "       ✅ OK - IBMAIOps:    $AIOPS_NAMESPACE"
+
+    echo "***************************************************************************************************************************************************"
+    echo "   🛠️   Waiting for LAGS data load to complete"
+    while [ `oc get po -n ibm-aiops-installer|grep Completed| grep -c ""` -lt 1 ]
+    do
+      echo "       ⏳ Waiting for data load"
+      sleep 15
+    done
+
+
+    echo "***************************************************************************************************************************************************"
+    echo "   🛠️   CONFIG - LAGS POD"
+    oc set env deploy -n $AIOPS_NAMESPACE aimanager-aio-log-anomaly-golden-signals --overwrite BUCKET_SIZE_IN_MILLIS="3600000" 
+    oc set env deploy -n $AIOPS_NAMESPACE aimanager-aio-log-anomaly-golden-signals --overwrite HISTORIC_START_TIMESTAMP-
+    oc set env deploy -n $AIOPS_NAMESPACE aimanager-aio-log-anomaly-golden-signals --overwrite HISTORIC_TIME_RANGE-
+
+    echo "***************************************************************************************************************************************************"
+    echo "   🛠️   RESTART - LAGS POD"
+    oc delete pod -n $AIOPS_NAMESPACE --ignore-not-found $(oc get po -n $AIOPS_NAMESPACE|grep golden-signals|awk '{print$1}')
+
+
+
+    echo "***************************************************************************************************************************************************"
+    echo "   🛠️   RESTART - LOG INJECTION POD"
+    oc delete pod -n $AIOPS_NAMESPACE-demo-ui --ignore-not-found $(oc get po -n $AIOPS_NAMESPACE-demo-ui|grep ibm-aiops-stream-lags-normal|awk '{print$1}')
+
+
+
+    echo "  ***************************************************************************************************************************************************"
+    echo "   🛠️   RERUN - MetricAnomaly"
+    export FILE_NAME=run-analysis-METRIC.graphql
+    export FILE_PATH="{{role_path}}/templates/training/training-definitions/"
+    {{role_path}}/templates/training/scripts/execute-graphql.sh
+
+
+  register: output_string
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+    
+- name: 🟣 TRAINING CREATE LAGS - RESULT
+  debug: 
+    var: output_string.stdout_lines
+    #verbosity: 1
+
+
+
+# - name: 🚀 TRAINING ENABLE LAGS - RESET LAGS POD
+#   shell: |
+#     set -x
+#     export ROUTE=""
+#     pwd
+
+#     export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+#     echo "       ✅ OK - IBMAIOps:    $AIOPS_NAMESPACE"
+
+#     echo "***************************************************************************************************************************************************"
+#     echo "   🛠️   Waiting for LAGS data load to complete"
+#     while [ `oc get po -n ibm-aiops-installer|grep Completed| grep -c ""` -lt 1 ]
+#     do
+#       echo "       ⏳ Waiting for data load"
+#       sleep 15
+#     done
+
+
+#     echo "***************************************************************************************************************************************************"
+#     echo "   🛠️   RESTART - LAGS POD"
+#     oc delete pod -n $AIOPS_NAMESPACE --ignore-not-found $(oc get po -n $AIOPS_NAMESPACE|grep golden-signals|awk '{print$1}')
+
+#   register: output_string
+#   ignore_errors: true
+#   args:
+#     executable: /bin/bash
+    
+# - name: 🟣 TRAINING CREATE LAGS - RESULT
+#   debug: 
+#     var: output_string.stdout_lines
+#     #verbosity: 1
+

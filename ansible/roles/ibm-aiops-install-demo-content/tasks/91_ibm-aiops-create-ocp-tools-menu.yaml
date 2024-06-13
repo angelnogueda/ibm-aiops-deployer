@@ -1,0 +1,215 @@
+
+
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Patching some stuff
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+    
+
+- name: 🛰️  START - OCP CONSOLE
+  debug: 
+    msg="{{ lookup('pipe','date +%d.%m.%Y---%H:%M:%S') }}"
+
+
+- name: Log
+  shell: |
+    export MESSAGE="Create Openshift WebConsole Menu Item"
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "$MESSAGE  >> ../install_{{current_ibmaiops_feature.kind}}.log
+  ignore_errors: true
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ffd500'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - Create Openshift WebConsole Menu Item'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+   
+
+
+
+
+- name: 🌏 OCP CONSOLE - Create Openshift WebConsole Menu Item - RobotShop
+  shell: |
+    appURL=$(oc get routes -n robot-shop robotshop  -o jsonpath="{['spec']['host']}")|| true
+
+    cat <<EOF | oc apply -f -
+      apiVersion: console.openshift.io/v1
+      kind: ConsoleLink
+      metadata:
+        name: ibm-aiops-robotshop
+      spec:
+        applicationMenu:
+          imageURL: >-
+            https://raw.githubusercontent.com/niklaushirt/ibm-aiops-deployer/main/doc/pics/icons/stan1.svg
+          section: IBM AIOps Demo
+        href: >-
+          https://$appURL
+        location: ApplicationMenu
+        text: RobotShop Demo App
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+
+
+
+- name: 🌏 OCP CONSOLE - Create Openshift WebConsole Menu Item - SockShop
+  shell: |
+    appURL=$(oc get routes -n sock-shop front-end  -o jsonpath="{['spec']['host']}")|| true
+
+    cat <<EOF | oc apply -f -
+      apiVersion: console.openshift.io/v1
+      kind: ConsoleLink
+      metadata:
+        name: ibm-aiops-sockshop
+      spec:
+        applicationMenu:
+          imageURL: >-
+            https://raw.githubusercontent.com/niklaushirt/ibm-aiops-deployer/main/doc/pics/icons/ibm-cloud-pak--business-automation-white.svg
+          section: IBM AIOps Demo
+        href: >-
+          https://$appURL
+        location: ApplicationMenu
+        text: SockShop Demo App
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+
+
+- name: 🌏 OCP CONSOLE - Create Openshift WebConsole Menu Item - AWX
+  shell: |
+    appURL=$(oc get route -n awx awx -o jsonpath={.spec.host})|| true
+
+    cat <<EOF | oc apply -f -
+      apiVersion: console.openshift.io/v1
+      kind: ConsoleLink
+      metadata:
+        name: ibm-aiops-awx
+      spec:
+        applicationMenu:
+          imageURL: >-
+            https://raw.githubusercontent.com/niklaushirt/ibm-aiops-deployer/main/doc/pics/icons/ansible-icon-white.svg
+          section: IBM AIOps Addons
+        href: >-
+          https://$appURL
+        location: ApplicationMenu
+        text: AWX Runbooks
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+
+- name: 🌏 OCP CONSOLE - Create Openshift WebConsole Menu Item - LDAP
+  shell: |
+    appURL=$(oc get route -n openldap admin -o jsonpath={.spec.host})|| true
+
+    cat <<EOF | oc apply -f -
+      apiVersion: console.openshift.io/v1
+      kind: ConsoleLink
+      metadata:
+        name: ibm-aiops-ldap
+      spec:
+        applicationMenu:
+          imageURL: >-
+            https://raw.githubusercontent.com/niklaushirt/ibm-aiops-deployer/main/doc/pics/icons/ldap-icon-white.svg
+          section: IBM AIOps Addons
+        href: >-
+          https://$appURL
+        location: ApplicationMenu
+        text: Open LDAP
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+
+- name: 🌏 OCP CONSOLE - Create Openshift WebConsole Menu Item
+  shell: |
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+    appURL=$(oc get routes -n $AIOPS_NAMESPACE job-manager  -o jsonpath="{['spec']['host']}")|| true
+
+    cat <<EOF | oc apply -f -
+      apiVersion: console.openshift.io/v1
+      kind: ConsoleLink
+      metadata:
+        name: ibm-aiops-flink-connectors
+      spec:
+        applicationMenu:
+          imageURL: >-
+            https://raw.githubusercontent.com/niklaushirt/ibm-aiops-deployer/main/doc/pics/icons/3D-curve--auto-vessels-white.svg
+          section: IBM AIOps Tools
+        href: >-
+          https://$appURL
+        location: ApplicationMenu
+        text: IBM AIOps Flink Connectors
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+
+- name: 🌏 OCP CONSOLE - Create Openshift WebConsole Menu Item
+  shell: |
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+    appURL=$(oc get routes -n $AIOPS_NAMESPACE job-manager-policy  -o jsonpath="{['spec']['host']}")|| true
+
+    cat <<EOF | oc apply -f -
+      apiVersion: console.openshift.io/v1
+      kind: ConsoleLink
+      metadata:
+        name: ibm-aiops-flink-policy
+      spec:
+        applicationMenu:
+          imageURL: >-
+            https://raw.githubusercontent.com/niklaushirt/ibm-aiops-deployer/main/doc/pics/icons/3D-curve--auto-vessels-white.svg
+          section: IBM AIOps Tools
+        href: >-
+          https://$appURL
+        location: ApplicationMenu
+        text: IBM AIOps Flink Policies
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+- name: 🌏 OCP CONSOLE - Create Openshift WebConsole Menu Item
+  shell: |
+    export AIOPS_NAMESPACE=$(oc get po -A|grep aiops-orchestrator-controller |awk '{print$1}')
+    appURL=$(oc get routes -n $AIOPS_NAMESPACE sparkadmin  -o jsonpath="{['spec']['host']}")|| true
+
+    cat <<EOF | oc apply -f -
+      apiVersion: console.openshift.io/v1
+      kind: ConsoleLink
+      metadata:
+        name: ibm-aiops-spark
+      spec:
+        applicationMenu:
+          imageURL: >-
+            https://raw.githubusercontent.com/niklaushirt/ibm-aiops-deployer/main/doc/pics/icons/3D-curve--auto-vessels-white.svg
+          section: IBM AIOps Tools
+        href: >-
+          https://$appURL
+        location: ApplicationMenu
+        text: IBM AIOps Spark
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash

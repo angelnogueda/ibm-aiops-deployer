@@ -1,0 +1,107 @@
+﻿apiVersion: console.openshift.io/v1
+kind: ConsoleQuickStart
+metadata:
+  creationTimestamp: '2023-06-01T06:29:13Z'
+  generation: 36
+  managedFields:
+    - apiVersion: console.openshift.io/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:spec':
+          .: {}
+          'f:conclusion': {}
+          'f:description': {}
+          'f:displayName': {}
+          'f:durationMinutes': {}
+          'f:icon': {}
+          'f:introduction': {}
+          'f:prerequisites': {}
+          'f:tasks': {}
+      manager: Mozilla
+      operation: Update
+      time: '2023-06-01T07:08:37Z'
+  name: ibm-aiops-configuration
+  resourceVersion: '668460'
+  uid: 67d91311-1e0f-45a1-a455-413f53eb2355
+spec:
+  conclusion: >-
+    You're ready to go! 
+
+
+    You can access your demo environment by clicking on the `DemoUI` Link in the
+    green Notification Bar.
+
+
+    Enjoy!!!
+  description: Learn how to install and access IBM AIOps Platform.
+  displayName: 111Install and access IBM AIOps Platform
+  durationMinutes: 5
+  icon: >-
+    data:image/svg+xml;base64,PHN2ZyBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCAxMDAgMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHdpZHRoPSIxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTY2LjcgNTUuOGM2LjYgMCAxNi4xLTEuNCAxNi4xLTkuMiAwLS42IDAtMS4yLS4yLTEuOGwtMy45LTE3Yy0uOS0zLjctMS43LTUuNC04LjMtOC43LTUuMS0yLjYtMTYuMi02LjktMTkuNS02LjktMy4xIDAtNCA0LTcuNiA0LTMuNSAwLTYuMS0yLjktOS40LTIuOS0zLjIgMC01LjIgMi4xLTYuOCA2LjYgMCAwLTQuNCAxMi41LTUgMTQuMy0uMS4zLS4xLjctLjEgMSAuMSA0LjcgMTkuMiAyMC42IDQ0LjcgMjAuNm0xNy4xLTZjLjkgNC4zLjkgNC44LjkgNS4zIDAgNy40LTguMyAxMS40LTE5LjEgMTEuNC0yNC42IDAtNDYuMS0xNC40LTQ2LjEtMjMuOSAwLTEuMy4zLTIuNi44LTMuOS04LjkuNS0yMC4zIDIuMS0yMC4zIDEyLjIgMCAxNi41IDM5LjIgMzYuOSA3MC4yIDM2LjkgMjMuOCAwIDI5LjgtMTAuNyAyOS44LTE5LjIgMC02LjctNS44LTE0LjMtMTYuMi0xOC44IiBmaWxsPSIjZWQxYzI0Ii8+PHBhdGggZD0ibTgzLjggNDkuOGMuOSA0LjMuOSA0LjguOSA1LjMgMCA3LjQtOC4zIDExLjQtMTkuMSAxMS40LTI0LjYgMC00Ni4xLTE0LjQtNDYuMS0yMy45IDAtMS4zLjMtMi42LjgtMy45bDEuOS00LjhjLS4xLjMtLjEuNy0uMSAxIDAgNC44IDE5LjEgMjAuNyA0NC43IDIwLjcgNi42IDAgMTYuMS0xLjQgMTYuMS05LjIgMC0uNiAwLTEuMi0uMi0xLjh6IiBmaWxsPSIjMDEwMTAxIi8+PC9zdmc+
+  introduction: >-
+    In this tour, you will learn how to deploy and access an IBM AIOps Demo
+    Environment.
+  prerequisites:
+    - >-
+      Get an Openshift Cluster from Techzone (IPI or UPI with ODF 5TB and 5x
+      32vCPU/128GB)
+      https://techzone.ibm.com/collection/tech-zone-certified-base-images 
+  tasks:
+    - description: >-
+        - Go to MyIBM by clicking
+        [**here**](https://myibm.ibm.com/products-services/containerlibrary)
+
+        - Save it somewhere safe
+      review:
+        failedTaskHelp: This task isn’t verified yet. Try the task again.
+        instructions: '####  Did you get your Entitlement Key?'
+      summary:
+        failed: Try the steps again.
+        success: You now have the Entitlement Key!
+      title: Get the Entitlement Key
+    - description: >-
+        - Create the Job by clicking
+        [**here**](/k8s/ns/ibm-common-services/jobs/~new)
+
+        - Copy and paste the YAML File from
+        [**here**](https://raw.githubusercontent.com/niklaushirt/ibm-aiops-deployer/main/Quick_Install/00_INSTALL_IBM_AIOPS.yaml)
+      review:
+        failedTaskHelp: This task isn’t verified yet. Try the task again.
+        instructions: '#### Do you have the Job YAML Code pasted in the ?'
+      summary:
+        failed: Try the steps again.
+        success: You are now ready to configure the Job!
+      title: Prepare the Installation Job
+    - description: >-
+        - Paste the Entitlement Key by replacing the `<REGISTRY_TOKEN>`
+        placeholder
+
+        - Click `Create`
+      review:
+        failedTaskHelp: This task isn’t verified yet. Try the task again.
+        instructions: >-
+          #### The OpenShift Console should say that the Job (and some other
+          Objects) have been successfully created.
+      summary:
+        failed: Try the steps again.
+        success: IBM AIOps is now installing!
+      title: Configure the Installation Job
+    - description: >-
+        - After a short while you should see a dark blue Notification Bar on top
+        of the OpenShift Console. 
+
+        - You can click on `OpenLogs` to follow the installation Process.
+
+        - It is also reflected by the Notification Bars at the bottom
+
+
+        `The complete installation takes about 1.5-2 hours`
+      review:
+        failedTaskHelp: This task isn’t verified yet. Try the task again.
+        instructions: >-
+          ####  Is the green Notification Bar visible at the top of the Console
+          ?
+      summary:
+        failed: Try the steps again.
+        success: You have successfully completed the Installation
+      title: Follow the Installation Progress

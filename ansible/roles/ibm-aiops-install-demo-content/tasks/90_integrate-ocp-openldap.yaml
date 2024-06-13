@@ -1,0 +1,112 @@
+
+
+# *************************************************************************************************************************************************
+# --------------------------------------------------------------------------------------------------------------------------------------
+# Integrate OpenShift Login with OpenLDAP
+# --------------------------------------------------------------------------------------------------------------------------------------
+# *************************************************************************************************************************************************
+#
+# oc delete identity --all
+# oc delete user --all  
+
+- name: 🛰️  START - OCP CONSOLE
+  debug: 
+    msg="{{ lookup('pipe','date +%d.%m.%Y---%H:%M:%S') }}"
+
+
+- name: Log
+  shell: |
+    export MESSAGE="Integrate OpenShift Login with OpenLDAP"
+    export currentDate=$(date +%Y-%m-%d_%H:%M)
+    echo "---------------------------------------------------------------------------------------------------------------------------------------------------" >> ../install_{{current_ibmaiops_feature.kind}}.log
+    echo $currentDate" - "$MESSAGE  >> ../install_{{current_ibmaiops_feature.kind}}.log
+  ignore_errors: true
+
+- name: 📣 OCP CONSOLE - Create Openshift NOTIFICATION
+  shell: |
+    cat <<EOF | oc apply -f -
+    apiVersion: console.openshift.io/v1
+    kind: ConsoleNotification
+    metadata:
+      name: ibm-aiops-notification
+    spec:
+      backgroundColor: '#ffd500'
+      color: '#000'
+      location: {{global_config.position_ocp_notifications | default("BannerTop")}}
+      text: 'Installing {{current_ibmaiops_feature.kind}} - Integrate OpenShift Login with OpenLDAP'    
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+  when: global_config.create_ocp_notifications | default(true) == true  
+   
+
+
+- name: 🌏 OCP INTEGRATION - Integrate OpenShift Login with OpenLDAP
+  shell: |
+    oc patch OAuth/cluster --type merge -p '{"spec": {"identityProviders": [{"ldap": {"attributes": {"email": [],"id": ["dn"],"name": ["cn"],"preferredUsername": ["cn"]},"bindDN": "cn=admin,dc=ibm,dc=com","bindPassword": {"name": "ldap-bind-password-demo"},"insecure": true,"url": "ldap://openldap.openldap:389/dc=ibm,dc=com?uid?sub?(objectclass=Person)"},"mappingMethod": "claim","name": "openldap","type": "LDAP"}]}}'
+
+    export LDAP_PASSWORD={{current_ibmaiops_feature.ldap_admin_password  | default( global_config.global_password )}}
+    export LDAP_PASSWORD_64=$(echo -n $LDAP_PASSWORD | base64)
+    echo ":"$LDAP_PASSWORD_64":"
+
+    cat <<EOF | oc apply -f -
+    ---
+    kind: Secret
+    apiVersion: v1
+    metadata:
+      name: ldap-bind-password-demo
+      namespace: openshift-config
+    data:
+      bindPassword: $LDAP_PASSWORD_64
+    type: Opaque
+    ---
+    kind: User
+    apiVersion: user.openshift.io/v1
+    metadata:
+      name: demo
+    fullName: demo
+    identities:
+      - 'openldap:dWlkPWRlbW8sb3U9UGVvcGxlLGRjPWlibSxkYz1jb20'
+    groups: null
+    ---
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: admin-demo-user
+    subjects:
+      - kind: User
+        apiGroup: rbac.authorization.k8s.io
+        name: demo
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: cluster-admin
+    ---
+    kind: User
+    apiVersion: user.openshift.io/v1
+    metadata:
+      name: nik
+    fullName: nik
+    identities:
+      - 'openldap:dWlkPW5payxvdT1QZW9wbGUsZGM9aWJtLGRjPWNvbQ'
+    groups: null
+    ---
+    kind: ClusterRoleBinding
+    apiVersion: rbac.authorization.k8s.io/v1
+    metadata:
+      name: admin-nik-user
+    subjects:
+      - kind: User
+        apiGroup: rbac.authorization.k8s.io
+        name: nik
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: cluster-admin
+    EOF
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+
