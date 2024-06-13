@@ -219,7 +219,7 @@ data:
         # Train the Models based on pre-canned content
 
         # Where to get the training data from
-        training_data_url: https://github.com/niklaushirt/
+        training_data_url: https://github.com/angelnogueda/
         training_data_repo: ibm-aiops-trainingdata
 
         # Create Kafka connection for Log inception (needed to create log anomalies in the demo environment)
