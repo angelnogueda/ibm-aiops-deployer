@@ -334,7 +334,7 @@ data:
 
 
 
-  INSTALL_REPO: 'https://github.com/niklaushirt/ibm-aiops-deployer.git -b main'
+  INSTALL_REPO: 'https://github.com/angelnogueda/ibm-aiops-deployer.git -b main'
 
 
 
