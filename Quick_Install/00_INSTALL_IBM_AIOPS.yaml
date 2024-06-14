@@ -494,18 +494,21 @@ spec:
 
               echo "------------------------------------------------------------------------------------------------------------------------------"
               echo " 🚀 Finalize Installation"
+              chmod +x ./tools/90_finalizeInstallation.sh
               ./tools/90_finalizeInstallation.sh
               echo ""
 
 
               echo "------------------------------------------------------------------------------------------------------------------------------"
               echo " 🔎 Check for Errors in Ansible Log"
+              chmod +x ./tools/91_checkErrorsLog.sh
               ./tools/91_checkErrorsLog.sh
               echo ""
 
 
               echo "------------------------------------------------------------------------------------------------------------------------------"
               echo " 🔎 Check Installation Consistency"
+              chmod +x ./tools/92_check_install_short.sh
               ./tools/92_check_install_short.sh
               echo ""
 
