@@ -414,7 +414,7 @@ spec:
       serviceAccountName: ibm-aiops-installer-admin
       containers:
         - name: install
-          image: quay.io/niklaushirt/ibm-aiops-tools:2.2
+          image: quay.io/angel_nogueda/ibm-aiops-tools:2.2
           imagePullPolicy: IfNotPresent
           resources:
             requests:
