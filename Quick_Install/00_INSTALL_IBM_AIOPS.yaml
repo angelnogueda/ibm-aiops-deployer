@@ -174,7 +174,7 @@ data:
         # Name of the ibm-aiops instance
         aiops_name: ibm-aiops
         # Version of the catalog subscription
-        subscription_channel: v4.5
+        subscription_channel: v4.6
         # Freeze the version of the Catalog image by patching CatalogSource
         freeze_catalog: true
 
